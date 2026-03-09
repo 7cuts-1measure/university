@@ -1,0 +1,23 @@
+# Use formula: (FIRST + LAST) * N / 2, where
+# FIRST is first term of progression
+# LAST is last term of progression
+# N is num of terms in progression
+
+# ====== Parameters ===== #
+DEFINE FIRST 1
+DEFINE LAST 100
+DEFINE N 100
+# ======================= #
+
+# ======= Algo ======= #
+PUSH 2
+PUSH FIRST
+PUSH LAST
++
+PUSH N
+*
+/
+
+PRINT
+
+# output: 5050.0

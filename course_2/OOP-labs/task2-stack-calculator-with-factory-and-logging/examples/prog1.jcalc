@@ -1,0 +1,6 @@
+DEFINE a 4
+PUSH a
+SQRT
+PRINT
+
+# output: 2.0

@@ -1,0 +1,4 @@
+.idea
+*.iml
+.vscode
+/task3-game/GUIBuilder
