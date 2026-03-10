@@ -7,7 +7,7 @@ ssize_t my_write(int fd, const void* buf, size_t count) {
     long long result; 
     
     /* 
-     * 1. Кладём номер сискола в eax. fd -> rdi, buf -> rsi, count -> rdx
+     * 1. Кладём номер сискола в rax. fd -> rdi, buf -> rsi, count -> rdx
      * 2. Проц выполняет инструкцию syscall
      * 3. Результат сискола из rax помещается в result
     */
