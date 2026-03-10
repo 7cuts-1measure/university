@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <sys/syscall.h> // for SYS_* constants
-#include <unistd.h>   // for syscall func
-#include <errno.h>      // errno
+#include <sys/syscall.h>  // for SYS_* constants
+#include <unistd.h>       // for syscall func
+#include <errno.h>
 
 ssize_t my_write(int fd, const void* buf, size_t count) {
     long long result; 
