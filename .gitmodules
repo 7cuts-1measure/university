@@ -1,0 +1,3 @@
+[submodule "course_2/parallel-programming-labs"]
+	path = course_2/parallel-programming-labs
+	url = git@gitlab-gpn-noc.nsu.ru:evm038/parallel-programming-labs.git
