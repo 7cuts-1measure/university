@@ -13,9 +13,9 @@ ssize_t my_write(int fd, const void* buf, size_t count) {
     */
     asm volatile(
      "\tsyscall\n"
-    : "=a" (result)
-    : "a" (SYS_write), "D" (1), "S" (buf), "d" (count) // a - rax, D - rdi, S - rsi, d - rdx
-    : "rcx", "r8", "r9", "r10", "r11", "memory", "cc" 
+        : "=a" (result)
+        : "a" (SYS_write), "D" (1), "S" (buf), "d" (count) // a - rax, D - rdi, S - rsi, d - rdx
+        : "rcx", "r8", "r9", "r10", "r11", "memory", "cc" 
     );
     if (-4095 <= result && result < 0) {
         errno = -result;
