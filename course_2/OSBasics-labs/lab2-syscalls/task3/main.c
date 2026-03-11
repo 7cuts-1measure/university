@@ -7,7 +7,7 @@ int main() {
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork problem");
-        exit(1)
+        exit(1);
     } else if (pid == 0) {
         execve("./hello_static", NULL, NULL);
         perror("execve problem"); /* execve has no return. if we are here -- execve has problems */
