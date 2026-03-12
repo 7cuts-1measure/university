@@ -27,7 +27,7 @@ const char* get_syscall_name(long nr) {
         }
    }
 }
-
+//TODO: Передавать запускаемый экзешник через аргумент
 int main() {
     const int ignored = 0;
     pid_t pid = fork();
@@ -44,7 +44,7 @@ int main() {
         int status;
         waitpid(pid, &status, 0);
 
-        ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD);
+        ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_T RACESYSGOOD);
         while (1) {
             ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
             waitpid( pid, &status, 0);
