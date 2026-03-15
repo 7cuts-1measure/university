@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
@@ -16,13 +17,16 @@ public class ScoreArea extends JPanel {
     JLabel scoreValue;
 
     public ScoreArea(Rectangle bounds, Model model) {
-        super();
+        
+        Font font = new Font(null, Font.BOLD, 24);
         scoreText = new JLabel("Score:");
         scoreText.setForeground(Color.WHITE);
+        scoreText.setFont(font);
         add(scoreText);
 
         scoreValue = new JLabel("");
         scoreValue.setForeground(Color.WHITE);
+        scoreValue.setFont(font);
         add(scoreValue);
         // set constructor params
         this.model = model;
@@ -33,7 +37,10 @@ public class ScoreArea extends JPanel {
         
     }
 
-
+    public void updateScore() {
+        scoreValue.setText(String.valueOf(model.getScore()));
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
