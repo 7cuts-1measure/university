@@ -7,7 +7,6 @@ import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.DefaultController;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Match3Model;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
-import ru.nsu.ccfit.gerasimov2.a.game.view.ConsoleView;
 import ru.nsu.ccfit.gerasimov2.a.game.view.swing.SwingView;
 
 public class App {
@@ -15,8 +14,7 @@ public class App {
     public static void main(String[] args) {
         Model match3Model = new Match3Model(10, 10, 5);
         //Controller controller = new DefaultController(match3Model, new SwingView(match3Model));
-        Controller controller = new DefaultController(match3Model, new ConsoleView(match3Model));
+        Controller controller = new DefaultController(match3Model, new SwingView(match3Model));
         controller.runGame();
-    
     }
 }
