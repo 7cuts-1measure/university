@@ -18,7 +18,7 @@ public class HelpCommand extends BaseCommand {
                 String keyword = ctx.factory.getKeywordForClassName(cmdClassName);
                 Command cmd = (Command) Class.forName(cmdClassName).getDeclaredConstructor().newInstance();
                 String description = cmd.getDescription();
-                System.out.printf("\t%s\n\t    %s\n\n", keyword, description);
+                System.out.printf("\t%s\t\t    %s\n\n", keyword, description);
             }
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Factory has a class but cannot create it: " + e.getLocalizedMessage());

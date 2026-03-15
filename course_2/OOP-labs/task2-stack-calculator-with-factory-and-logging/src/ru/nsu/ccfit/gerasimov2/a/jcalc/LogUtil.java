@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.gerasimov2.a.jcalc;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.LogManager;
@@ -12,7 +11,6 @@ public class LogUtil {
         if (!isFirstTime) {
             return Logger.getLogger(name);
         }
-
         isFirstTime = false;
         try (InputStream ins = CalculatorApp.class.getResourceAsStream("log.properties")){
             LogManager.getLogManager().readConfiguration(ins);

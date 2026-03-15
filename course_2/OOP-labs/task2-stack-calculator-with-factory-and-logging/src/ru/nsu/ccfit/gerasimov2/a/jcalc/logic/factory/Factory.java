@@ -20,15 +20,10 @@ public class Factory {
     private Map<String, String> classMap = new HashMap<>();
 
     public Factory() {
-        loadClasses();
-    }
-
-    private void loadClasses() {
         try (InputStream is = Factory.class.getResourceAsStream("CommandList.properties")) {
             if (is == null) {
                 throw new IllegalStateException("Configuration file 'CommandList.properties' was not founded in pacgake " + Factory.class.getPackageName());
             }
-
             LOGGER.info("Load factory properties");
             Properties props = new Properties();
             props.load(is);
@@ -83,14 +78,11 @@ public class Factory {
         if (cmdName == null || cmdName.isEmpty()) {
             throw new IllegalArgumentException("Command name cannot be null or empty");
         }
-
         // check a comment
         if (cmdName.charAt(0) == '#') {
             cmdName = "#";
         }
-
         return tryCreateCommand(cmdName);
-
     }
 
     public Collection<String> getCommandClassNames() {

@@ -68,18 +68,30 @@ public class CalculatorApp {
                 printHelpMessage(options);
                 ctx.setShouldClose(isFileMode);
         }
-
         LOGGER.info("Parse positional arguments");
         parsePositionalArguments(cmdLine);
 
     }
-    public CalculatorApp(String[] args) throws FileNotFoundException, ParseException {
+    public CalculatorApp(String[] args) {
         LOGGER.info("Setup calculator");
         this.factory = new Factory();
         this.ctx = new Context(out, factory);
-        setUp(args);
-
-        LOGGER.info("Setup complete!");
+        try {
+            setUp(args);
+        } catch (ParseException e) {
+            System.out.println("Failed to parse command line options: " + e.getLocalizedMessage());
+            System.out.println("type --help for help options");
+            LOGGER.log(Level.WARNING, "Bad parsing", e.getLocalizedMessage());
+            ctx.setShouldClose(true);
+        } catch (FileNotFoundException e) { 
+            System.out.println("Error: " + e.getLocalizedMessage());
+            LOGGER.log(Level.WARNING, "File not found: ", e.getLocalizedMessage());
+            ctx.setShouldClose(true);
+        } catch (Throwable e) {
+            LOGGER.log(Level.SEVERE, "Got unexpected throwable", e.getLocalizedMessage());
+            ctx.setShouldClose(true);
+        }
+        LOGGER.info("Setup complete");
     }
 
     private void handleError(String msg) {
