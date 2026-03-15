@@ -41,7 +41,7 @@ public class GameArea extends JPanel {
         this.model = model;
         this.setBounds(bounds);
 
-        this.setBackground(Color.WHITE);
+        this.setBackground(GameForm.bgColor);
         this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
         
         this.gridCols = model.getGemField().getCols();
@@ -95,18 +95,18 @@ public class GameArea extends JPanel {
         int x = col * gridCellSize;
         int y = row * gridCellSize;
         
-        g.setColor(Color.MAGENTA);
+        g.setColor(new Color(188, 215, 255));
         g.fillRect(x, y, gridCellSize, gridCellSize);
     }
 
     private Color intToColor(int number) {
         switch (number) {
-            case 0: return Color.ORANGE;
-            case 1: return Color.RED;
-            case 2: return Color.GREEN;
-            case 3: return Color.BLUE;
-            case 4: return  Color.YELLOW;
-            case 5: return Color.CYAN;
+            case 0: return Theme.BLUE;
+            case 1: return Theme.RED;
+            case 2: return Theme.WHITE;
+            case 3: return Theme.ORANGE;
+            case 4: return Theme.GREEN;
+            case 5: return Theme.GRAY;
             case 6: return Color.MAGENTA;
             default:
                 return Color.DARK_GRAY;
@@ -122,7 +122,7 @@ public class GameArea extends JPanel {
                 Gem gem = model.gemAt(row, col);
 
                 g.setColor(intToColor(gem.color));
-                g.fillRect(col * gridCellSize + 5, row * gridCellSize + 5, gridCellSize - 10, gridCellSize - 10);
+                g.fillRect(col * gridCellSize + 2, row * gridCellSize + 2, gridCellSize - 4, gridCellSize - 4);
                 if (gem.isDestroyed()) {
                     g.setColor(Color.BLACK);
                     g.fillRect(col * gridCellSize + 10, row * gridCellSize + 10, gridCellSize - 20, gridCellSize - 20);

@@ -9,6 +9,8 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameForm extends JFrame {
+    final static Color bgColor = new Color(35, 35, 35);
+
     private int width, height;
     private Model model;
     private GameArea gameArea;
@@ -23,15 +25,14 @@ public class GameForm extends JFrame {
         setLocationRelativeTo(null);
 
         setResizable(false);
-        setBackground(Color.BLACK);
         setLayout(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        getContentPane().setBackground(Color.BLACK);
+        getContentPane().setBackground(bgColor);
 
-        gameArea = new GameArea(new Rectangle(50, 50, 400, 400), model);
+        gameArea = new GameArea(new Rectangle(50, 50, width, heght), model);
         add(gameArea);
 
-        scoreArea = new ScoreArea(new Rectangle(450, 50, 200, 100), model);
+        scoreArea = new ScoreArea(new Rectangle(gameArea.getX() + 400, 50, 200, 100), model);
         add(scoreArea);
 
         setVisible(true);
