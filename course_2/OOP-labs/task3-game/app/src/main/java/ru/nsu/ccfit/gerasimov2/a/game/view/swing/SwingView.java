@@ -13,7 +13,7 @@ public class SwingView extends View {
 
     public SwingView(Model model) {
         super(model);
-        this.gameForm = new GameForm("tri v ryad", 800,  800, model);
+        this.gameForm = new GameForm("tri v ryad", 640,  480, model);
     }
 
     void sleep() {
