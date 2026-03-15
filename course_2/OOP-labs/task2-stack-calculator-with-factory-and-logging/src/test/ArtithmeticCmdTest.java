@@ -112,22 +112,22 @@ public class ArtithmeticCmdTest extends BaseTest {
         Command cmd = new DivideCommand();
         double a = 2;
         double b = 3;
-        test2args(cmd, a, b, a / b);
+        test2args(cmd, a, b, b / a);
     }
 
     @Test
     public void dividePositiveByZero() {
         Command cmd = new DivideCommand();
-        double a = 2;
-        double b = 0;
+        double a = 0;
+        double b = 2;
         test2args(cmd, a, b, Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void divideNegativeByZero() {
         Command cmd = new DivideCommand();
-        double a = -2;
-        double b = 0;
+        double a = 0;
+        double b = -2;
         test2args(cmd, a, b, Double.NEGATIVE_INFINITY);
     }
 
@@ -214,7 +214,7 @@ public class ArtithmeticCmdTest extends BaseTest {
         for (double a = -100; a < 100; a++) {
             for (double b = -100;  b < 100; b++) {
                 if (a == 0 || b == 0) {continue;}
-                test2args(cmd, a, b, a / b);        
+                test2args(cmd, a, b, b / a);        
             }
         }
     }
