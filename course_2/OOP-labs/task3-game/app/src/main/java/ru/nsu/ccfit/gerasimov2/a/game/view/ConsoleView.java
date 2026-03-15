@@ -16,7 +16,6 @@ public class ConsoleView extends View {
     List<String> messages;
     Scanner scanner;    
     Position selectionPos;
-    private boolean isStdinEmpty = true;
 
 
     public ConsoleView(Model model) {
@@ -35,7 +34,6 @@ public class ConsoleView extends View {
     private Position readInputPosition() {
         while (true) {
             String rowString = scanner.next();
-            isStdinEmpty = false;
             String colString = scanner.next();
             try {
                 Integer row = Integer.valueOf(rowString);

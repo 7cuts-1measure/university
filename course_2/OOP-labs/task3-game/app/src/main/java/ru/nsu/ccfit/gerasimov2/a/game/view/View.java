@@ -17,7 +17,5 @@ public abstract class View implements Observer {
     public abstract void message(String string);;
     public abstract void popupMessage(String string);
     public abstract Position getUserInputSelection();
-
     public abstract void drawSelection(Position selectionPos);
-    
 }
