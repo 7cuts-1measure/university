@@ -10,6 +10,7 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.StackUnderflowException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.Command;
@@ -17,7 +18,7 @@ import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.arithmetic.*;
 
 public class ArtithmeticCmdTest extends BaseTest {
 
-    private void test2args(Command cmd, double a, double b, double expected) {
+    private void test2args(Command cmd, double a, double b, double expected) throws CommandException {
         System.setOut(new PrintStream(new OutputStream() {
             @Override
             public void write(int arg0) throws IOException {}
@@ -30,7 +31,7 @@ public class ArtithmeticCmdTest extends BaseTest {
         cmd.execute(ctx, new String[] {});
         assertEquals(expected, ctx.getStack().pop(), 0.001f);
     }
-    private void test1arg(Command cmd, double x, double expected) {
+    private void test1arg(Command cmd, double x, double expected) throws CommandException {
         System.setOut(new PrintStream(new OutputStream() {
             @Override
             public void write(int arg0) throws IOException {}
@@ -60,7 +61,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void plus() {
+    public void plus() throws CommandException {
         Command cmd = new PlusCommand();
         int a = 2;
         int b = 3;
@@ -68,7 +69,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void plusZero() {
+    public void plusZero() throws CommandException {
         Command cmd = new PlusCommand();
         int a = 2;
         int b = 0;
@@ -76,7 +77,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void plusZeroZero() {
+    public void plusZeroZero() throws CommandException {
         Command cmd = new PlusCommand();
         int a = 0;
         int b = 0;
@@ -84,7 +85,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void minus() {
+    public void minus() throws CommandException {
         Command cmd = new MinusCommand();
         double a = 2;
         double b = 3;
@@ -92,7 +93,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void minusZero() {
+    public void minusZero() throws CommandException{
         Command cmd = new MinusCommand();
         int a = 2;
         int b = 0;
@@ -100,7 +101,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void minusZeroZero() {
+    public void minusZeroZero() throws CommandException {
         Command cmd = new MinusCommand();
         int a = 0;
         int b = 0;
@@ -108,7 +109,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void divide() {
+    public void divide() throws CommandException {
         Command cmd = new DivideCommand();
         double a = 2;
         double b = 3;
@@ -116,7 +117,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void dividePositiveByZero() {
+    public void dividePositiveByZero() throws CommandException {
         Command cmd = new DivideCommand();
         double a = 0;
         double b = 2;
@@ -124,7 +125,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void divideNegativeByZero() {
+    public void divideNegativeByZero() throws CommandException {
         Command cmd = new DivideCommand();
         double a = 0;
         double b = -2;
@@ -132,7 +133,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void divideZeroByZero() {
+    public void divideZeroByZero() throws CommandException {
         Command cmd = new DivideCommand();
         Context ctx = new Context(System.out, null);
         var stack = ctx.getStack();
@@ -151,7 +152,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void mult() {
+    public void mult() throws CommandException {
         Command cmd = new MultCommand();
         double a = 2;
         double b = 3;
@@ -159,7 +160,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void multZero() {
+    public void multZero() throws CommandException {
         Command cmd = new MultCommand();
         double a = 2;
         double b = 0;
@@ -167,19 +168,19 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test 
-    public void sqrt() {
+    public void sqrt() throws CommandException {
         Command cmd = new SqrtCommand();
         double x = 2;
         test1arg(cmd, x, Math.sqrt(x));
     }
 
     @Test 
-    public void sqrtZero() {
+    public void sqrtZero() throws CommandException {
         test1arg(new SqrtCommand(), 0, 0); 
     }
 
     @Test
-    public void plusManyValues(){
+    public void plusManyValues()throws CommandException {
         Command cmd = new PlusCommand();
         for (double a = -100; a < 100; a++) {
             for (double b = -100;  b < 100; b++) {
@@ -189,7 +190,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void minusManyValues(){
+    public void minusManyValues() throws CommandException{
         Command cmd = new MinusCommand();
         for (double a = -100; a < 100; a++) {
             for (double b = -100;  b < 100; b++) {
@@ -199,7 +200,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void multManyValues(){
+    public void multManyValues() throws CommandException{
         Command cmd = new MultCommand();
         for (double a = -100; a < 100; a++) {
             for (double b = -100;  b < 100; b++) {
@@ -209,7 +210,7 @@ public class ArtithmeticCmdTest extends BaseTest {
     }
 
     @Test
-    public void divideManyValues(){
+    public void divideManyValues() throws CommandException {
         Command cmd = new DivideCommand();
         for (double a = -100; a < 100; a++) {
             for (double b = -100;  b < 100; b++) {

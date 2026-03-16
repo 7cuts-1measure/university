@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.InvalidArgumentException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.StackUnderflowException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.VarException;
@@ -25,7 +26,7 @@ import java.io.PrintStream;
 
 public class MemoryTest extends BaseTest {
 
-    private void testVar(String name, Double value) {
+    private void testVar(String name, Double value) throws CommandException {
     
         System.setOut(new PrintStream(new OutputStream() {
             @Override
@@ -57,7 +58,7 @@ public class MemoryTest extends BaseTest {
 
 
     @Test
-    public void basicTests() {
+    public void basicTests() throws CommandException {
         testVar("abacaba", 10.345);
         testVar("name", 0.000123);
     }
@@ -70,7 +71,7 @@ public class MemoryTest extends BaseTest {
     }
 
     @Test 
-    public void define() {
+    public void define() throws CommandException{
         System.setOut(new PrintStream(new OutputStream() {
             @Override
             public void write(int arg0) throws IOException {}
@@ -87,7 +88,7 @@ public class MemoryTest extends BaseTest {
 
 
     @Test 
-    public void storeAndLoadByCommandPop() {
+    public void storeAndLoadByCommandPop() throws CommandException {
         final String varName = "varkdsakdl";
         final String varValue = "12.5";
 
@@ -110,7 +111,7 @@ public class MemoryTest extends BaseTest {
     }
 
     @Test 
-    public void useNonExitsVarName() {
+    public void useNonExitsVarName() throws CommandException {
         ctx.getMemory().defineVar("varName", 0);
         assertThrows(VarException.class, () -> {
             ctx.getMemory().getVar("another name");
@@ -135,7 +136,7 @@ public class MemoryTest extends BaseTest {
     }
 
     @Test
-    public void stackPushPop() {
+    public void stackPushPop() throws CommandException {
         Stack stack = ctx.getStack();
         double expected = 12.5;
         stack.push(expected);
@@ -145,7 +146,7 @@ public class MemoryTest extends BaseTest {
     }
 
      @Test 
-    public void storeAndPrint() {
+    public void storeAndPrint() throws CommandException {
         final String varName = "varkdsakdl";
         final String varValue = "12.5";
 
@@ -178,7 +179,7 @@ public class MemoryTest extends BaseTest {
     }
 
     @Test 
-    public void PrintWhenStackIsEmpty() {
+    public void PrintWhenStackIsEmpty()throws CommandException {
         Command cmdPrint = new PrintCommand();
         String[] argsPrint = {};
 

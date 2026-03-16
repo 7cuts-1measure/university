@@ -17,13 +17,13 @@ public class Memory {
      * @param name
      * @param value
      */
-    public void defineVar(String name, double value) {
+    public void defineVar(String name, double value) throws VarException {
         LOGGER.fine("Defining " + name + " = " + String.valueOf(value) );
         checkVarName(name);
         varTable.put(name, value);
     }
 
-    private void checkVarName(String name) {
+    private void checkVarName(String name) throws VarException {
         if (name.isEmpty()) {
             LOGGER.fine("Var name is empty");
             throw new VarException("Cannot create var with empty name"); // TODO: make a WrongVariableNameException

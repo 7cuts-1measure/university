@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.InvalidArgumentException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.VarException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 
 public abstract class BaseCommand implements Command {
@@ -25,7 +27,7 @@ public abstract class BaseCommand implements Command {
      * @param token variable or double literal
      * @return value of token
      */
-    public Double parseToken(Context ctx, String token) {
+    public Double parseToken(Context ctx, String token) throws VarException {
         try {
             return Double.parseDouble(token);
         } catch (NumberFormatException e) {

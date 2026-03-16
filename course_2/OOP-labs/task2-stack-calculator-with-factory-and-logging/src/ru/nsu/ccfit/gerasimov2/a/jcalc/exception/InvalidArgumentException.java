@@ -5,9 +5,4 @@ public class InvalidArgumentException extends CommandException {
     public InvalidArgumentException(String message) {
         super(message);
     }
-
-    public InvalidArgumentException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

@@ -11,6 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CalculatorException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.FactoryConfigExcpetion;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.FactoryException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.Command;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.factory.Factory;
@@ -19,12 +22,12 @@ import org.apache.commons.cli.*;
 
 public class CalculatorApp {
 
-    static Logger LOGGER = LogUtil.getLogger(CalculatorApp.class.getSimpleName());;
+    static Logger LOGGER = LogUtil.getLogger(CalculatorApp.class.getSimpleName());
 
     private BufferedReader in = null;
     private final PrintStream out = System.out;
-    private final Factory factory;
-    private final Context ctx;
+    private Factory factory;
+    private Context ctx;
 
     /**
      * {@code true} if input file was provided. if {@code flase} then calculator
@@ -34,9 +37,10 @@ public class CalculatorApp {
      */
     private boolean isFileMode = true;
     private final String prompt = "> ";
-
     /** Current line in file. Do not use it if in calculator works in file mode */
     private int lineCount = 0;
+
+
 
     private void printHelpMessage(Options options) {
         @SuppressWarnings("deprecation")
@@ -63,7 +67,7 @@ public class CalculatorApp {
         options.addOption("h", "help", false, "Print this message");
         
         LOGGER.info("Parse options");
-        CommandLine cmdLine = parser.parse(options, args); // TODO: print help if parse excetption and close program
+        CommandLine cmdLine = parser.parse(options, args);
         if (cmdLine.hasOption("help")) {
                 printHelpMessage(options);
                 ctx.setShouldClose(isFileMode);
@@ -72,25 +76,38 @@ public class CalculatorApp {
         parsePositionalArguments(cmdLine);
 
     }
+
     public CalculatorApp(String[] args) {
         LOGGER.info("Setup calculator");
-        this.factory = new Factory();
-        this.ctx = new Context(out, factory);
+        boolean shouldClose = false;
+        
+        factory = null;
         try {
+            factory = new Factory();
+        } catch(FactoryException e) {
+            System.out.println("Failed to init factory: " + e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "Factory didn't init", e.getLocalizedMessage());
+            shouldClose = true;
+        } 
+
+        try {
+            ctx = new Context(out, factory);
             setUp(args);
         } catch (ParseException e) {
             System.out.println("Failed to parse command line options: " + e.getLocalizedMessage());
             System.out.println("type --help for help options");
             LOGGER.log(Level.WARNING, "Bad parsing", e.getLocalizedMessage());
-            ctx.setShouldClose(true);
-        } catch (FileNotFoundException e) { 
+            shouldClose = true;
+        } 
+        catch (FileNotFoundException e) { 
             System.out.println("Error: " + e.getLocalizedMessage());
             LOGGER.log(Level.WARNING, "File not found: ", e.getLocalizedMessage());
-            ctx.setShouldClose(true);
+            shouldClose = true;
         } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "Got unexpected throwable", e.getLocalizedMessage());
-            ctx.setShouldClose(true);
+            shouldClose = true;
         }
+        ctx.setShouldClose(shouldClose);
         LOGGER.info("Setup complete");
     }
 
@@ -116,12 +133,11 @@ public class CalculatorApp {
             Command cmd = factory.newCommand(cmdName);
             LOGGER.fine("Executing commandClass " + cmd.getClass().getSimpleName());
             cmd.execute(ctx, args);
-        } catch (CalculatorException e) {
+        } catch (CommandException e) {
             handleError(e.getLocalizedMessage());
         }
         
     }
-
 
     private void printPrompt() {
         if (!isFileMode) {

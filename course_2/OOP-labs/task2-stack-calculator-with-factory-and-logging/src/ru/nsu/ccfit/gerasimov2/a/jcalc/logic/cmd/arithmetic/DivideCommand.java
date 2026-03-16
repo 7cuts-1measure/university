@@ -1,6 +1,9 @@
 package ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.arithmetic;
 
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.BaseCommand;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CalculatorException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.InvalidArgumentException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Stack;
 
@@ -8,7 +11,7 @@ import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Stack;
 public class DivideCommand extends BaseCommand {
 
     @Override
-    public void execute(Context ctx, String[] args) {
+    public void execute(Context ctx, String[] args) throws CommandException {
         validateArgs(args, 0);
         Stack stack = ctx.getStack();
 

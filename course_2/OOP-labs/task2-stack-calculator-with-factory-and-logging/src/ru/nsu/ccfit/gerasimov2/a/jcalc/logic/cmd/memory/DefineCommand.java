@@ -1,12 +1,13 @@
 package ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.memory;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.BaseCommand;
 
 public class DefineCommand extends BaseCommand {
 
     @Override
-    public void execute(Context ctx, String[] args) {
+    public void execute(Context ctx, String[] args) throws CommandException {
         validateArgs(args, 2); // DEFINE a 4
         String varName = args[0];
         double value = parseToken(ctx, args[1]);

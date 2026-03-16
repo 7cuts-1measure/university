@@ -44,7 +44,7 @@ public class Context {
         this.shouldClose = shouldClose;
     }
 
-    public Collection<String> getCommandsClassNames() {
+    public Collection<Class<?>> getCommandsClassNames() {
         return factory.getCommandClassNames();
     }
 }

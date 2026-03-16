@@ -8,6 +8,8 @@ import java.io.PrintStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.FactoryException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.UnknownCommandException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.Command;
@@ -20,13 +22,13 @@ public class FactoryTest extends BaseTest {
     ByteArrayOutputStream stdout = new ByteArrayOutputStream();
 
     @Before
-    public void setUp() {
+    public void setUp() throws FactoryException {
         this.factory = new Factory();
         this.ctx = new Context(new PrintStream(stdout), factory);
     }
 
     @Test
-    public void createCommand() {
+    public void createCommand() throws CommandException{
         Command cmd = factory.newCommand("help");
         cmd.execute(ctx, new String[]{});
     }

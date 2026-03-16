@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.CommandException;
+import ru.nsu.ccfit.gerasimov2.a.jcalc.exception.FactoryException;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.Context;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.Command;
 import ru.nsu.ccfit.gerasimov2.a.jcalc.logic.cmd.util.CommentCommand;
@@ -23,7 +25,7 @@ public class UtilCmdTest extends BaseTest {
 
 
     @Before
-    public void setUpStreams() {
+    public void setUpStreams() throws FactoryException {
         ctx = new Context(new PrintStream(outContent), new Factory());
     }
     
@@ -32,13 +34,13 @@ public class UtilCmdTest extends BaseTest {
     }
 
     @Test
-    public void dummyCommand() {
+    public void dummyCommand() throws CommandException {
         Command cmd = new CommentCommand();
         cmd.execute(ctx, null);        
     }
 
     @Test
-    public void exitCommand() {
+    public void exitCommand() throws CommandException {
         Command cmd = new ExitCommand();
         assertFalse(ctx.shouldClose());
 
@@ -47,7 +49,7 @@ public class UtilCmdTest extends BaseTest {
     }
 
     @Test
-    public void helpCommand() {
+    public void helpCommand() throws CommandException {
         Command cmd = new HelpCommand();
         cmd.execute(ctx, null);        
     }
