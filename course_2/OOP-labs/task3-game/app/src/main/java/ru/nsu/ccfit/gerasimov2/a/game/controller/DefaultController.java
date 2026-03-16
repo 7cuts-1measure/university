@@ -1,19 +1,17 @@
 package ru.nsu.ccfit.gerasimov2.a.game.controller;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.view.View;
 
 public class DefaultController extends Controller {
     private Position firstSelection;
     private Position secondSelection;
-    private boolean isRunning = true;
 
-    public DefaultController(Model model, View view) {
+    public DefaultController(GameModel model, View view) {
         super(model, view);
     }
 
-    // DefaultController accept only 2 inputs!
     public void handleInput(Position userSelection) {
         if (userSelection == null) {
             return;
@@ -61,14 +59,5 @@ public class DefaultController extends Controller {
             view.drawSelection(pos); // remove selection
             view.updateImmediatly();  // show it immediatly 
          
-    }
-
-    public void runGame() {
-        view.updateImmediatly();    // show model for the first time
-        model.step();
-        while (isRunning) {
-            handleInput(view.getUserInputSelection());        
-        }
-
     }
 }

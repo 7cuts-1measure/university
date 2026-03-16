@@ -6,15 +6,23 @@ package ru.nsu.ccfit.gerasimov2.a.game;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.DefaultController;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Match3Model;
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
+import ru.nsu.ccfit.gerasimov2.a.game.view.ConsoleView;
+import ru.nsu.ccfit.gerasimov2.a.game.view.View;
 import ru.nsu.ccfit.gerasimov2.a.game.view.swing.SwingView;
 
 public class App {
 
-    public static void main(String[] args) {
-        Model match3Model = new Match3Model(10, 10, 5);
-        //Controller controller = new DefaultController(match3Model, new SwingView(match3Model));
-        Controller controller = new DefaultController(match3Model, new SwingView(match3Model));
-        controller.runGame();
+    private static void startGame(boolean isConsoleMode) {
+        GameModel model = new Match3Model(10, 10, 5);
+        View view = isConsoleMode ? new ConsoleView(model) : new SwingView(model);
+        Controller controller = new DefaultController(model, view);
+        view.setController(controller);
+        view.start();
     }
+    public static void main(String[] args) {
+        boolean isConsoleMode = false;
+        startGame(isConsoleMode);
+    }
+        
 }

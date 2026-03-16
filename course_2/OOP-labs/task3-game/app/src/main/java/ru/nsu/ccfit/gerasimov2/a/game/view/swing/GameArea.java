@@ -4,7 +4,6 @@ package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -12,18 +11,18 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameArea extends JPanel {
 
     private int gridRows;
     private int gridCols;
-    private Model model;
+    private GameModel model;
+    private Controller controller;
     private Position cachedSelection;
     boolean isSelecting = false;
-    volatile Position selection = null;
-
 
     private void drawGrid(Graphics g, int cellSize, int offsetX, int offsetY) {
         g.setColor(Color.black);
@@ -34,29 +33,30 @@ public class GameArea extends JPanel {
         }
     }
 
-    public GameArea(Model model) {
-        super();
-
-        // set constructor params
+    public GameArea(GameModel model) {
         this.model = model;
-
-        this.setBackground(GameForm.bgColor);
-        this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
-        
-        this.gridCols = model.getGemField().getCols();
-        this.gridRows = model.getGemField().getRows();
-        
+        this.gridCols = model.getCols();
+        this.gridRows = model.getRows();
+               
+        setBackground(GameForm.bgColor);
+        setBorder(BorderFactory.createLineBorder(Color.black, 2));
+        setMinimumSize(getMinimumSize());
+        setPreferredSize(getMinimumSize());
         addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
                 handleMouseClick(e.getX(), e.getY());
             }
         }); 
         
     }
-    
+
+
     private void handleMouseClick(int x, int y) {
         System.out.printf("Get mouse event: (%d, %d)\n", x, y);
+        
+        Position selection = null;
         int width = getWidth();
         int height = getHeight();
 
@@ -76,23 +76,16 @@ public class GameArea extends JPanel {
         System.out.printf("Calculated col=%d, row=%d\n", col, row);
         if (row >= 0 && row < gridRows && col >= 0 && col < gridCols) {
             selection = new Position(row, col);
+            controller.handleInput(selection);
         }
 
     }
 
     @Override
-    public Dimension getPreferredSize() {
-        int preferredCellSize = 20; 
+    public Dimension getMinimumSize() {
+        int preferredCellSize = 40;
+        System.out.println("preferred size: " + gridCols * preferredCellSize + ", " + gridRows *preferredCellSize); 
         return new Dimension(gridCols * preferredCellSize, gridRows * preferredCellSize); 
-    }
-
-
-    public Position getSelection() {
-        Position pos = selection;
-        if (selection != null) {
-            selection = null;             
-        }
-        return pos;
     }
 
     @Override
@@ -127,8 +120,11 @@ public class GameArea extends JPanel {
         int x = col * cellSize + offsetX;
         int y = row * cellSize + offsetY;
         
+        int arcWidth = cellSize / 5;
+        int arcHegiht = cellSize / 5;
+
         g.setColor(new Color(188, 215, 255));
-        g.fillRect(x, y, cellSize, cellSize);
+        g.fillRoundRect(x, y, cellSize, cellSize, arcWidth, arcHegiht);
     }
 
     private Color intToColor(int number) {
@@ -148,6 +144,8 @@ public class GameArea extends JPanel {
 
     private void drawGemsOnField(Graphics g, int cellSize, int offsetX, int offsetY) {
         Color previous = g.getColor();
+        int arcWidth = cellSize / 5;
+        int arcHegiht = cellSize / 5;
 
         for (int row = 0; row < gridRows; row++) {
             for (int col = 0; col < gridCols; col++) {          
@@ -155,13 +153,16 @@ public class GameArea extends JPanel {
                 
                 g.setColor(intToColor(gem.color));
                 int identation = 2;
-                g.fillRect(col * cellSize + identation + offsetX, 
+                g.fillRoundRect(col * cellSize + identation + offsetX, 
                             row * cellSize + identation + offsetY, 
                             cellSize - 2 * identation, 
-                            cellSize - 2 * identation);
+                            cellSize - 2 * identation, arcWidth, arcHegiht);
                 if (gem.isDestroyed()) {
                     g.setColor(Color.BLACK);
-                    g.fillRect(col * cellSize + 10 + offsetX, row * cellSize + 10 + offsetY, cellSize - 20, cellSize - 20);
+                    int indent = 10;
+                    int x = col * cellSize + indent + offsetX;
+                    int y = row * cellSize + indent + offsetY;
+                    g.fillRect(x, y, cellSize - 2 * indent, cellSize - 2 * indent);
                 }
             } 
         }
@@ -171,5 +172,9 @@ public class GameArea extends JPanel {
 
     public void setSelection(Position selectionPos) {
         this.cachedSelection = selectionPos;
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 }

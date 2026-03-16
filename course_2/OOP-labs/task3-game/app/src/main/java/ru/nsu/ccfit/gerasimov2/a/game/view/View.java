@@ -3,19 +3,23 @@ package ru.nsu.ccfit.gerasimov2.a.game.view;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 import ru.nsu.ccfit.gerasimov2.a.game.Observer;
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 
 public abstract class View implements Observer {
-    protected Model model;
+    protected GameModel model;
+    protected Controller controller;
 
-    public View(Model model) {
+    public View(GameModel model) {
         this.model = model;
     }
 
-    public abstract void updateSuspended();
+    public abstract void setController(Controller controller);
+
+    public abstract void update();
     public abstract void updateImmediatly();
     public abstract void message(String string);;
     public abstract void popupMessage(String string);
-    public abstract Position getUserInputSelection();
     public abstract void drawSelection(Position selectionPos);
+    public abstract void start();
 }

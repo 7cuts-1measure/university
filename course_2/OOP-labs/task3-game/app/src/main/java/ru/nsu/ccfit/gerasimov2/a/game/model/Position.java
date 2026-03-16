@@ -15,7 +15,7 @@ public class Position {
     }
 
     public Position(int row, int col) {
-        if (col< 0) throw new IllegalArgumentException("Invalid col (negative): " + col);
+        if (col < 0) throw new IllegalArgumentException("Invalid col (negative): " + col);
         if (row < 0) throw new IllegalArgumentException("Invalid row (negative): " + row);
 
         this.row = row;

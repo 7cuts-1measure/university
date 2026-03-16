@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.gerasimov2.a.game.view;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -8,20 +9,19 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import ru.nsu.ccfit.gerasimov2.a.game.model.GemField;
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
 public class ConsoleView extends View {
-    List<String> messages;
     Scanner scanner;    
     Position selectionPos;
 
 
-    public ConsoleView(Model model) {
+    public ConsoleView(GameModel model) {
         super(model);
         scanner = new Scanner(System.in);
-        messages = new ArrayList<>();
     }
 
     /**
@@ -79,22 +79,22 @@ public class ConsoleView extends View {
 
     private void printGem(Gem gem, Position gemPos, Position selection) {
         String DestroyFmt = "\033[1;40m";
-        String ResetFmt = "\033[m";
+        String resetFmt = "\033[m";
 
         
         String gemString;
         if (gem.isDestroyed()) {
-            gemString = DestroyFmt + "x" + ResetFmt;
+            gemString = DestroyFmt + "x" + resetFmt;
         } else {
             String colorFmt = "\033[0;3" + gem.color + "m";
             String backgrundFmt =  gemPos.isSameAs(selection) ? "\033[7m" : "";
-            gemString = colorFmt + backgrundFmt + gem.color + ResetFmt; 
+            gemString = colorFmt + backgrundFmt + gem.color + resetFmt; 
         }
         System.out.print(gemString);
     }
 
     @Override
-    public void updateSuspended() {
+    public void update() {
         sleep(Duration.ofMillis(1000));
         updateImmediatly();
     }
@@ -116,7 +116,7 @@ public class ConsoleView extends View {
 
     @Override
     public void message(String msg) {
-        messages.add(msg);
+        System.out.println(msg);
     }
 
     @Override
@@ -125,16 +125,35 @@ public class ConsoleView extends View {
     }
 
     @Override
-    public Position getUserInputSelection() {
-        System.out.print("->  ");
-
-        return readInputPosition();
-    }
-
-    @Override
     public void drawSelection(Position selectionPos) {
         this.selectionPos = selectionPos;       
     }
 
-    
+    @Override
+    public void start() {
+        // main cycle of a game
+        model.step();   // at the start moment there are already matched gems. the should be destroyed
+        while (true) {
+            System.out.print("-> ");  // printing prompt
+            clearInputStream();
+            Position userInput = readInputPosition();
+            controller.handleInput(userInput);
+        }
+    }
+
+    private void clearInputStream() {
+        try {
+            // Проверяем, есть ли доступные байты для чтения
+            while (System.in.available() > 0) {
+                System.in.read(); // Читаем и игнорируем их
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
 }

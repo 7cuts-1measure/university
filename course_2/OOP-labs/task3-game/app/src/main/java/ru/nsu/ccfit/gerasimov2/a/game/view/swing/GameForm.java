@@ -5,9 +5,9 @@ import java.awt.Color;
 import java.awt.Rectangle;
 
 import javax.swing.JFrame;
-import javax.swing.border.Border;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameForm extends JFrame {
@@ -17,12 +17,12 @@ public class GameForm extends JFrame {
     private GameArea gameArea;
     private ScoreArea scoreArea;
 
-    public GameForm(String winTitle, int width, int heght, Model model) {
+    public GameForm(String winTitle, int width, int heght, GameModel model) {
         super(winTitle);
         setSize(width, height);
         setLocationRelativeTo(null);
 
-        setResizable(false);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(bgColor);
@@ -30,22 +30,26 @@ public class GameForm extends JFrame {
         gameArea = new GameArea(model);
         add(gameArea, BorderLayout.CENTER);
 
-        scoreArea = new ScoreArea(new Rectangle(gameArea.getX() + 400, 50, 200, 100), model);
+        scoreArea = new ScoreArea(model);
         add(scoreArea, BorderLayout.NORTH);
 
         pack();
 
-        setSize(width, heght);
+        setMinimumSize(getSize());
         setResizable(true);
-
-        setLocationRelativeTo(null);
         setVisible(true);
     }
-    public Position getSelection() {
-        return gameArea.getSelection();
+    
+    public GameArea getGameArea() {
+        return gameArea;
     }
+
     public void drawSelection(Position selectionPos) {
         gameArea.setSelection(selectionPos);
+    }
+
+    public void setController(Controller controller) {
+        gameArea.setController(controller);
     }
 
 }

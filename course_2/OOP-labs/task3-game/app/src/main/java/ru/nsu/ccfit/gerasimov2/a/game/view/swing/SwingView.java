@@ -2,18 +2,20 @@ package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 
 import java.time.Duration;
 
-
-import ru.nsu.ccfit.gerasimov2.a.game.model.Model;
+import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.view.View;
 
 public class SwingView extends View {
 
     private GameForm gameForm;
+    private GameArea gameArea;
 
-    public SwingView(Model model) {
+    public SwingView(GameModel model) {
         super(model);
         this.gameForm = new GameForm("tri v ryad", 640,  480, model);
+        this.gameArea = gameForm.getGameArea();
     }
 
     void sleep() {
@@ -25,15 +27,16 @@ public class SwingView extends View {
     }
 
     @Override
-    public void updateSuspended() {
-        sleep();
+    public void update() {
         updateImmediatly();
         return;
     }
 
     @Override
     public void updateImmediatly() {
-        gameForm.paintAll(gameForm.getGraphics());
+        //gameForm.paint(gameForm.getGraphics());
+        gameForm.repaint(100);
+        
     }
 
     @Override
@@ -47,13 +50,19 @@ public class SwingView extends View {
     }
 
     @Override
-    public Position getUserInputSelection() {
-        return gameForm.getSelection();
+    public void drawSelection(Position selectionPos) {
+        gameForm.drawSelection(selectionPos);
     }
 
     @Override
-    public void drawSelection(Position selectionPos) {
-        gameForm.drawSelection(selectionPos);
+    public void start() {
+        model.step();
+    }
+
+    @Override
+    public void setController(Controller controller) {
+        this.controller = controller;
+        gameForm.setController(controller);
     }
 
 }

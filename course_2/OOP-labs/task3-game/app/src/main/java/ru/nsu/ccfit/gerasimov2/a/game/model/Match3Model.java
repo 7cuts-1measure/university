@@ -8,7 +8,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.factory.GemFactory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.DestroyStratagy;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.Match3DestroyStrategy;
 
-public class Match3Model extends Model {
+public class Match3Model extends GameModel {
     private GemField gemField;
     private DestroyStratagy destroyAlgo;
     private int score = 0;
@@ -26,11 +26,6 @@ public class Match3Model extends Model {
     @Override
     public boolean isDestroyable() {
         return destroyAlgo.isDestroyable(gemField);
-    }
-
-    @Override
-    public GemField getGemField() {
-        return gemField;    //TODO: not a good function!!!!
     }
 
 
@@ -56,9 +51,9 @@ public class Match3Model extends Model {
     public boolean setMove(Position p1, Position p2) {
         boolean isSame = p1.getCol() == p2.getCol() && p1.getRow() == p2.getRow();
 
-        int diff_rows = Math.abs(p1.getRow() - p2.getRow());
-        int diff_cols = Math.abs(p1.getCol() - p2.getCol());
-        boolean isNeghbours = diff_rows <= 1 && diff_cols <= 1 && diff_cols + diff_rows != 2; 
+        int diffRows = Math.abs(p1.getRow() - p2.getRow());
+        int diffCols = Math.abs(p1.getCol() - p2.getCol());
+        boolean isNeghbours = diffRows <= 1 && diffCols <= 1 && diffCols + diffRows != 2; 
         boolean isOutOfBounds = isOutOfBounds(p1) || isOutOfBounds(p2);
         
         if (isSame || !isNeghbours || isOutOfBounds) {
@@ -93,7 +88,22 @@ public class Match3Model extends Model {
     }
 
     @Override
+    public GemField getGemField() {
+        return gemField;
+    }
+
+    @Override
     public int getScore() {
         return score;
+    }
+
+    @Override
+    public int getCols() {
+        return gemField.getCols();
+    }
+
+    @Override
+    public int getRows() {
+        return gemField.getRows();
     }
 }
