@@ -2,9 +2,7 @@ package ru.nsu.ccfit.gerasimov2.a.game.view;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -67,8 +65,8 @@ public class ConsoleView extends View {
         for (int i = 0; i < gemField.getRows(); i++) {
             System.out.printf("%d | ", i);
             for (int j = 0; j < gemField.getCols(); j++) {
-                Position currPos = new Position(i, j);
-                Gem gem = gemField.at(currPos);
+                Position currPos    = new Position(i, j);
+                Gem gem             = gemField.at(currPos);
                 printGem(gem, currPos, selectionPos);
                 System.out.print(" ");
             }
@@ -87,7 +85,7 @@ public class ConsoleView extends View {
             gemString = DestroyFmt + "x" + resetFmt;
         } else {
             String colorFmt = "\033[0;3" + gem.color + "m";
-            String backgrundFmt =  gemPos.isSameAs(selection) ? "\033[7m" : "";
+            String backgrundFmt = gemPos.isSameAs(selection) ? "\033[7m" : "";
             gemString = colorFmt + backgrundFmt + gem.color + resetFmt; 
         }
         System.out.print(gemString);
@@ -95,7 +93,6 @@ public class ConsoleView extends View {
 
     @Override
     public void update() {
-        sleep(Duration.ofMillis(1000));
         displayClear();
         displayGemField();
         displayScore();
@@ -121,27 +118,36 @@ public class ConsoleView extends View {
 
     @Override
     public void drawSelection(Position selectionPos) {
-        this.selectionPos = selectionPos;       
+        this.selectionPos = selectionPos;
+        update();       
+    }
+
+
+    private void processFullAnimation() {
+        while (model.isAnimating()) {
+            sleep(Duration.ofMillis(1000));
+            model.nextAnimationStep();
+        }
     }
 
     @Override
     public void start() {
-        // main cycle of a game
-        //model.step();   // at the start moment there are already matched gems. the should be destroyed
+        model.reset();
         while (true) {
+            if (model.isAnimating()) processFullAnimation();
             System.out.print("-> ");  // printing prompt
             clearInputStream();
             Position userInput = readInputPosition();
             controller.handleInput(userInput);
+            if (model.isAnimating()) model.nextAnimationStep();
+
         }
     }
 
     private void clearInputStream() {
         try {
-            // Проверяем, есть ли доступные байты для чтения
-            while (System.in.available() > 0) {
-                System.in.read(); // Читаем и игнорируем их
-            }
+            int skip = System.in.available();
+            System.in.readNBytes(skip);
         } catch (IOException e) {
             e.printStackTrace();
         }

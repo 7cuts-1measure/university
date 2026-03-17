@@ -21,7 +21,7 @@ public class App {
         view.start();
     }
     public static void main(String[] args) {
-        boolean isConsoleMode = false;
+        boolean isConsoleMode = true;
         startGame(isConsoleMode);
     }
         
