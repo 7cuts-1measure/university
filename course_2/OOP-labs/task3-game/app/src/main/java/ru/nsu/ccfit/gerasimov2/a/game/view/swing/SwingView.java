@@ -75,14 +75,6 @@ public class SwingView extends View {
         swapTimer.start();
     }
 
-    void sleep() {
-        try {
-            Thread.sleep(Duration.ofMillis(600));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // interrupt our thread if other 
-        }
-    }
-
     @Override
     public void update() {
         AnimationState state = model.getAnimationState();
