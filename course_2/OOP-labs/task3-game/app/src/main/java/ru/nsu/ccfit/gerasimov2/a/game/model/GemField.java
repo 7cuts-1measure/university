@@ -88,4 +88,8 @@ public class GemField {
             }
         }
     }
+
+    public GemFactory getFactory() {
+        return gemFactory;
+    }
 }

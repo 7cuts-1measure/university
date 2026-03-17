@@ -14,5 +14,9 @@ public class GemFactory {
         int color = (int) (Math.random() * maxColor) + 1;
         return new DefaultGem(color);
     }
+    
+    public int getMaxColor() {
+        return maxColor;
+    }
 
 }

@@ -46,7 +46,7 @@ public class GameArea extends JPanel {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-                handleMouseClick(e.getX(), e.getY());
+                if (!model.isAnimating()) handleMouseClick(e.getX(), e.getY());
             }
         }); 
         

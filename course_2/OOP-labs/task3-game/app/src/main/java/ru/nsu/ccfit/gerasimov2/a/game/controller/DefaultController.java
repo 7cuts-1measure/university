@@ -21,15 +21,14 @@ public class DefaultController extends Controller {
         } else if (userSelection.isSameAs(firstSelection)) { // gets the same selection
             deselectFirst();
             return;
-        } 
-        else if (secondSelection == null) {
+        } else if (secondSelection == null) {
             selectSecond(userSelection);
 
-            boolean isMovable = model.setMove(firstSelection, secondSelection);
+            boolean isMovable = model.checkMove(firstSelection, secondSelection);
             
             if (isMovable) {
+                model.startSwapAnimation(firstSelection, secondSelection);   /* Calling the model */
                 deselectFirst();
-                model.step();
             } else {
                 view.message("Wrong move");
             }            
@@ -56,8 +55,12 @@ public class DefaultController extends Controller {
     }
 
     private void updateSelection(Position pos) {
-            view.drawSelection(pos); // remove selection
-            view.updateImmediatly();  // show it immediatly 
-         
+            view.drawSelection(pos); // remove selection         
+    }
+
+    @Override
+    public void resetModel() {
+        model.reset();
     }
 }
+

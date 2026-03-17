@@ -45,19 +45,18 @@ public abstract class GameModel implements Observable {
     public void notifyView() { notifyObservers(); }
 
 
-    public abstract boolean setMove(Position p1, Position p2);    
-    public abstract void step();
+    public abstract boolean checkMove(Position p1, Position p2);    
 
     public abstract GemField getGemField();
 
     public abstract int getCols();
     public abstract int getRows();
 
-    public abstract AnimationState getAnimationState(); // TODO: AnimationState - enum с состояниями 
-    public abstract int getCurrentAnimationStep();
-    public abstract int getTotalAnimationSteps();
-    public boolean isAnimating;
+    public abstract AnimationState getAnimationState();
+    public abstract void startSwapAnimation(Position p1, Position p2);  // начало обмена
+    public abstract void nextAnimationStep();        // переход на один
 
-    public void startSwapAnimation(Position p1, Position p2);  // начало обмена
-    public void nextAnimationStep();        // переход на один
+    public abstract void reset();
+
+    public abstract boolean isAnimating();
 }

@@ -17,7 +17,6 @@ public abstract class View implements Observer {
     public abstract void setController(Controller controller);
 
     public abstract void update();
-    public abstract void updateImmediatly();
     public abstract void message(String string);;
     public abstract void popupMessage(String string);
     public abstract void drawSelection(Position selectionPos);

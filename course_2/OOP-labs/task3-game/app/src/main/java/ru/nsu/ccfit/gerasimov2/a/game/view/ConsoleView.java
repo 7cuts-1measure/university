@@ -96,11 +96,6 @@ public class ConsoleView extends View {
     @Override
     public void update() {
         sleep(Duration.ofMillis(1000));
-        updateImmediatly();
-    }
-
-    @Override
-    public void updateImmediatly() {
         displayClear();
         displayGemField();
         displayScore();
@@ -132,7 +127,7 @@ public class ConsoleView extends View {
     @Override
     public void start() {
         // main cycle of a game
-        model.step();   // at the start moment there are already matched gems. the should be destroyed
+        //model.step();   // at the start moment there are already matched gems. the should be destroyed
         while (true) {
             System.out.print("-> ");  // printing prompt
             clearInputStream();

@@ -8,15 +8,41 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.factory.GemFactory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.DestroyStratagy;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.Match3DestroyStrategy;
 
+class Move {
+    public Position start;
+    public Position end;
+
+    public Move(Position start, Position end) {
+        this.start = start;
+        this.end = end;
+    }
+}
+
 public class Match3Model extends GameModel {
     private GemField gemField;
     private DestroyStratagy destroyAlgo;
-    private int score = 0;
+    private AnimationState currAnimationState = AnimationState.IDLE;
+    private Move move;
+    private int score;
+    public boolean isAnimating = false;
 
-    public Match3Model(int rows, int cols, int maxCOlor) {
-        gemField = new GemField(rows, cols, new GemFactory(maxCOlor));
+    @Override
+    public void reset() {
+        int rows = gemField.getRows();
+        int cols = gemField.getCols();
         destroyAlgo = new Match3DestroyStrategy();
-        
+        int maxColor = gemField.getFactory().getMaxColor();
+        gemField = new GemField(rows, cols, new GemFactory(maxColor));
+       
+        score = 0;
+        move = null;
+
+        isAnimating = true;
+        currAnimationState = AnimationState.DESTROY;
+    }
+
+    public Match3Model(int rows, int cols, int maxColor) {
+        gemField = new GemField(rows, cols, new GemFactory(maxColor));
     }
 
     public List<Position> getPositionsToDestroy() {
@@ -27,7 +53,6 @@ public class Match3Model extends GameModel {
     public boolean isDestroyable() {
         return destroyAlgo.isDestroyable(gemField);
     }
-
 
     @Override
     public Gem gemAt(Position pos) {
@@ -48,7 +73,7 @@ public class Match3Model extends GameModel {
     }
 
     @Override
-    public boolean setMove(Position p1, Position p2) {
+    public boolean checkMove(Position p1, Position p2) {
         boolean isSame = p1.getCol() == p2.getCol() && p1.getRow() == p2.getRow();
 
         int diffRows = Math.abs(p1.getRow() - p2.getRow());
@@ -59,32 +84,12 @@ public class Match3Model extends GameModel {
         if (isSame || !isNeghbours || isOutOfBounds) {
             return false;
         }
-        
         // now we sure that positions are correct and we allowed to try to swap gems 
         gemField.swap(p1, p2);  
-        if (destroyAlgo.isDestroyable(gemField)) {
-            return true;
-        } else {
-            gemField.swap(p1, p2);  // undo move
-            return false;
-        }
-    }
-
-    @Override
-    public void step() {
-        List<Position> toDestroy = getPositionsToDestroy();
-        while (!toDestroy.isEmpty()) {  /* do steps while can destroy */
-            score += toDestroy.size() * 10;
-            for (Position pos : toDestroy) {    /* destroy all */
-                gemField.destroyAt(pos);
-            }
-            notifyView(); /* showing destroyed field */
+        boolean isValidMove = destroyAlgo.isDestroyable(gemField);
+        gemField.swap(p1, p2);
+        return isValidMove;
         
-            gemField.refillDestroyed(); /* generating new gems */
-            notifyView(); /* showing new generated gems */
-
-            toDestroy = getPositionsToDestroy(); /* check again */
-        }
     }
 
     @Override
@@ -106,4 +111,75 @@ public class Match3Model extends GameModel {
     public int getRows() {
         return gemField.getRows();
     }
+
+    @Override
+    public AnimationState getAnimationState() {
+        return currAnimationState;
+    }
+
+    @Override
+    public void startSwapAnimation(Position p1, Position p2) {
+        isAnimating = true;
+        currAnimationState = AnimationState.SWAP;
+        move = new Move(p1, p2);
+    }
+
+    @Override
+    public void nextAnimationStep() {
+        switch (currAnimationState) {
+            case IDLE:
+                isAnimating = false;
+                return;
+            case SWAP:
+                doSwap();
+                notifyView(); /* update the view */
+                currAnimationState = AnimationState.DESTROY;
+                break;
+            case DESTROY:
+                doDestroy();
+                notifyView(); /* update the view */
+                currAnimationState = AnimationState.FALLING;
+                break;
+            case FALLING:
+                doFalling();
+                notifyView(); /* update the view */
+                if (destroyAlgo.isDestroyable(gemField)) {
+                    currAnimationState = AnimationState.DESTROY;
+                } else {
+                    currAnimationState = AnimationState.IDLE; 
+                    isAnimating = false; /* end animating */
+                }
+                break;
+            default:
+                throw new AnimationStateException("Unknown animation state");
+        }
+
+
+        
+    }
+    
+    private void doSwap() {
+        if (move == null) throw new AnimationStateException("No move was set");
+        gemField.swap(move.start, move.end);
+        move = null;
+
+    }
+    
+    private void doDestroy() {
+        List<Position> toDestroy = getPositionsToDestroy();
+        score += toDestroy.size() * 10;
+        toDestroy.forEach(gemPos -> gemField.destroyAt(gemPos));
+    }
+    
+    private void doFalling() {
+        gemField.refillDestroyed();
+    }
+
+    @Override
+    public boolean isAnimating() {
+        return isAnimating;
+    }
+
+
+    
 }

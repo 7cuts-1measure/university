@@ -15,4 +15,6 @@ public abstract class Controller{
     }
 
     public abstract void handleInput(Position userSelection);
+
+    public abstract void resetModel();
 }
