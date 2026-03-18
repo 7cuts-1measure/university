@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.product;
 
-public class Auto implements FactoryProduct{
+public class Auto implements Product{
     private int id;
 
     @Override

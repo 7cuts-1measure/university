@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.storage;
 
-import ru.nsu.ccfit.gerasimov2.a.factory.product.FactoryProduct;
+import ru.nsu.ccfit.gerasimov2.a.factory.UnsupportedProductException;
+import ru.nsu.ccfit.gerasimov2.a.factory.product.Product;
 
 public interface Storage {
     
@@ -11,7 +12,7 @@ public interface Storage {
      * @throws StorageFullException if storage is full. 
      * In this case you shoud wait until storage will be free.
      */
-    public void put(FactoryProduct product) throws UnsupportedProductException, StorageFullException;
+    public void put(Product product) throws UnsupportedProductException, StorageFullException;
 
     public int getNumberOfProducts();
 }

@@ -7,5 +7,7 @@ public class StorageException extends FactoryException {
     public StorageException(String msg) {
         super(msg);
     }
-    
+    public StorageException() {
+        super();
+    }    
 }

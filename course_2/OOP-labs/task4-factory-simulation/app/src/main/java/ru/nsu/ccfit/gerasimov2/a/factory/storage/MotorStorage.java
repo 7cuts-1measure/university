@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.storage;
 
-import ru.nsu.ccfit.gerasimov2.a.factory.product.FactoryProduct;
+import ru.nsu.ccfit.gerasimov2.a.factory.product.Product;
+import ru.nsu.ccfit.gerasimov2.a.factory.UnsupportedProductException;
 import ru.nsu.ccfit.gerasimov2.a.factory.product.Motor;
 
 public class MotorStorage implements Storage {
@@ -9,15 +10,15 @@ public class MotorStorage implements Storage {
     Motor[] products;
 
     @Override
-    public void put(FactoryProduct product) throws StorageFullException, UnsupportedProductException {
-        if (count + 1 > MAX_COUNT) { throw new StorageFullException("Storage is full"); }
+    public void put(Product product) throws StorageFullException, UnsupportedProductException {
+        if (product == null) throw new NullPointerException();
+        if (count + 1 > MAX_COUNT) { throw new StorageFullException(); }
         if (!(product instanceof Motor)) throw new UnsupportedProductException("Supports only " + Motor.class.getSimpleName() + " but got " + product.getClass().getSimpleName());
         products[count++] = (Motor) product; 
     }
 
 	@Override
 	public int getNumberOfProducts() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'getNumberOfProducts'");
+        return count;
 	}
 }

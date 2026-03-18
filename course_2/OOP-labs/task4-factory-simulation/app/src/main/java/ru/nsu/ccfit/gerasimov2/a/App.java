@@ -14,6 +14,5 @@ public class App {
     public static void main(String[] args) {
         System.out.println(new App().getGreeting());
         MotorStorage storage = new MotorStorage();
-        storage.put(null);     
     }
 }
