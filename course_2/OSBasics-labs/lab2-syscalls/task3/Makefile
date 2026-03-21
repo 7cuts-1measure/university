@@ -1,11 +1,11 @@
 
-all: main
+all: my_strace
 
-main: main.c hello_static.c
-	gcc main.c -o main
+my_strace: my_strace.c hello_static.c
+	gcc my_strace.c -o my_strace
 	gcc -nolibc -nostdlib hello_static.c -o hello_static
 
 clean:
-	rm -f main hello_static
+	rm -f my_strace hello_static
 
 .PHONY: all clean
