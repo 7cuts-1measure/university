@@ -1,4 +1,5 @@
 #include "my_syscall.h"
+#include <stdlib.h>
 
 void __stack_chk_fail() {} /* idk what this function should do, but without them it does not compile... */
 
@@ -24,8 +25,7 @@ long my_syscall(long syscall_no, long a1, long a2, long a3,
 }
 
 void exit(int code) {
-    my_syscall1(MY_NR_exit, code);
-} /* ignore warning: there is no return */
+    my_syscall1(MY_NR_exit, code); } /* ignore warning: there is syscall exit before this code */
 
 long my_write(int fd, const void* buf, long count) {
     return my_syscall3(MY_NR_write, fd, buf, count);

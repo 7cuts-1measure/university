@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <complex.h>
 #include <string.h>
 #include <stdint.h>     // for intmax_t
 #include <stdio.h>
@@ -125,10 +124,10 @@ int main(int argc, char* argv[], char* env[])
     // only parent process should be here
     int status;
     waitpid(pid, &status, 0);
-    ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD);
-    printf("%20s\t%16s %16s %16s %16s %16s %16s %16s\n",
+    ptrace(PTRACE_SETOPTIONS, pid, IGNORED, PTRACE_O_TRACESYSGOOD);
+    fprintf(stderr, "%10s\t%16s %16s %16s %16s\n",
             "[syscall name]",
-            "[rdi]", "[rsi]", "[rdx]", "[r10]", "[r8]", "[r9]", "[result]");
+            "[rdi]", "[rsi]", "[rdx]", "[result]");
     while (1) {
         ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
         waitpid(pid, &status, 0);
@@ -139,14 +138,14 @@ int main(int argc, char* argv[], char* env[])
             ptrace(PTRACE_GETREGS, pid, NULL, &regs);
             if (on_etry) {
                 // args in syscall for x86-64: rdi rsi rdx r10 r8 r9 
-                printf("%20s\t%16llx %16llx %16llx %16llx %16llx %16llx ", 
+                fprintf(stderr, "%10s\t%16llx %16llx %16llx ", 
                     get_syscall_name(regs.orig_rax), 
-                    regs.rdi, regs.rsi, regs.rdx, regs.r10, regs.r8, regs.r9
+                    regs.rdi, regs.rsi, regs.rdx
                 );
                 // printf("syscall: %s, %10s rax: %llu, orig_rax: %llu", 
                 //     get_syscall_name(regs.orig_rax), " ", regs.rax, regs.orig_rax);
             } else {
-                printf(" = %lld\n", regs.rax);
+                fprintf(stderr, " = %lld\n", regs.rax);
             }
             on_etry = !on_etry;
         }
