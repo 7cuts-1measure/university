@@ -10,10 +10,11 @@
 #include <stdbool.h>    
 #include <asm/unistd_64.h>
 
-
+                             
 #define IGNORED 0
 #define SYSCALL_HEADER_PATH "/usr/include/asm/unistd_64.h"
 #define BUFF_LEN 32
+
 static char buf_syscall_name[BUFF_LEN];
 static const char (*names)[BUFF_LEN] = NULL;
 static bool *name_is_cached = NULL;
@@ -126,8 +127,9 @@ int main(int argc, char* argv[], char* env[])
     waitpid(pid, &status, 0);
     ptrace(PTRACE_SETOPTIONS, pid, IGNORED, PTRACE_O_TRACESYSGOOD);
     fprintf(stderr, "%10s\t%16s %16s %16s %16s\n",
-            "[syscall name]",
-            "[rdi]", "[rsi]", "[rdx]", "[result]");
+            "syscall name",
+            "rdi", "rsi", "rdx", "result");
+    fprintf(stderr, "-------------------------------------------------------------------------------------\n");
     while (1) {
         ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
         waitpid(pid, &status, 0);
