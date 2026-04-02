@@ -1,30 +1,30 @@
+#include <asm/unistd_64.h>  // does not compile if not /usr/include/asm/unistd_64.h which i looking for...
 #include <assert.h>
+#include <err.h>
 #include <string.h>
-#include <stdint.h>     // for intmax_t
 #include <stdio.h>
 #include <stdlib.h>     // for exit
-#include <unistd.h>     // for fork, execve
+#include <stdbool.h>    
 #include <sys/wait.h>   // WIFEXITED, W* defines. waitpid()
 #include <sys/ptrace.h> // ptrace, ptrace PTRACE_* defines
 #include <sys/user.h>   // for struct user_regs_struct
-#include <stdbool.h>    
-#include <asm/unistd_64.h>
-
+#include <unistd.h>     // for fork, execve
                              
 #define IGNORED 0
 #define SYSCALL_HEADER_PATH "/usr/include/asm/unistd_64.h"
 #define BUFF_LEN 32
 
 static char buf_syscall_name[BUFF_LEN];
-static const char (*names)[BUFF_LEN] = NULL;
-static bool *name_is_cached = NULL;
+static char (*names)[BUFF_LEN]  = NULL;
+static bool *name_is_cached     = NULL;
+
+
 void clean() {
-    if (names) free((void *)names);
+    if (names)          free((void *)names);
     if (name_is_cached) free(name_is_cached);
 }
 
-int count_lines(FILE* f)
-{
+int count_lines(FILE* f) {
     if (!f) {
         fprintf(stderr, "Cannot count lines in NULL file\n");
         return -1;
@@ -38,45 +38,50 @@ int count_lines(FILE* f)
     while ((c = fgetc(f)) != EOF) {
         if (c == '\n') cnt++;
     }  
-
     // restore offset 
     fseek(f, offest_backup, SEEK_SET);
     return cnt;
 } 
 
-void cache_syscall_names() {
+////////////////// PARSE HEADER FILE ////////////////
+    // token_count:       0              1             2  
+    // str in header:  #define   __NR_[syscall_name] [nr]
+static void cache_syscall_names() {
     FILE* f = fopen(SYSCALL_HEADER_PATH, "r");
     if (!f) {
         perror("Cannot open " SYSCALL_HEADER_PATH);
         puts("Printing only numbers");
     }
+    
     int lines = count_lines(f);
-    names = (const char (*)[BUFF_LEN]) malloc(lines * sizeof(*names));
-    name_is_cached = (bool *) calloc(lines, sizeof(bool));
-    ////////////////// PARSE HEADER FILE ////////////////
-    // token_count:       0              1             2  
-    // str in header:  #define   __NR_[syscall_name] [nr]
+    
+    names           = (char (*)[BUFF_LEN]) malloc(lines * sizeof(*names));
+    name_is_cached  = (bool *) calloc(lines, sizeof(bool));
+    
     char line[100];
+    int line_cnt = 0;
     while (fgets(line, sizeof(line), f)) {
-        int token_count = 0;
+        line_cnt++;
+        
+        int token_count = -1;
         for (char *str = line; ; str = NULL) {
+            token_count++;
             char *token = strtok(str, " ");
-            if (token == NULL) 
+            if (token == NULL) { 
                 break;
+            }
+
             if (!strcmp(token, "#define")) {
-                assert(token_count == 0 && "\"#define\" should be first token");
-                token_count++;
+                assert(token_count == 0 && "\"#define\" should be the first token");
                 continue;
             } else if (!strncmp(token, "__NR_", 5)) {
-                assert(token_count == 1 && "\"__NR_...\" should be second token");
-                token_count++;
+                assert(token_count == 1 && "\"__NR_...\" should be the second token");
                 strncpy(buf_syscall_name, token + 5, BUFF_LEN);
             } else if (token_count == 2) {
                 char *endptr;
                 int nr = strtol(token, &endptr, 10);
                 if (*endptr != '\n' && *endptr != '\0' && *endptr != ' ') {
-                    perror("Invalid define in " SYSCALL_HEADER_PATH);
-                    exit(EXIT_FAILURE);
+                    err(EXIT_FAILURE, "Invalid define in %s:%d", SYSCALL_HEADER_PATH, line_cnt);
                 }
                 token_count = 0;
                 strncpy((char*)names[nr], buf_syscall_name, BUFF_LEN);
@@ -89,8 +94,7 @@ void cache_syscall_names() {
     fclose(f);
 }
 
-const char* get_syscall_name(long nr) 
-{
+const char* get_syscall_name(long nr) {
     static bool cached = false; 
     if (!cached) {
         cache_syscall_names(); 
@@ -98,15 +102,12 @@ const char* get_syscall_name(long nr)
     }
     if (name_is_cached[nr]) {   
         return names[nr];        
-    } else {
-        sprintf(buf_syscall_name, "%ld", nr);
-        return buf_syscall_name;
     }
-    
+    sprintf(buf_syscall_name, "%ld", nr);
+    return buf_syscall_name;
 }
 
-int main(int argc, char* argv[], char* env[]) 
-{
+int main(int argc, char* argv[], char* env[]) {
     if (argc < 2) {
         printf("Usage: %s [prog to exec]\n", argv[0]);
         exit(EXIT_FAILURE);
@@ -114,21 +115,19 @@ int main(int argc, char* argv[], char* env[])
     bool on_etry = true;
     pid_t pid = fork();
     if (pid == -1) {
-        perror("fork problem");
-        exit(EXIT_FAILURE);
+        err(EXIT_FAILURE, "fork problem");
     } else if (pid == 0) {
         ptrace(PTRACE_TRACEME, IGNORED, IGNORED, IGNORED);
         execve(argv[1], argv + 1, env);
-        perror("exec child problems");
-        exit(EXIT_FAILURE);
+        err(EXIT_FAILURE, "exec child problems");
     }
     // only parent process should be here
     int status;
     waitpid(pid, &status, 0);
+   
     ptrace(PTRACE_SETOPTIONS, pid, IGNORED, PTRACE_O_TRACESYSGOOD);
     fprintf(stderr, "%10s\t%16s %16s %16s %16s\n",
-            "syscall name",
-            "rdi", "rsi", "rdx", "result");
+            "syscall name", "rdi", "rsi", "rdx", "result");
     fprintf(stderr, "-------------------------------------------------------------------------------------\n");
     while (1) {
         ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
@@ -141,11 +140,7 @@ int main(int argc, char* argv[], char* env[])
             if (on_etry) {
                 // args in syscall for x86-64: rdi rsi rdx r10 r8 r9 
                 fprintf(stderr, "%10s\t%16llx %16llx %16llx ", 
-                    get_syscall_name(regs.orig_rax), 
-                    regs.rdi, regs.rsi, regs.rdx
-                );
-                // printf("syscall: %s, %10s rax: %llu, orig_rax: %llu", 
-                //     get_syscall_name(regs.orig_rax), " ", regs.rax, regs.orig_rax);
+                    get_syscall_name(regs.orig_rax), regs.rdi, regs.rsi, regs.rdx);
             } else {
                 fprintf(stderr, " = %lld\n", regs.rax);
             }
