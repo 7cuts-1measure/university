@@ -1,7 +1,8 @@
 all: filter
 
+CC=gcc
 filter: filter.c
-	gcc filter.c -o filter.out  
+	$(CC) filter.c -o filter.out  
 
 clean: 
 	rm -f filter.out
