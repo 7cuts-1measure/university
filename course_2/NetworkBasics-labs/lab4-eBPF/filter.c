@@ -107,7 +107,7 @@ void log_packet(size_t packet_len, ether_header *eth) {
     log_ip_protocol(ip);
 }
 
-int setup_filter(sock_fprog *prog) {
+int setup_filter(sock_fprog *prog, const char* interface) {
     if (prog == NULL) {
         errx(EXIT_FAILURE, "Error: Program for eBPF is NULL");
     }
@@ -115,7 +115,7 @@ int setup_filter(sock_fprog *prog) {
     sockaddr_ll addr = {
         .sll_family = AF_PACKET,
         .sll_protocol = htons(ETH_P_ALL),
-        .sll_ifindex = if_nametoindex("wlan0"),
+        .sll_ifindex = if_nametoindex(interface),
         .sll_pkttype = PACKET_HOST  // только пакеты для этого хоста
     };
     // создаём сокет
@@ -127,13 +127,12 @@ int setup_filter(sock_fprog *prog) {
     }
     // связываем интерфес c сокетом
     if (bind(socket_fd, (sockaddr *)&addr, sizeof(addr)) == -1) {
-        perror("Connot bind interface wlan0 to socket");
-        exit(EXIT_FAILURE);
+        err(EXIT_FAILURE, "Connot bind interface %s to socket", interface);
     }
     // применяем BPF фильтр
     if (setsockopt(socket_fd, SOL_SOCKET, SO_ATTACH_FILTER, prog, sizeof(*prog)) == -1) {
-        perror("Cannot set bpf-filter to socket");
-        exit(EXIT_FAILURE);
+        err(EXIT_FAILURE, "Cannot set bpf-filter to socket");
+        
     }
     return socket_fd;
 }
@@ -147,20 +146,24 @@ int main()
         .filter = tcp_ip_filter_code
     };
 
-    int socket_fd = setup_filter(&prog);
-    char packet_buf[BUF_SIZE];
-    while (1) {
-        ssize_t packet_len = recv(socket_fd, packet_buf, sizeof(packet_buf), 0);
-        if (packet_len == -1) {
-            perror("Error while reading data from socket");
-            exit(EXIT_FAILURE);
-        }
-        ether_header *eth = (ether_header *) packet_buf;
-        iphdr *ip = (iphdr *) (eth + 1);  // ip header goes after the end of ethernet header       
-        log_packet(packet_len, eth);
-    }
+    int socket_fd = setup_filter(&prog, "wlan0");
+
     
-    printf("done!\n");
+    
+
+
+    // char packet_buf[BUF_SIZE];
+    // while (1) {
+    //     ssize_t packet_len = recv(socket_fd, packet_buf, sizeof(packet_buf), 0);
+    //     if (packet_len == -1) {
+    //         perror("Error while reading data from socket");
+    //         exit(EXIT_FAILURE);
+    //     }
+    //     ether_header *eth = (ether_header *) packet_buf;
+    //     iphdr *ip = (iphdr *) (eth + 1);  // ip header goes after the end of ethernet header       
+    //     log_packet(packet_len, eth);
+    // }
+    
     close(socket_fd);
     return 0;
 }
