@@ -192,28 +192,25 @@ interactive_loop() {
 }
 
 main() {
-    # Проверка прав (скрипт должен запускаться с sudo)
     if [[ $EUID -eq 0 ]]; then
         echo -e "${RED}Do not run this script with root permissions (do not use sudo). ${NC}"
         exit 1
     fi
-    # Проверяем, что передан аргумент с интерфейсом
+
     if [[ $# -ne 1 ]]; then
         echo -e "${RED}Usage: $0 <interface>${NC}"
         echo "Example: $0 eth0"
         exit 1
     fi
-    INTERFACE="$1"   # глобальная переменная, будет доступна всем функциям
+    INTERFACE="$1"   # global var
 
     check_deps
-    # Пересобираем и загружаем XDP
+
     rebuild_xdp
     load_xdp
 
-    # Устанавливаем trap для корректного выхода
     trap unload_xdp INT TERM
 
-    # Запускаем интерактивный режим
     interactive_loop
     unload_xdp
 }
