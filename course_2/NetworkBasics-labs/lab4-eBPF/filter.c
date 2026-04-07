@@ -46,9 +46,8 @@ bool parse_tcp_packet(struct xdp_md *ctx, __u32 *src_ip, __u32 *dst_ip, __u8 *tc
     return true;
 }
 
-// Объявляем секцию "xdp", под которую ядро будет загружать нашу программу
 SEC("xdp")
-int xdp_tcp_blacklist_func(struct xdp_md *ctx) {
+int xdp_tcp_blacklist(struct xdp_md *ctx) {
     __u32 src_ip = 0, dst_ip = 0;
     __u8 tcp_hdr_len = 0;
     
