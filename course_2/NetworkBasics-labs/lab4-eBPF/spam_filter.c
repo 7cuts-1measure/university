@@ -10,8 +10,7 @@
 #define MAX_PAYLOAD_COPY_TO_STACK 511
 
 // Helper function to check if the packet is TCP
-static bool is_tcp(struct ethhdr *eth, void *data_end)
-{
+static bool is_tcp(struct ethhdr *eth, void *data_end) {
     // Ensure Ethernet header is within bounds
     if ((void *)(eth + 1) > data_end)
         return false;
@@ -34,8 +33,7 @@ static bool is_tcp(struct ethhdr *eth, void *data_end)
 }
 
 SEC("xdp")
-int xdp_pass(struct xdp_md *ctx)
-{
+int xdp_pass(struct xdp_md *ctx) {
     // Pointers to packet data
     void *data = (void *)(long)ctx->data;
     void *data_end = (void *)(long)ctx->data_end;
