@@ -7,7 +7,7 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_endian.h>
 
-#define MAX_PAYLOAD_COPY_TO_STACK 511
+#define MAX_PAYLOAD_LEN 1639
 
 // Helper function to check if the packet is TCP
 static bool is_tcp(struct ethhdr *eth, void *data_end) {
@@ -31,6 +31,8 @@ static bool is_tcp(struct ethhdr *eth, void *data_end) {
 
     return true;
 }
+
+#define HAS_SPAM(payload) ((payload)[i] == 'S' && (payload)[i+1] == 'P' && (payload)[i+2] == 'A' && (payload)[i+3] == 'M')
 
 SEC("xdp")
 int xdp_pass(struct xdp_md *ctx) {
@@ -65,24 +67,13 @@ int xdp_pass(struct xdp_md *ctx) {
     if (tcp_hdr_len < sizeof(struct tcphdr))                return XDP_PASS;
     
     unsigned char *payload = (unsigned char *)tcp + tcp_hdr_len;
-    long payload_len = (char *)data_end - (char *)payload;
+    const long payload_len = (char *)data_end - (char *)payload;
     if (payload_len < 4)                                    return XDP_PASS;
 
-    // Копируем payload в стековую переменную (безопасно)
-    unsigned char copy[MAX_PAYLOAD_COPY_TO_STACK];
-    long copy_len = payload_len;
-    if (copy_len > MAX_PAYLOAD_COPY_TO_STACK) copy_len = MAX_PAYLOAD_COPY_TO_STACK;
-    
-    // bpf_probe_read_kernel копирует данные из пакета в стек
-    if (bpf_probe_read_kernel(copy, copy_len, payload) < 0) return XDP_PASS;
 
-    // Поиск "SPAM" в скопированных данных (теперь доступ безопасен)
-    for (int i = 0; i <= copy_len - 4; i++) {
-        if (copy[i] == 0x53 && copy[i+1] == 0x50 &&
-            copy[i+2] == 0x41 && copy[i+3] == 0x4D) {
-            bpf_printk("SPAM found, dropping packet\n");
-            return XDP_DROP;
-        }
+    for (int i = 0; i <= MAX_PAYLOAD_LEN-4; i++) {
+        if ((void *)(payload + i + 4) > data_end) break;
+        if (HAS_SPAM(payload))                              return XDP_DROP;
     }
 
     return XDP_PASS;
