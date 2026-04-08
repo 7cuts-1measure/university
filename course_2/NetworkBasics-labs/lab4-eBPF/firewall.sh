@@ -47,13 +47,14 @@ get_map_id() {
 # ========== ОСНОВНЫЕ КОМАНДЫ ==========
 block_ip() {
     local ip="$1"
-    local hex_key=$(ip_to_hex "$ip")
-    local map_id=$(get_map_id)
+    local hex_key; hex_key=$(ip_to_hex "$ip")
+    local map_id;  map_id=$(get_map_id)
+   
     if [[ -z "$map_id" ]]; then
         echo -e "${RED}Ошибка: карта $MAP_NAME не найдена. Убедитесь, что XDP загружен.${NC}"
         return 1
     fi
-    if sudo bpftool map update id "$map_id" key hex $hex_key value hex 00 any; then
+    if sudo bpftool map update id "$map_id" key hex "$hex_key" value hex 00 any; then
         echo -e "${GREEN}$ip (0x${hex_key// /}) was added in blacklist.${NC}"
     else
         echo -e "${RED}Cannot add $ip. Maybe, it is already in blacklist?.${NC}"
@@ -62,8 +63,8 @@ block_ip() {
 
 unblock_ip() {
     local ip="$1"
-    local hex_key=$(ip_to_hex "$ip")
-    local map_id=$(get_map_id)
+    local hex_key; hex_key=$(ip_to_hex "$ip")
+    local map_id;  map_id=$(get_map_id)
     if [[ -z "$map_id" ]]; then
         echo -e "${RED}ERROR: map $MAP_NAME is not found.${NC}"
         return 1
@@ -86,13 +87,13 @@ decimal_to_ip_with_dots() {
 }
 
 list_blacklist() {
-    local map_id=$(get_map_id)
+    local map_id; map_id=$(get_map_id)
     echo "map_id = $map_id"
     if [[ -z "$map_id" ]]; then
         echo -e "${RED}Map $MAP_NAME was not found.${NC}"
         return 1
     fi
-    local dump=$(sudo bpftool map dump id "$map_id")
+    local dump; dump=$(sudo bpftool map dump id "$map_id")
     if [[ -z "$dump" ]] || [[ "$dump" == "[]" ]]; then
         echo -e "${YELLOW}Blacklist is empty.${NC}"
         return
@@ -100,7 +101,7 @@ list_blacklist() {
     echo -e "${GREEN}Blacklist:${NC}"
     
     echo "$dump" | grep -oP '\"key\": \d+' | awk -F ': ' '{print $2}' | while read -r num; do
-        echo "   $(decimal_to_ip_with_dots $num)"
+        echo "   $(decimal_to_ip_with_dots "$num")"
     done
 }
 
@@ -134,7 +135,7 @@ load_xdp() {
 unload_xdp() {
     echo "Unloading XDP from $INTERFACE ..."
     sudo ip link set dev "$INTERFACE" xdp off
-    echo -e "${GREEN}XDP unloaded.${NC}"
+    echo -e "${GREEN}XDP unloaded.${NC}"Ё
     exit
 }
 
