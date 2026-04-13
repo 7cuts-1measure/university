@@ -10,3 +10,4 @@ bin
 # Ignore Kotlin plugin data
 .kotlin
 
+data.json
