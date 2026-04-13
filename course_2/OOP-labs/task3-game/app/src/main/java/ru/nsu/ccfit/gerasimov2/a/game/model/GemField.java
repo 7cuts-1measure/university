@@ -78,6 +78,7 @@ public class GemField {
 
     /**
      * Update only if gem is destroyed
+     * TODO: not create gem -> fall it down from top!
      */
     public void refillDestroyed() {
         for (int i = 0; i < getRows(); i++) {
