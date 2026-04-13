@@ -132,7 +132,7 @@ public class ConsoleView extends View {
 
     @Override
     public void start() {
-        model.reset();
+        model.restart();
         while (true) {
             if (model.isAnimating()) processFullAnimation();
             System.out.print("-> ");  // printing prompt

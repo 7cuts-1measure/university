@@ -25,24 +25,36 @@ public class Match3Model extends GameModel {
     private Move move;
     private int score;
     public boolean isAnimating = false;
+    private int rows;
+    private int cols;
+    private GemFactory gemFactory;
 
     @Override
-    public void reset() {
-        int rows = gemField.getRows();
-        int cols = gemField.getCols();
-        destroyAlgo = new Match3DestroyStrategy();
-        int maxColor = gemField.getFactory().getMaxColor();
-        gemField = new GemField(rows, cols, new GemFactory(maxColor));
-       
-        score = 0;
-        move = null;
-
+    public void restart() {
+        reset();
+        
+        gemField = new GemField(cols, rows, gemFactory);
         isAnimating = true;
         currAnimationState = AnimationState.DESTROY;
     }
 
+
+    @Override
+    public void reset() {
+        score = 0;
+        move = null;
+        isAnimating = false;
+        currAnimationState = AnimationState.IDLE;
+    }
+
+
     public Match3Model(int rows, int cols, int maxColor) {
-        gemField = new GemField(rows, cols, new GemFactory(maxColor));
+        this.rows   = rows;
+        this.cols   = cols;
+        gemFactory  = new GemFactory(maxColor);
+        gemField    = new GemField(this.rows, this.cols, gemFactory);
+        destroyAlgo = new Match3DestroyStrategy();
+
     }
 
     public List<Position> getPositionsToDestroy() {

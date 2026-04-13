@@ -60,7 +60,7 @@ public class DefaultController extends Controller {
 
     @Override
     public void resetModel() {
-        model.reset();
+        model.restart();
     }
 }
 

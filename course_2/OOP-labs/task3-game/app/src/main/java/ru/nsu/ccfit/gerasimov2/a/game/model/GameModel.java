@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.gerasimov2.a.game.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,21 @@ public abstract class GameModel implements Observable {
     public abstract void startSwapAnimation(Position p1, Position p2);  // начало обмена
     public abstract void nextAnimationStep();        // переход на один
 
+    public abstract void restart();
+
     public abstract void reset();
 
     public abstract boolean isAnimating();
+
+
+    public final void saveUserResult(String username) throws IOException {
+        var userResult = new UserResult(username, getScore());
+        var saver = new UserResultFileManager();
+        saver.save(userResult);
+    }
+
+    public final List<UserResult> loadUserResults() throws IOException {
+        var loader = new UserResultFileManager();
+        return loader.load();    
+    }
 }
