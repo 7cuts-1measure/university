@@ -78,17 +78,34 @@ public class GemField {
 
     /**
      * Update only if gem is destroyed
-     * TODO: not create gem -> fall it down from top!
      */
     public void refillDestroyed() {
-        for (int i = 0; i < getRows(); i++) {
-            for (int j = 0; j < getCols(); j++) {
-                if (field[i][j].isDestroyed()) {
-                    field[i][j] = gemFactory.newGem();
+        final int rows = getRows();
+        final int cols = getCols();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Gem gem = field[i][j];
+                if (gem.isDestroyed()) {
+                    fallGemsDown(i, j);
                 }
             }
         }
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (field[i][j].isDestroyed()) field[i][j] = gemFactory.newGem();
+            }
+        }
     }
+
+
+    private void fallGemsDown(int row, int col) {
+        if (row == 0) return;
+        swap(new Position(row - 1, col), new Position(row, col));
+        fallGemsDown(row - 1, col);
+    }
+
 
     public GemFactory getFactory() {
         return gemFactory;
