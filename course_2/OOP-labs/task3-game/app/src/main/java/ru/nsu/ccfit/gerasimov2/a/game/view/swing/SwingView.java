@@ -47,7 +47,7 @@ public class SwingView extends View {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (model.isAnimating() && model.getAnimationState() == AnimationState.FALLING) {
-                        model.nextAnimationStep();
+                    model.nextAnimationStep();
                 }
             }
         });
@@ -58,7 +58,7 @@ public class SwingView extends View {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (model.isAnimating() && model.getAnimationState() == AnimationState.DESTROY) {
-                        model.nextAnimationStep();
+                    model.nextAnimationStep();
                 }
             }
         });
@@ -68,7 +68,7 @@ public class SwingView extends View {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (model.isAnimating() && model.getAnimationState() == AnimationState.SWAP) {
-                        model.nextAnimationStep();
+                    model.nextAnimationStep();
                 }
             }
         });
