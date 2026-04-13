@@ -68,44 +68,7 @@ public class GameForm extends JFrame {
     }
 
     private void createMenuBar() {
-        Font font = new Font("Arial", Font.BOLD, 16);
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.setBackground(Color.BLACK);        
-        // Создаем меню "Игра"
-        JMenu gameMenu = new JMenu("Игра");
-        gameMenu.setForeground(Color.WHITE);
-        gameMenu.setBackground(Color.BLACK);
-        gameMenu.setFont(font);
-        
-        JMenuItem newGameItem = new JMenuItem("New game");
-        newGameItem.setForeground(Theme.WHITE);
-        newGameItem.setBackground(Color.BLACK);
-        newGameItem.setFont(font);
-        newGameItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("New game started!");
-                gameArea.setVisible(true);
-                model.reset();
-            }
-        });
-        
-        JMenuItem exitItem = new JMenuItem("Exit to Windows");
-        exitItem.setForeground(Theme.WHITE);
-        exitItem.setBackground(Color.BLACK);
-        exitItem.setFont(font);
-        exitItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Завершает игру
-            }
-        });
-
-        gameMenu.add(newGameItem);
-        gameMenu.add(exitItem);
-        
-        menuBar.add(gameMenu);
-        
+        JMenuBar menuBar = new MenuBar(gameArea, model);
         setJMenuBar(menuBar);
     }
 
