@@ -1,11 +1,14 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.product;
 
 public class Motor implements Product {
-    int id;
+    private final int id;
 
     @Override
     public int getID() {
         return id;
     }
-
+    
+    public Motor(int id) {
+        this.id = id;
+    }
 }

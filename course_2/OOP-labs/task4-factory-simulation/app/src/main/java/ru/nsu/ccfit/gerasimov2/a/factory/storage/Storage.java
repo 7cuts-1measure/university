@@ -1,18 +1,54 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.storage;
 
-import ru.nsu.ccfit.gerasimov2.a.factory.UnsupportedProductException;
-import ru.nsu.ccfit.gerasimov2.a.factory.product.Product;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface Storage {
-    
+public class Storage<T> {
+    public final int capacity;
+    private List<T> items = new ArrayList<>();
+
     /**
-     * @param product Product that matches this kind of storage
-     * @throws UnsupportedProductException if specific kind of storage does not support specific type of product. 
-     * For example, {@code AutoStorage} does not support {@code Motor} 
-     * @throws StorageFullException if storage is full. 
-     * In this case you shoud wait until storage will be free.
+     * We use {@code lock} instead of {@code this} because we don't want to let other threads 
+     * synchronize with {@code this} and interfere storage 
+     * i.e. we don't want to allow other threads to write {@code synchonized(storage)}
      */
-    public void put(Product product) throws UnsupportedProductException, StorageFullException;
+    private Object lock = new Object();
+    
+    public Storage(int capacity) {
+        this.capacity = capacity;
+    }
+    
 
-    public int getNumberOfProducts();
+    public void put(T product) {
+        if (product == null) return; 
+        synchronized(lock) {
+            // Use while (condition) istead if (condition) because
+            // OS has spurious wakeup https://en.wikipedia.org/wiki/Spurious_wakeup
+            // That means current thread can be awaken not from notify() or notifyall()
+            // and storage still can be full
+            while (items.size() >= capacity) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }                
+            }
+            items.add(product);
+            assert items.size() <= capacity;
+        }
+        items.add(product);
+        lock.notifyAll(); 
+    }
+
+    public T get() throws InterruptedException {
+        synchronized(lock) {
+            while (items.isEmpty()) {
+                lock.wait();
+            }
+            T item = items.getLast();
+            return item;
+        }
+    }
+
 }
