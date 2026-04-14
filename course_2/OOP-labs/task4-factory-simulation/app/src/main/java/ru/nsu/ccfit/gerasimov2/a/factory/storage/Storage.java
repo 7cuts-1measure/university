@@ -36,9 +36,8 @@ public class Storage<T> {
             }
             items.add(product);
             assert items.size() <= capacity;
+            lock.notifyAll(); 
         }
-        items.add(product);
-        lock.notifyAll(); 
     }
 
     public T get() throws InterruptedException {
@@ -46,9 +45,15 @@ public class Storage<T> {
             while (items.isEmpty()) {
                 lock.wait();
             }
-            T item = items.getLast();
+            T item = items.removeLast();
+            lock.notifyAll();
             return item;
         }
+    }
+
+
+    public int size() {
+        return items.size();
     }
 
 }
