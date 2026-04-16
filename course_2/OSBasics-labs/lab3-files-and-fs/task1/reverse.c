@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <err.h>
+#include <linux/limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,45 +13,16 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#define BUF_SIZE 1000
+#define BUF_SIZE 1024
 #define MAX_PATH_LEN 4096
 
 typedef struct {
     __ino64_t inode_num;
     __off64_t fs_specific_offset;
-    unsigned short len;
-    unsigned char type;
-    char name[];  // variable size
+    unsigned short reclen;
+    unsigned char type; // better use stat(2) to explore type
+    char name[];  // variable size array
 } linux_dirent64;
-
-typedef struct {
-    char* data;
-    size_t count;
-    size_t capcity;
-} String_Builder;
-
-void sb_append_c(String_Builder *sb, char c) {
-    if (sb->count + 1 > sb->capcity) {
-        sb->capcity *= 2;
-        sb->data = realloc(sb->data, sb->capcity);
-        if (!sb->data) err(EXIT_FAILURE, "Cannot alloc data");
-    }
-}
-void sb_append_s(String_Builder *sb, const char* s) {
-    if (!s) return;
-    for (; *s != '\0'; s++) {
-        sb_append_c(sb, *s);
-    }
-}
-
-void sb_free(String_Builder *sb) {
-    if (sb) {
-        free(sb->data);
-        sb->capcity = 0;
-        sb->count   = 0;
-        sb->data    = NULL;
-    }
-}
 
 
 bool validate(int argc, char* argv[]) 
@@ -88,7 +60,7 @@ void print_info(linux_dirent64 *dentry) {
                     (dentry_type == DT_LNK)  ?  "symlink"   :
                     (dentry_type == DT_BLK)  ?  "block dev" :
                     (dentry_type == DT_CHR)  ?  "char dev"  : "???");
-    printf("%5d    %s\n", dentry->len, dentry->name);
+    printf("%5d    %s\n", dentry->reclen, dentry->name);
 }
 
 bool is_exists(const char* path) {
@@ -181,26 +153,27 @@ void copy_entire_file_reversed_at(int src_dir_fd, int dst_dir_fd, const char *sr
 
 }
 
-
 void process_dir_at(int fd, int rfd) {
     static int depth = -1;
     depth++;
 
     // Use malloc instead of allocating on a stack
     // because if we have a depth of recursion >= 8 and BUF_SIZE = 1024
-    // then we will have 8 * 1024 -> 8 KBytes that overflow stack
+    // then we need 8 * 1024 == 8 KBytes --> stack overflow
     char *buf = (char *) malloc(BUF_SIZE);
     for (;;) {
         
         long nread = syscall(SYS_getdents64, fd, buf, BUF_SIZE);
-        if (nread == -1)
+        if (nread == -1) {
             err(EXIT_FAILURE, "Cannot read directory");
+        }
         
-        if (nread == 0)
+        if (nread == 0) {
             break;
+        }
 
         linux_dirent64 *dentry;
-        for (size_t bpos = 0; bpos < nread; bpos += dentry->len) {
+        for (size_t bpos = 0; bpos < nread; bpos += dentry->reclen) {
             dentry = (linux_dirent64 *) (buf + bpos);
             
             if (!strcmp(dentry->name, ".") || !strcmp(dentry->name, "..")) {
@@ -297,8 +270,9 @@ int main(int argc, char *argv[]) {
     }
     
     int rfd = open(dir_path, O_RDONLY | O_DIRECTORY);   // TODO: создать ФАЙЛ tset и получить сломанную программу
-    if (rfd == -1)
+    if (rfd == -1) {
         err(EXIT_FAILURE, "1Cannot open %s", dir_path);
+    }
 
     printf("\n");
     process_dir_at(fd, rfd);
