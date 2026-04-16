@@ -1,32 +1,57 @@
 #include <asm-generic/errno-base.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#include <assert.h>
+#include <errno.h>
+#include <dirent.h>
+#include <err.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <dirent.h>     /* Defines DT_* constants */
-#include <err.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h> 
 #include <sys/syscall.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <assert.h>
+#include <unistd.h>
 
 #define BUF_SIZE 1000
 #define MAX_PATH_LEN 4096
 
-typedef struct linux_dirent {
-    ino_t inode_num;
-    off_t fs_specific_offset;
+typedef struct {
+    __ino64_t inode_num;
+    __off64_t fs_specific_offset;
     unsigned short len;
+    unsigned char type;
     char name[];  // variable size
-    //char pad;
-    //char d_type;
-} linux_dirent;
+} linux_dirent64;
+
+typedef struct {
+    char* data;
+    size_t count;
+    size_t capcity;
+} String_Builder;
+
+void sb_append_c(String_Builder *sb, char c) {
+    if (sb->count + 1 > sb->capcity) {
+        sb->capcity *= 2;
+        sb->data = realloc(sb->data, sb->capcity);
+        if (!sb->data) err(EXIT_FAILURE, "Cannot alloc data");
+    }
+}
+void sb_append_s(String_Builder *sb, const char* s) {
+    if (!s) return;
+    for (; *s != '\0'; s++) {
+        sb_append_c(sb, *s);
+    }
+}
+
+void sb_free(String_Builder *sb) {
+    if (sb) {
+        free(sb->data);
+        sb->capcity = 0;
+        sb->count   = 0;
+        sb->data    = NULL;
+    }
+}
+
 
 bool validate(int argc, char* argv[]) 
 {
@@ -46,8 +71,7 @@ void str_copy_reversed(char *dst, const char *src, size_t n)
 }
 
 
-void print_info(linux_dirent *dentry) 
-{
+void print_info(linux_dirent64 *dentry) {
     static bool printed_statistics = false;
     if (!printed_statistics) {
         printf("NOTE: `len` is not a file size! it is a `struct linux_dirent` size\n");
@@ -56,8 +80,7 @@ void print_info(linux_dirent *dentry)
     }
     
     printf("%8lu  ", dentry->inode_num);
-    char dentry_type = *((char *)dentry + dentry->len - 1); // dentry->len is length of structure in *bytes* so we shuold cast dentry to (char *)
-    
+    char dentry_type = dentry->type;    
     printf("%-10s ",(dentry_type == DT_REG)  ?  "regular"   :
                     (dentry_type == DT_DIR)  ?  "directory" :
                     (dentry_type == DT_FIFO) ?  "FIFO"      :
@@ -69,22 +92,15 @@ void print_info(linux_dirent *dentry)
 }
 
 bool is_exists(const char* path) {
-    int err = open(path, O_RDONLY);
-    if (err == -1)
-        return false; 
-    close(err);
+    int fd = open(path, O_RDONLY);  // TODO: зачем RDONLY?
+    if (fd == -1) return false; 
+    close(fd);
     return true;
 }
 
-
-// return index of last C in STR
-// return -1 if no C in STR
 ssize_t find_last(char* str, size_t len, char c) {
-    // idea: search first C from end of STR
     for (int i = len - 1; i >= 0; i--) {
-        if (str[i] == c) {
-            return i;
-        }
+        if (str[i] == c) return i;
     }
     return -1;
 } 
@@ -101,28 +117,24 @@ void reverse(char* str, size_t len) {
     }
 }
 
-void path_reverse_last(char* path, size_t *len) {
-    ssize_t last = find_last(path, *len, '/');
-    while (last == *len - 1) {  //   path/to/dir////  <- last character is '/'
-        path[last] = '\0';
-        (*len)--;
-        last = find_last(path, *len, '/');
+char *areversed(const char* str) {
+    size_t len = strlen(str);
+    char *res = malloc(len + 1);
+    if (!res)
+        err(EXIT_FAILURE, "Cannot allocate memory");
+    
+    for (int i = 0; i < len; ++i) {
+        res[i] = str[len - 1 - i];
     }
-    last == -1 ? reverse(path, *len) : reverse(path + last, *len - last);
-}
-void path_append(char *path, size_t len, const char *name) {
-    path[len] = '/';
-    strcpy(path + 1 + len, name);
+    return res;
 }
 
 ssize_t max(ssize_t a, ssize_t b) {
     return a > b ? a : b;
 }
 
-void copy_entire_file_reversed(const char*dst_path, const char *src_path) {
-    printf("\"%s\" -> \"%s\"\n", src_path, dst_path);
-
-    int src_fd = open(src_path, O_RDONLY);
+void copy_entire_file_reversed_at(int src_dir_fd, int dst_dir_fd, const char *src_path, const char*dst_path) {
+    int src_fd = openat(src_dir_fd, src_path, O_RDONLY);
     if (src_fd == -1) {
         warn("Cannot open file \"%s\" for copy", src_path);
         return;
@@ -130,14 +142,14 @@ void copy_entire_file_reversed(const char*dst_path, const char *src_path) {
     
     struct stat src_stat;
     if (fstat(src_fd, &src_stat) == -1) {
-        close(src_fd);
         warn("Cannot get statistics of %s", src_path);
+        close(src_fd);
         return;
     }
-    int dst_fd = open(dst_path, O_WRONLY | O_CREAT | O_TRUNC, src_stat.st_mode);  // same mode as src file
+    int dst_fd = openat(dst_dir_fd, dst_path, O_WRONLY | O_CREAT | O_TRUNC, src_stat.st_mode);  // same mode as src file
     if (dst_fd == -1) {
         warn("Cannot create or open %s", dst_path);
-        close(src_fd);
+        close(dst_fd);
         return;
     }
     
@@ -149,10 +161,10 @@ void copy_entire_file_reversed(const char*dst_path, const char *src_path) {
     for (bool is_copy_end = false; !is_copy_end; is_copy_end = offset_dst == 0) {
         int nread = pread(src_fd, buf, buf_size, offset_src);
         if (nread == 0) {
-            break;
+            return;
         } else if (nread == -1) {
             warn("Skip %s due to read error", src_path);
-            break;
+            return;
         }
         assert((ssize_t)offset_dst - nread >= 0);
         offset_src += nread;
@@ -162,9 +174,94 @@ void copy_entire_file_reversed(const char*dst_path, const char *src_path) {
         
         int nwrite = pwrite(dst_fd, buf, nread, offset_dst);
         if (nwrite != nread) {
-            warn("WARNING: Dst file corruped due to error");
+            warn("WARNING: %s corruped due to error", dst_path);
+            return;
+        }
+    }
+
+}
+
+
+void process_dir_at(int fd, int rfd) {
+    static int depth = -1;
+    depth++;
+
+    // Use malloc instead of allocating on a stack
+    // because if we have a depth of recursion >= 8 and BUF_SIZE = 1024
+    // then we will have 8 * 1024 -> 8 KBytes that overflow stack
+    char *buf = (char *) malloc(BUF_SIZE);
+    for (;;) {
+        
+        long nread = syscall(SYS_getdents64, fd, buf, BUF_SIZE);
+        if (nread == -1)
+            err(EXIT_FAILURE, "Cannot read directory");
+        
+        if (nread == 0)
+            break;
+
+        linux_dirent64 *dentry;
+        for (size_t bpos = 0; bpos < nread; bpos += dentry->len) {
+            dentry = (linux_dirent64 *) (buf + bpos);
+            
+            if (!strcmp(dentry->name, ".") || !strcmp(dentry->name, "..")) {
+                continue;
+            }
+            
+            for (int i = 0; i < depth; i++) {
+                printf("    ");
+            }
+            
+            const char * reversed_name = areversed(dentry->name);
+            struct stat stat;
+            if (fstatat(fd, dentry->name, &stat, AT_SYMLINK_NOFOLLOW) == -1) {
+                err(EXIT_FAILURE, "Cannot get statistics");
+            }
+
+            printf("%s -> %s\n", dentry->name, reversed_name);
+            
+            if (S_ISDIR(stat.st_mode)) {
+                int next_fd = openat(fd, dentry->name, O_RDONLY | O_DIRECTORY);
+                if (next_fd == -1) {
+                    err(EXIT_FAILURE, "Cannot open %s", dentry->name);
+                }
+
+                int ret = mkdirat(rfd, reversed_name, stat.st_mode | S_IWUSR | S_IWGRP); // add write mode bits
+                if (ret == -1 && errno != EEXIST) {
+                    err(EXIT_FAILURE, "bad mkdir"); // TODO: handle errors
+                }
+                
+
+                int next_rfd = openat(rfd, reversed_name, O_RDONLY | O_DIRECTORY);
+                if (next_rfd == -1) {
+                    err(EXIT_FAILURE, "Cannot create %s", reversed_name);
+                }
+                
+                process_dir_at(next_fd, next_rfd);    // recursive call
+            } else {
+                copy_entire_file_reversed_at(fd, rfd, dentry->name, reversed_name);
+            }
+        }
+    }
+    free(buf);
+    depth--;
+}
+
+
+
+void reverse_last_dir_in_realpath(char *realpath) {
+    //    /home/user/path  ->  /home/user/htap
+    size_t len = strlen(realpath);
+    int idx = -1;
+    for (int i = len - 1; i >= 0; i--) {
+        if (realpath[i] == '/'){
+            idx = i;
             break;
         }
+    }
+    assert(idx != -1);
+    idx++;
+    for (int i = 0; i < (len - idx) / 2; ++i) {
+        swap(&realpath[idx + i], &realpath[len - i - 1]);
     }
 }
 
@@ -172,49 +269,40 @@ int main(int argc, char *argv[]) {
     if (!validate(argc, argv)) {
         return EXIT_FAILURE;
     }
-    const char* dir_path = argv[1];
-    int src_fd = open(dir_path, O_RDONLY | O_DIRECTORY);
-    if (src_fd == -1) { 
-        err(EXIT_FAILURE, "Cannot open %s", dir_path);
-    }
-
-    // reverse dir path
-    size_t dir_path_len = strlen(dir_path);
-    
-    char src_path[MAX_PATH_LEN];
-    char dst_path[MAX_PATH_LEN];
-    
-    strcpy(src_path, dir_path);
-    strcpy(dst_path, dir_path);
-    path_reverse_last(dst_path, &dir_path_len);
-    
  
-    int ret = syscall(SYS_mkdir, dst_path, 0777);
-    if (ret == -1) {
-        if (errno == EEXIST) {
-            printf("Directory \"%s\" exists. Writing into it\n", dst_path);
+    char* dir_path = realpath(argv[1], NULL);
+    
+    printf("%s\n", dir_path);
+    
+    int fd = open(dir_path, O_RDONLY | O_DIRECTORY);
+    if (fd == -1) {
+        if (errno == ENOTDIR) {
+            errx(EXIT_FAILURE, "%s is not a directory", argv[1]);            
         } else {
-            err(EXIT_FAILURE, "Cannot create directory %s", dst_path);
+            err(EXIT_FAILURE, "Cannot open a directory %s", argv[1]);
         }
     }
 
-    char buf[BUF_SIZE];
-    long nread;
-    while((nread = syscall(SYS_getdents, src_fd, buf, BUF_SIZE)) > 0) {
-        
-        linux_dirent *dentry;
-        for (size_t buf_pos = 0; buf_pos < nread;  buf_pos += dentry->len) {
-            dentry = (linux_dirent *) (buf + buf_pos);
-            char dentry_type = *((char *)dentry + dentry->len - 1);
-            if (dentry_type != DT_REG) {
-                continue;
-            }
-            path_append(src_path, dir_path_len, dentry->name);
-            path_append(dst_path, dir_path_len, dentry->name);
-            reverse(dst_path + 1 + dir_path_len, strlen(dentry->name));
-            copy_entire_file_reversed(dst_path, src_path);
-        }
+    
+    reverse_last_dir_in_realpath(dir_path);
+    
+    struct stat src_stat;
+    if (fstat(fd, &src_stat) == -1) {
+        err(EXIT_FAILURE, "Cannot get statistics");
     }
-    if (nread == -1) err(EXIT_FAILURE, "ERROR: Syscall getdents problem");
+
+    int ret = mkdir(dir_path, src_stat.st_mode | S_IWUSR | S_IWGRP); // add write mode bits
+    if (ret == -1 && errno != EEXIST) {
+        err(EXIT_FAILURE, "bad mkdir"); // TODO: handle errors
+    }
+    
+    int rfd = open(dir_path, O_RDONLY | O_DIRECTORY);   // TODO: создать ФАЙЛ tset и получить сломанную программу
+    if (rfd == -1)
+        err(EXIT_FAILURE, "1Cannot open %s", dir_path);
+
+    printf("\n");
+    process_dir_at(fd, rfd);
+    free(dir_path);
+
     return EXIT_SUCCESS;
 }
