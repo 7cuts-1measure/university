@@ -376,6 +376,8 @@ int fp_rmhardlink(int argc, char *argv[])
     if (not_unique_hardlink(argv[1])) {
         return rm_one(argv[1]);
     }
-    if (!errno) warnx("%s: Not a hardlink", argv[1]);
+    if (!errno) 
+        warnx("%s: Not a hardlink", argv[1]);
+   
     return 1;
 }
