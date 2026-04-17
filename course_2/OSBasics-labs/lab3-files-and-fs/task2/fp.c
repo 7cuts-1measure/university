@@ -415,3 +415,26 @@ int fp_mod(int argc, char *argv[])
     }
     return exit_code;
 }
+
+int fp_chmod(int argc, char *argv[])
+{
+    if (argc < 2) {
+        warnx("missing file opernand and mod (permissions) in octal (like 0777 or 0644)");
+        return 1;
+    } else if (argc < 3) {
+        warnx("missing mod (permissions) in octal (like 0777 or 0644)");
+        return 1;
+    }
+    char *endptr = NULL;
+    int mode = strtol(argv[2], &endptr, 8);
+    if (*endptr != '\0') {
+        warn("invalid octal number: %s", argv[1]);
+        return 1;
+    }
+
+    if (chmod(argv[1], mode) == -1) {
+        warn("%s", argv[1]);
+        return 1;
+    }
+    return 0;
+}
