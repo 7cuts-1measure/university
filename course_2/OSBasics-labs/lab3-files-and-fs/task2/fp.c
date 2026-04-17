@@ -210,12 +210,37 @@ int fp_cat(int argc, char *argv[])
         exit_code = cat_one(NULL);
 
     for (int i = 1; i < argc; ++i) {
-        if (cat_one(argv[i]) != 0) {
+        if (cat_one(argv[i]) != 0) 
             exit_code = 1;
-        }
+
         printf("\n");
     }
     return exit_code;
+}
+
+int rm_one(const char *path) 
+{
+    if (unlink(path) == -1) {
+        warn("%s", path);
+        return 1;
+    }
+    return 0;
+}
+
+int fp_rm(int argc, char *argv[])
+{
+    int exit_code = 0;
+    if (argc < 2) {
+        warnx("missing file operand");
+        return 1;
+    }
+
+    for (int i = 1; i < argc; ++i) {
+        if (rm_one(argv[i]) != 0)
+            exit_code = 1;
+    }
+    return exit_code;
+    
 }
 
 
