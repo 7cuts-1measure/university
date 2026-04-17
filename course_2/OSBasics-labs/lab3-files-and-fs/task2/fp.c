@@ -243,7 +243,50 @@ int fp_rm(int argc, char *argv[])
     
 }
 
+int fp_symlink(int argc, char *argv[])
+{
+    if (argc < 2) {
+        warnx("missing target and linkpath");
+        return 1;
+    } else if (argc < 3) {
+        warnx("missing linkpath");
+        return 1;
+    }
+
+    const char *target = argv[1];
+    const char *linkpath =argv[2];
+    
+    if (symlink(target, linkpath) == -1) {
+        warn("filed to create symlink from '%s' to '%s'", target, linkpath);
+        return 1;
+    }
+    return 0;
+}
 
 
+int fp_readsymlink(int argc, char *argv[]) 
+{
+    if (argc < 2) {
+        warnx("missing file operand");
+        return 1;
+    }
+
+    char buf[PATH_MAX];
+    int nread = readlink(argv[1], buf, PATH_MAX);
+    if (nread == -1) {
+        warn("%s", argv[1]);
+        return 1;
+    }
+    int nwrite = write(STDOUT_FILENO, buf, nread);
+    puts("");
+    if (nwrite != nread) {
+        warn("%s", argv[1]);
+        return 1;
+    }
+    
+    return 0;
+}
+
+int
 
 
