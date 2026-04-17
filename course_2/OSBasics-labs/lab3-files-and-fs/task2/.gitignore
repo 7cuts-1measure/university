@@ -1,0 +1,4 @@
+programs
+*.so
+main
+update_links
