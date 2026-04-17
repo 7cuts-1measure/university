@@ -161,5 +161,6 @@ int fp_touch(int argc, char *argv[])
         }
         close(fd);
     }
+    return exit_code;
     
 }
