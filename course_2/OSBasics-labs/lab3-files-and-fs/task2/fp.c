@@ -21,6 +21,8 @@
 
 #define LOG(format, ...) printf("LOG: " format "\n", __VA_ARGS__)
 
+#define CAT_BUF_SIZE 1024
+
 // rmdir DIR_PATH
 int fp_rmdir(int argc, char *argv[])
 {
@@ -164,3 +166,59 @@ int fp_touch(int argc, char *argv[])
     return exit_code;
     
 }
+
+int cat_one(const char* path)
+{
+    int exit_code = 0;
+    int fd = path ? open(path, O_RDONLY) : STDIN_FILENO;
+    if (fd == -1) {
+        warn("%s", path);
+        return 1;
+    }
+
+    for (;;) {
+        char buf[CAT_BUF_SIZE];
+
+        int nread = read(fd, buf, CAT_BUF_SIZE); 
+
+        if (nread == -1) {
+            warn("error reading");
+            exit_code =1;
+            break;
+        }
+
+        if (nread == 0) 
+            break;
+
+        int nwrite = write(STDOUT_FILENO, buf, nread);
+        
+        if (nwrite == -1) {
+            warn("error writing");
+            exit_code = 1;
+            break;
+        }        
+        
+    }
+    if (path) close(fd);
+    return exit_code;
+}
+
+int fp_cat(int argc, char *argv[])
+{
+    int exit_code = 0;
+    if (argc == 1) 
+        exit_code = cat_one(NULL);
+
+    for (int i = 1; i < argc; ++i) {
+        if (cat_one(argv[i]) != 0) {
+            exit_code = 1;
+        }
+        printf("\n");
+    }
+    return exit_code;
+}
+
+
+
+
+
