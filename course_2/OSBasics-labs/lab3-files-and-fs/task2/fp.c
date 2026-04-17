@@ -13,6 +13,7 @@
 #include <err.h>
 #include <fcntl.h>
 #include <linux/limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -380,4 +381,37 @@ int fp_rmhardlink(int argc, char *argv[])
         warnx("%s: Not a hardlink", argv[1]);
    
     return 1;
+}
+
+int mod_one(const char *path)
+{
+    struct stat s;
+    if (stat(path, &s) == -1) {
+        warn("%s", path);
+        return 1;
+    }
+    printf("File type:                %s\n", file_type(s));
+    printf("Permissions (w/o type):   %jo (octal)\n", 0777 & (uintmax_t) s.st_mode);
+    printf("Link count:               %ju\n", (uintmax_t) s.st_nlink);
+
+    return 0;
+}
+
+int fp_mod(int argc, char *argv[])
+{
+    int exit_code = 0;
+    if (argc == 1)
+        return mod_one(".");
+
+    for (int i = 1; i < argc; ++i) {
+        if (argc > 2) 
+            printf("%s:\n", argv[i]);
+        
+        if (mod_one(argv[i]) != 0)
+            exit_code = 1;
+
+        if (argc > 2)
+            printf("\n");
+    }
+    return exit_code;
 }
