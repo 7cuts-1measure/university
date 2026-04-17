@@ -176,21 +176,19 @@ void process_dir_at(int fd, int rfd) {
         for (size_t bpos = 0; bpos < nread; bpos += dentry->reclen) {
             dentry = (linux_dirent64 *) (buf + bpos);
             
-            if (!strcmp(dentry->name, ".") || !strcmp(dentry->name, "..")) {
+            if (!strcmp(dentry->name, ".") || !strcmp(dentry->name, ".."))
                 continue;
-            }
             
-            for (int i = 0; i < depth; i++) {
+            for (int i = 0; i < depth; i++)
                 printf("    ");
-            }
             
             const char * reversed_name = areversed(dentry->name);
             struct stat stat;
-            if (fstatat(fd, dentry->name, &stat, AT_SYMLINK_NOFOLLOW) == -1) {
+            if (fstatat(fd, dentry->name, &stat, AT_SYMLINK_NOFOLLOW) == -1)
                 err(EXIT_FAILURE, "Cannot get statistics");
-            }
 
-            printf("%s -> %s\n", dentry->name, reversed_name);
+            if (S_ISDIR(stat.st_mode) || S_ISREG(stat.st_mode))
+                printf("%s -> %s\n", dentry->name, reversed_name);
             
             if (S_ISDIR(stat.st_mode)) {
                 int next_fd = openat(fd, dentry->name, O_RDONLY | O_DIRECTORY);
@@ -210,10 +208,9 @@ void process_dir_at(int fd, int rfd) {
                 }
                 
                 process_dir_at(next_fd, next_rfd);    // recursive call
-            } else {
+            } else if (S_ISREG(stat.st_mode))
                 copy_entire_file_reversed_at(fd, rfd, dentry->name, reversed_name);
-            }
-        }
+        }       
     }
     free(buf);
     depth--;
