@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -293,7 +294,6 @@ bool is_symlink(const char *path)
 {
     struct stat s;
     if (lstat(path, &s) == -1) {
-        puts("lstat == -1");
         warn("%s", path);
         return false;
     }
@@ -317,4 +317,42 @@ int fp_catsymlink(int argc, char *argv[])
     return 0;
 }
 
+int fp_rmsymlink(int argc, char *argv[])
+{
+    if (argc < 2) {
+        warnx("missing file operand");
+        return 1;
+    }
 
+    if (!is_symlink(argv[1])) {
+        if (!errno) warnx("'%s' is not a symbolic link", argv[1]);
+        return 1;
+    }
+
+    if (unlink(argv[1]) == -1) {
+        warn("%s", argv[1]);
+        return 1;
+    }
+    return 0;
+}
+
+
+int fp_hardlink(int argc, char *argv[])
+{  
+    if (argc < 2) {
+        warnx("missing target and linkpath");
+        return 1;
+    } else if (argc < 3) {
+        warnx("missing linkpath");
+        return 1;
+    }
+    const char *target = argv[1];
+    const char *linkpath =argv[2];
+
+    if (link(target, linkpath) == -1) {
+        warn("%s", argv[1]);
+        return 1;
+    }
+    return 0;
+    
+}
