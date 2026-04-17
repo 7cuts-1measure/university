@@ -15,6 +15,7 @@
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -287,6 +288,33 @@ int fp_readsymlink(int argc, char *argv[])
     return 0;
 }
 
-int
+
+bool is_symlink(const char *path)
+{
+    struct stat s;
+    if (lstat(path, &s) == -1) {
+        puts("lstat == -1");
+        warn("%s", path);
+        return false;
+    }
+
+    return S_ISLNK(s.st_mode);
+}
+
+int fp_catsymlink(int argc, char *argv[])
+{
+    if (argc < 2) {
+        warnx("missing file operand");
+        return 1;
+    }
+
+    if (!is_symlink(argv[1])) {
+        warnx("'%s' is not a symbolic link", argv[1]);
+        return 1;
+    }
+
+    cat_one(argv[1]);
+    return 0;
+}
 
 
