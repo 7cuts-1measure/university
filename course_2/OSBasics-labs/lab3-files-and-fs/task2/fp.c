@@ -354,5 +354,28 @@ int fp_hardlink(int argc, char *argv[])
         return 1;
     }
     return 0;
-    
+}
+
+bool not_unique_hardlink(const char *path)
+{
+    struct stat s;
+    if (stat(path, &s) == -1) {
+        warn("%s", path);
+        return false;
+    }
+
+    return (s.st_nlink > 1);
+}
+
+int fp_rmhardlink(int argc, char *argv[])
+{
+    if (argc < 2) {
+        warnx("missing target and linkpath");
+        return 1;
+    }
+    if (not_unique_hardlink(argv[1])) {
+        return rm_one(argv[1]);
+    }
+    if (!errno) warnx("%s: Not a hardlink", argv[1]);
+    return 1;
 }
