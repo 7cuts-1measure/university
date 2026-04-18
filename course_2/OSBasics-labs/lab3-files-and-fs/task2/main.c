@@ -149,7 +149,5 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Unknown function: `%s`\nType --help to list all functions\n", exe_name);
         return 1;
     }
-
     return func(argc, argv);
-
 }

@@ -14,7 +14,6 @@
 #include <unistd.h>
 
 #define BUF_SIZE 1024
-#define MAX_PATH_LEN 4096
 
 typedef struct {
     __ino64_t inode_num;
@@ -34,48 +33,6 @@ bool validate(int argc, char* argv[])
     return true;        
 }
 
-void str_copy_reversed(char *dst, const char *src, size_t n) 
-{
-    for (int i = 0; i < n; i++) {
-        dst[i] = src[n - i - 1];
-    }
-    dst[n] = '\0';
-}
-
-
-void print_info(linux_dirent64 *dentry) {
-    static bool printed_statistics = false;
-    if (!printed_statistics) {
-        printf("NOTE: `len` is not a file size! it is a `struct linux_dirent` size\n");
-        printf("inode No  file type    len    name\n");
-        printed_statistics = true;
-    }
-    
-    printf("%8lu  ", dentry->inode_num);
-    char dentry_type = dentry->type;    
-    printf("%-10s ",(dentry_type == DT_REG)  ?  "regular"   :
-                    (dentry_type == DT_DIR)  ?  "directory" :
-                    (dentry_type == DT_FIFO) ?  "FIFO"      :
-                    (dentry_type == DT_SOCK) ?  "socket"    :
-                    (dentry_type == DT_LNK)  ?  "symlink"   :
-                    (dentry_type == DT_BLK)  ?  "block dev" :
-                    (dentry_type == DT_CHR)  ?  "char dev"  : "???");
-    printf("%5d    %s\n", dentry->reclen, dentry->name);
-}
-
-bool is_exists(const char* path) {
-    int fd = open(path, O_RDONLY);  // TODO: зачем RDONLY?
-    if (fd == -1) return false; 
-    close(fd);
-    return true;
-}
-
-ssize_t find_last(char* str, size_t len, char c) {
-    for (int i = len - 1; i >= 0; i--) {
-        if (str[i] == c) return i;
-    }
-    return -1;
-} 
 
 void swap(char* c1, char* c2) {
     char tmp = *c1;
@@ -99,10 +56,6 @@ char *areversed(const char* str) {
         res[i] = str[len - 1 - i];
     }
     return res;
-}
-
-ssize_t max(ssize_t a, ssize_t b) {
-    return a > b ? a : b;
 }
 
 void copy_entire_file_reversed_at(int src_dir_fd, int dst_dir_fd, const char *src_path, const char*dst_path) {
