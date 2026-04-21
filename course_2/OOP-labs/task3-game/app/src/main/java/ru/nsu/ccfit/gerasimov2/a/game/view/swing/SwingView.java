@@ -1,10 +1,7 @@
 package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Duration;
 
 import javax.swing.Timer;
 
@@ -19,6 +16,7 @@ public class SwingView extends View {
     final int fallingTimerDealyMilliseconds = 700; 
     final int swapTimerDealyMilliseconds = 100; 
     final int destroyTimerDealyMilliseconds = 500; 
+    
     private Timer fallingTimer;
     private Timer swapTimer;
     private Timer destroyTimer;

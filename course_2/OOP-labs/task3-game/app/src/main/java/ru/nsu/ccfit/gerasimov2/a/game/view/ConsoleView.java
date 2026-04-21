@@ -54,19 +54,18 @@ public class ConsoleView extends View {
     }
 
     public void displayGemField() {
-        GemField gemField = model.getGemField();
         System.out.print("    ");
-        for (int i = 0; i < gemField.getCols(); i++) {
+        for (int i = 0; i < model.getCols(); i++) {
             System.out.printf("%d ", i);
         }
         System.out.println();
         System.out.println("---------------------");
 
-        for (int i = 0; i < gemField.getRows(); i++) {
+        for (int i = 0; i < model.getRows(); i++) {
             System.out.printf("%d | ", i);
-            for (int j = 0; j < gemField.getCols(); j++) {
+            for (int j = 0; j < model.getCols(); j++) {
                 Position currPos    = new Position(i, j);
-                Gem gem             = gemField.at(currPos);
+                Gem gem             = model.gemAt(currPos);
                 printGem(gem, currPos, selectionPos);
                 System.out.print(" ");
             }

@@ -62,16 +62,6 @@ public class Match3Model extends GameModel {
     }
 
     @Override
-    public boolean isDestroyable() {
-        return destroyAlgo.isDestroyable(gemField);
-    }
-
-    @Override
-    public Gem gemAt(Position pos) {
-        return gemField.at(pos);
-    }
-
-    @Override
     public Gem gemAt(int row, int col) {
         return gemField.at(row, col);
     }
@@ -102,11 +92,6 @@ public class Match3Model extends GameModel {
         gemField.swap(p1, p2);
         return isValidMove;
         
-    }
-
-    @Override
-    public GemField getGemField() {
-        return gemField;
     }
 
     @Override
@@ -193,5 +178,8 @@ public class Match3Model extends GameModel {
     }
 
 
-    
+    @Override
+    public Gem gemAt(Position currPos) {
+        return gemField.at(currPos);
+    }
 }

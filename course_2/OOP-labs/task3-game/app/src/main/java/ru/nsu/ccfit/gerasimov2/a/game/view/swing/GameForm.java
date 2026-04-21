@@ -2,14 +2,9 @@ package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;

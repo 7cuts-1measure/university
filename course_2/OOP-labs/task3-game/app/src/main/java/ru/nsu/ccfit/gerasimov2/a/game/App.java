@@ -3,6 +3,10 @@
  */
 package ru.nsu.ccfit.gerasimov2.a.game;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.DefaultController;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Match3Model;
@@ -12,8 +16,37 @@ import ru.nsu.ccfit.gerasimov2.a.game.view.View;
 import ru.nsu.ccfit.gerasimov2.a.game.view.swing.SwingView;
 
 public class App {
+    private boolean isConsoleMode = true;
 
-    private static void startGame(boolean isConsoleMode) {
+    public App() {
+        
+        System.out.println("Run graphic mode? [y/n]");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            boolean optionGot = false;
+            while (true) {
+                String line = br.readLine();
+                if (line.length() < 1) 
+                    continue;
+
+                if (line.charAt(0) == 'Y' || line.charAt(0) == 'y') {
+                    isConsoleMode = false;
+                    break;
+                }
+                else if (line.charAt(0) == 'N' || line.charAt(0) == 'n') {
+                    isConsoleMode = true;
+                    break;
+                }
+                else 
+                    continue;
+            }
+        } catch (IOException e) {
+            System.err.println("Cannot read input: " + e.getLocalizedMessage());
+            System.err.println("Choosing console mode");
+            isConsoleMode = true;
+        }
+    }
+    private void startGame() {
         GameModel model = new Match3Model(10, 10, 5);
         View view = isConsoleMode ? new ConsoleView(model) : new SwingView(model);
         Controller controller = new DefaultController(model, view);
@@ -21,8 +54,9 @@ public class App {
         view.start();
     }
     public static void main(String[] args) {
-        boolean isConsoleMode = false;
-        startGame(isConsoleMode);
+
+        App app = new App();
+        app.startGame();
     }
         
 }
