@@ -90,13 +90,33 @@ void print_file(FILE *f) {
     rewind(f);
 }
 
-int main() 
+int main(int argc, char *argv[]) 
 {
-    FILE *pagemap_file  = fopen("/proc/self/pagemap", "rb");
-    FILE *maps_file     = fopen("/proc/self/maps", "r");
+    pid_t pid;
+    if (argc > 1) {
+        char *endptr = argv[2];
+        pid = strtoul(argv[1], &endptr, 10);
+        
+        if (*endptr != '\0') {
+            errx(1, "Invalid PID\n");
+        }
+
+    } else {
+        pid = getpid();
+        printf("No pid was supplied. Using self pid: %d\n", pid);
+    }
+
+    
+    char path_buf[256];
+
+    sprintf(path_buf, "/proc/%d/pagemap", pid);
+    FILE *pagemap_file  = fopen(path_buf, "rb");
+    
+    sprintf(path_buf, "/proc/%d/maps", pid);
+    FILE *maps_file     = fopen(path_buf, "r");
+
     if (!pagemap_file || !maps_file) {
-        warn("cannot open file");
-        return 1;
+        err(1, "cannot open file %s", path_buf);
     }
 
     // const int alloc_size = 6;
@@ -111,6 +131,7 @@ int main()
         uint64_t start_addr, end_addr;
  
         int nscan = sscanf(line, "%lx-%lx", &start_addr, &end_addr);        
+
         if (nscan != 2)
             err(EXIT_FAILURE, "cannot parse /proc/self/maps");
 
@@ -118,12 +139,9 @@ int main()
         printf("%s", line);
         print_pme_in_range(pagemap_file, start_addr, end_addr);
     }
+
     if (ferror(maps_file)) {
-        perror("/proc/self/maps");
-        return EXIT_FAILURE;
+        err(1, "/proc/self/maps");
     }
-
-    free(line);
-
     return 0;
 }
