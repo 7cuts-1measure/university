@@ -5,21 +5,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
-#include <errno.h>
 #include <unistd.h>
 
 #define LINE_SZ 1024
 #define PME_SIZE 8
 
 
-#define GET_BIT(num, idx) (( (num) & (1UL << (idx)) ) >> (idx)) 
+#define GET_BIT(num, idx)  ( ((num) >> (idx)) & 1 )
 int PAGE_SIZE = 4096;
 
 #define IS_IN_RAM(pme)             GET_BIT((pme), 63)
 #define IS_IN_SWAP(pme)            GET_BIT((pme), 62)
 #define IS_FILE_MAPPED(pme)        GET_BIT((pme), 61)
 #define IS_WRITE_PROTECTED(pme)    GET_BIT((pme), 57)
-#define IS_EXCLUSIVELY_MAPPED(pme) GET_BIT((pme), 62)
+#define IS_EXCLUSIVELY_MAPPED(pme) GET_BIT((pme), 61)
 #define IS_SOFT_DIRTY(pme)         GET_BIT((pme), 55)
 
 
@@ -47,24 +46,24 @@ void print_one(uint64_t start_addr, int count, FILE *pagemap_file)
 {
     uint64_t addr = start_addr + (uint64_t)count * PAGE_SIZE;
     uint64_t pme = read_pme(pagemap_file, addr);
-    
-    printf("%5d:   %s      %s        %s            %s          %s          %s       \n",
+    uint64_t pfn = pme & ((1UL << 55) - 1);
+
+    printf("%5d:   %s      %s        %s            %s          %s          %s                 %lx\n",
         count,
         IS_IN_RAM(pme)             ? "x" : ".",
         IS_IN_SWAP(pme)            ? "x" : ".",
         IS_FILE_MAPPED(pme)        ? "x" : ".",
         IS_WRITE_PROTECTED(pme)    ? "x" : ".",
         IS_EXCLUSIVELY_MAPPED(pme) ? "x" : ".",
-        IS_SOFT_DIRTY(pme)         ? "x" : "."
+        IS_SOFT_DIRTY(pme)         ? "x" : ".",
+        pfn
     );
 }
 
 void print_pme_in_range(FILE *pagemap_file, uint64_t start_addr, uint64_t end_addr)
 {
-    printf(    "  cnt   ram    swap   file-mapped    wr-prot    excl    soft-dirty pte\n");
+    printf(    "  cnt   ram    swap   file-mapped    wr-prot    excl    soft-dirty pte   pfn (if page exists in RAM)\n");
     int total_pages = (end_addr - start_addr) / PAGE_SIZE;
-    int count = 1;
-
     
     for (int count = 0; count < CNT_SHOW; count++) {
         print_one(start_addr, count, pagemap_file);
@@ -93,19 +92,19 @@ void print_file(FILE *f) {
 
 int main() 
 {
-    volatile int *p = malloc(4096 * 4);
-    
     FILE *pagemap_file  = fopen("/proc/self/pagemap", "rb");
-    FILE *maps_file     = fopen("/proc/self/maps", "rb");
-    print_file(maps_file);
+    FILE *maps_file     = fopen("/proc/self/maps", "r");
     if (!pagemap_file || !maps_file) {
         warn("cannot open file");
         return 1;
     }
 
-    PAGE_SIZE = getpagesize();
-    printf("Page size: %d bytes\n", PAGE_SIZE);
-
+    // const int alloc_size = 6;
+    // char *p = malloc(PAGE_SIZE * alloc_size);
+    // for (int i = 0; i < alloc_size; ++i) {
+    //     p[PAGE_SIZE * i] = 'a';
+    // }
+    
     char *line = NULL;
     size_t len = 0;
     while (getline(&line, &len, maps_file) > 0) {        
@@ -115,11 +114,9 @@ int main()
         if (nscan != 2)
             err(EXIT_FAILURE, "cannot parse /proc/self/maps");
 
-
-        printf("%lx-%lx\n", start_addr, end_addr);
-        
+        puts("");
+        printf("%s", line);
         print_pme_in_range(pagemap_file, start_addr, end_addr);
-        
     }
     if (ferror(maps_file)) {
         perror("/proc/self/maps");
