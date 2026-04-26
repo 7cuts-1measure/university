@@ -17,13 +17,13 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.UserResult;
 import ru.nsu.ccfit.gerasimov2.a.game.model.UserResultFileManager;
 
 class NewGameItem extends JMenuItem {
-    NewGameItem(GameArea gameArea, Context ctx, String name) {
+    NewGameItem(SwingView view, Context ctx, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("New game started!");
-                gameArea.setVisible(true);
+                view.getGameArea().setVisible(true);
                 ctx.model.restart();
             }
         });
@@ -43,7 +43,7 @@ class ExitItem extends JMenuItem {
 }
 
 class GameOverItem extends JMenuItem {
-    GameOverItem(GameArea gameArea, Context ctx, String name) {
+    GameOverItem(SwingView view, Context ctx, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
@@ -58,7 +58,7 @@ class GameOverItem extends JMenuItem {
                     System.err.println("Cannot save result: " + ex.getLocalizedMessage());
                 }
                 ctx.model.reset();
-                gameArea.setVisible(false);
+                view.getGameArea().setVisible(false);
             }
         });
     }
@@ -84,7 +84,7 @@ class LeaderboardItem extends JMenuItem {
 }
 
 public class MenuBar extends JMenuBar {
-    MenuBar(GameArea gameArea, GameModel model) {
+    MenuBar(GameModel model, SwingView view) {
         setBackground(Color.BLACK);
         Context ctx = new Context(model);
 
@@ -94,7 +94,7 @@ public class MenuBar extends JMenuBar {
         add(gameMenu);
         menuItems.add(gameMenu);
 
-        JMenuItem newGameItem = new NewGameItem(gameArea, ctx, "Новая игра!");
+        JMenuItem newGameItem = new NewGameItem(view, ctx, "Новая игра!");
         gameMenu.add(newGameItem);
         menuItems.add(newGameItem);
         
@@ -104,7 +104,7 @@ public class MenuBar extends JMenuBar {
         menuItems.add(exitItem);
         
 
-        JMenuItem gameOverItem = new GameOverItem(gameArea, ctx, "Закончить игру");
+        JMenuItem gameOverItem = new GameOverItem(view, ctx, "Закончить игру");
         gameMenu.add(gameOverItem);
         menuItems.add(gameOverItem);
 

@@ -30,7 +30,7 @@ public class SwingView extends View {
 
     public SwingView(GameModel model) {
         super(model);
-        gameForm = new GameForm("tri v ryad", 640,  480, model);
+        gameForm = new GameForm("tri v ryad", 640,  480, model, this);
         gameArea = gameForm.getGameArea();
         gameArea.setVisible(false);
         scoreArea = gameForm.getScoreArea();
@@ -128,6 +128,10 @@ public class SwingView extends View {
     public void setController(Controller controller) {
         this.controller = controller;
         gameForm.setController(controller);
+    }
+
+    public GameArea getGameArea() {
+        return gameArea;
     }
 
 }
