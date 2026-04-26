@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuBar;
@@ -18,9 +19,6 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.UserResultFileManager;
 class NewGameItem extends JMenuItem {
     NewGameItem(GameArea gameArea, Context ctx, String name) {
         super(name);
-        setForeground(Theme.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -35,9 +33,6 @@ class NewGameItem extends JMenuItem {
 class ExitItem extends JMenuItem {
     ExitItem(Context ctx, String name) {
         super(name);
-        setForeground(Theme.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -50,9 +45,6 @@ class ExitItem extends JMenuItem {
 class GameOverItem extends JMenuItem {
     GameOverItem(GameArea gameArea, Context ctx, String name) {
         super(name);
-        setForeground(Theme.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -72,30 +64,9 @@ class GameOverItem extends JMenuItem {
     }
 }
 
-class GameMenu extends JMenu {
-    GameMenu(Context ctx, String name) {
-        super(name);
-        setForeground(Color.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
-    }
-}
-
-class InfoMenu extends JMenu {
-    InfoMenu(Context ctx, String name) {
-        super(name);
-        setForeground(Color.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
-    }
-}
-
 class LeaderboardItem extends JMenuItem {
     LeaderboardItem(Context ctx, String name) {
         super(name);
-        setForeground(Theme.WHITE);
-        setBackground(Color.BLACK);
-        setFont(ctx.font);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -109,31 +80,51 @@ class LeaderboardItem extends JMenuItem {
                 }
             }
         });
-
     }
 }
 
 public class MenuBar extends JMenuBar {
     MenuBar(GameArea gameArea, GameModel model) {
         setBackground(Color.BLACK);
-        Context ctx = new Context(gameArea, model, new Font("Arial", Font.BOLD, 16));
-        // --------------------------Игра---------------------------------
-        JMenu gameMenu = new GameMenu(ctx, "Игра");
+        Context ctx = new Context(model);
+
+        List<JMenuItem> menuItems = new ArrayList<>();
+        // --------------------------Game menu---------------------------------
+        JMenu gameMenu = new JMenu("Игра");
+        add(gameMenu);
+        menuItems.add(gameMenu);
 
         JMenuItem newGameItem = new NewGameItem(gameArea, ctx, "Новая игра!");
-        JMenuItem exitItem = new ExitItem(ctx, "Выйти в windows");
-        JMenuItem gameOverItem = new GameOverItem(gameArea, ctx, "Закончить игру");
-
         gameMenu.add(newGameItem);
-        gameMenu.add(exitItem);
-        gameMenu.add(gameOverItem);
-        // ----------------------------Инфо-------------------------------
-        JMenu infoMenu = new InfoMenu(ctx, "Инфо");
-        JMenuItem leaderboardItem = new LeaderboardItem(ctx, "Таблица лидеров");
+        menuItems.add(newGameItem);
+        
 
-        infoMenu.add(leaderboardItem);
-        // ------------------------------------------------------------------
-        add(gameMenu);
+        JMenuItem exitItem = new ExitItem(ctx, "Выйти в windows");
+        gameMenu.add(exitItem);
+        menuItems.add(exitItem);
+        
+
+        JMenuItem gameOverItem = new GameOverItem(gameArea, ctx, "Закончить игру");
+        gameMenu.add(gameOverItem);
+        menuItems.add(gameOverItem);
+
+        // ----------------------------Info menu-------------------------------
+        JMenu infoMenu = new JMenu( "Инфо");
         add(infoMenu);
+        menuItems.add(infoMenu);
+        
+        JMenuItem leaderboardItem = new LeaderboardItem(ctx, "Таблица лидеров");
+        infoMenu.add(leaderboardItem);
+        menuItems.add(leaderboardItem);
+
+        
+        // --------------------Configure theme of items------------------------------
+        Font font = new Font("Arial", Font.BOLD, 16);
+        for (var item : menuItems) {
+            item.setFont(font);
+            item.setForeground(Color.WHITE);
+            item.setBackground(Color.BLACK);
+        }
+        
     }
 }
