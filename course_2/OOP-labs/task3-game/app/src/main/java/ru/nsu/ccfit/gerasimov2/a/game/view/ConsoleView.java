@@ -6,7 +6,6 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.GemField;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;

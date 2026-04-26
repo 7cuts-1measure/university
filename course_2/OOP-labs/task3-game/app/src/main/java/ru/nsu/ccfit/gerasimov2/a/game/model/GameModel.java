@@ -56,6 +56,9 @@ public abstract class GameModel implements Observable, java.io.Serializable {
     }
 
     @Override
+    public void removeAllObservers() { observers.clear(); }
+
+    @Override
     public void removeObserver(Observer o) { observers.remove(o); }
 
     protected void notifyObservers() {
