@@ -11,7 +11,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.view.View;
 
-public class SwingView extends View {
+public class SwingView implements View {
 
     final int fallingTimerDealyMilliseconds = 700; 
     final int swapTimerDealyMilliseconds = 100; 
@@ -26,10 +26,10 @@ public class SwingView extends View {
     private GameArea gameArea;
     private ScoreArea scoreArea;
 
+    private ModelBox modelBox;
 
     public SwingView(GameModel model) {
-        super(model);
-        ModelBox modelBox = new ModelBox(model);
+        this.modelBox = new ModelBox(model);
         gameForm = new GameForm("tri v ryad", 640,  480, modelBox, this);
         gameArea = gameForm.getGameArea();
         gameArea.setVisible(false);
@@ -44,8 +44,8 @@ public class SwingView extends View {
         fallingTimer = new Timer(fallingTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (model.isAnimating() && model.getAnimationState() == AnimationState.FALLING) {
-                    model.nextAnimationStep();
+                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.FALLING) {
+                    modelBox.getModel().nextAnimationStep();
                 }
             }
         });
@@ -55,8 +55,8 @@ public class SwingView extends View {
         destroyTimer = new Timer(destroyTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (model.isAnimating() && model.getAnimationState() == AnimationState.DESTROY) {
-                    model.nextAnimationStep();
+                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.DESTROY) {
+                    modelBox.getModel().nextAnimationStep();
                 }
             }
         });
@@ -65,8 +65,8 @@ public class SwingView extends View {
         swapTimer = new Timer(swapTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (model.isAnimating() && model.getAnimationState() == AnimationState.SWAP) {
-                    model.nextAnimationStep();
+                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.SWAP) {
+                    modelBox.getModel().nextAnimationStep();
                 }
             }
         });
@@ -75,7 +75,7 @@ public class SwingView extends View {
 
     @Override
     public void update() {
-        AnimationState state = model.getAnimationState();
+        AnimationState state = modelBox.getModel().getAnimationState();
         restartTimers();
         System.out.println("Current animation state: " + state);
         
@@ -126,7 +126,6 @@ public class SwingView extends View {
 
     @Override
     public void setController(Controller controller) {
-        this.controller = controller;
         gameForm.setController(controller);
     }
 
