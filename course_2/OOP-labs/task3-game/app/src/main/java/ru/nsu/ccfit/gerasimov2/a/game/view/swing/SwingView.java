@@ -3,7 +3,6 @@ package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JMenu;
 import javax.swing.Timer;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;

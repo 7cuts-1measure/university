@@ -20,15 +20,15 @@ public abstract class GameModel implements Observable, java.io.Serializable {
     public abstract Gem gemAt(int row, int col);
     public abstract Gem gemAt(Position currPos);
     public abstract int getScore(); 
-    public abstract boolean checkMove(Position p1, Position p2);    
+    public abstract boolean isValidMove(Position p1, Position p2);    
     public abstract int getCols();
     public abstract int getRows();
     // ----------------------------------------------------
 
     // +++++++++++++ Change model state ++++++++++++++++
     public abstract AnimationState getAnimationState();
-    public abstract void startSwapAnimation(Position p1, Position p2);  // начало обмена
-    public abstract void nextAnimationStep();        // переход на один
+    public abstract void startSwapAnimation(Position p1, Position p2);  // for controller
+    public abstract void nextAnimationStep();        // for view
     public abstract void restart();
     public abstract void reset();
 
@@ -43,8 +43,6 @@ public abstract class GameModel implements Observable, java.io.Serializable {
         return loader.load();    
     }
     // ------------------------------------------------------
-
-
     
 
     // +++++++++++++++++ Observer pattern methods ++++++++++++++++++

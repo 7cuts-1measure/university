@@ -24,9 +24,8 @@ public class DefaultController extends Controller {
         } else if (secondSelection == null) {
             selectSecond(userSelection);
 
-            boolean isMovable = model.checkMove(firstSelection, secondSelection);
-            
-            if (isMovable) {
+            boolean isValidMove = model.isValidMove(firstSelection, secondSelection);
+            if (isValidMove) {
                 model.startSwapAnimation(firstSelection, secondSelection);   /* Calling the model */
                 deselectFirst();
             } else {

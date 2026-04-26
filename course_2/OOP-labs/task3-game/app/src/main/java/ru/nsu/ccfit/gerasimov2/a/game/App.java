@@ -4,10 +4,8 @@
 package ru.nsu.ccfit.gerasimov2.a.game;
 
 import java.io.BufferedReader;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.DefaultController;
@@ -15,7 +13,6 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.Match3Model;
 import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.view.ConsoleView;
 import ru.nsu.ccfit.gerasimov2.a.game.view.View;
-import ru.nsu.ccfit.gerasimov2.a.game.view.swing.Dialogs;
 import ru.nsu.ccfit.gerasimov2.a.game.view.swing.SwingView;
 
 public class App {

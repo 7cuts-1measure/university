@@ -73,7 +73,7 @@ public class Match3Model extends GameModel {
     }
 
     @Override
-    public boolean checkMove(Position p1, Position p2) {
+    public boolean isValidMove(Position p1, Position p2) {
         boolean isSame = p1.getCol() == p2.getCol() && p1.getRow() == p2.getRow();
 
         int diffRows = Math.abs(p1.getRow() - p2.getRow());
