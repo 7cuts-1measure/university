@@ -16,12 +16,9 @@ public class GameForm extends JFrame {
     private int height;
     private GameArea gameArea;
     private ScoreArea scoreArea;
-    private ModelBox modelBox;
-
-    public GameForm(String winTitle, int width, int heght, GameModel model, SwingView view) {
+    public GameForm(String winTitle, int width, int heght, ModelBox modelBox, SwingView view) {
         super(winTitle);
 
-        this.modelBox = new ModelBox(model);
         setSize(width, height);
         setLocationRelativeTo(null);
 
@@ -30,10 +27,10 @@ public class GameForm extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(bgColor);
 
-        gameArea = new GameArea(model);
+        gameArea = new GameArea(modelBox);
         add(gameArea, BorderLayout.CENTER);
 
-        scoreArea = new ScoreArea(model);
+        scoreArea = new ScoreArea(modelBox);
         add(scoreArea, BorderLayout.NORTH);
 
         JMenuBar menuBar = new MenuBar(modelBox, view);

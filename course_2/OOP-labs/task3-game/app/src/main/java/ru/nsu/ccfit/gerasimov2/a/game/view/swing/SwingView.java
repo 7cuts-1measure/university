@@ -22,7 +22,6 @@ public class SwingView extends View {
     private Timer destroyTimer;
     
 
-
     private GameForm gameForm;
     private GameArea gameArea;
     private ScoreArea scoreArea;
@@ -30,7 +29,8 @@ public class SwingView extends View {
 
     public SwingView(GameModel model) {
         super(model);
-        gameForm = new GameForm("tri v ryad", 640,  480, model, this);
+        ModelBox modelBox = new ModelBox(model);
+        gameForm = new GameForm("tri v ryad", 640,  480, modelBox, this);
         gameArea = gameForm.getGameArea();
         gameArea.setVisible(false);
         scoreArea = gameForm.getScoreArea();
