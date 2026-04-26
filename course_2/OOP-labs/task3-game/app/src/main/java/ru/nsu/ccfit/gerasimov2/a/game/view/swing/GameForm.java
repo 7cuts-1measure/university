@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
-import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameForm extends JFrame {
