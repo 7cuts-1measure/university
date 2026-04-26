@@ -23,7 +23,6 @@ public class App {
         System.out.println("Run graphic mode? [y/n]");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
-            boolean optionGot = false;
             while (true) {
                 String line = br.readLine();
                 if (line.length() < 1) 
