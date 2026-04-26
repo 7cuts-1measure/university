@@ -8,7 +8,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.factory.GemFactory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.DestroyStratagy;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.Match3DestroyStrategy;
 
-class Move {
+class Move implements java.io.Serializable {
     public Position start;
     public Position end;
 
@@ -27,6 +27,7 @@ public class Match3Model extends GameModel {
     public boolean isAnimating = false;
     private int rows;
     private int cols;
+    
     private GemFactory gemFactory;
 
     @Override

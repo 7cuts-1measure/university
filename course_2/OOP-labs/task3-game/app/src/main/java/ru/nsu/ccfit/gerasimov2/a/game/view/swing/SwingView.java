@@ -3,6 +3,7 @@ package ru.nsu.ccfit.gerasimov2.a.game.view.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JMenu;
 import javax.swing.Timer;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
@@ -25,8 +26,13 @@ public class SwingView implements View {
     private GameForm gameForm;
     private GameArea gameArea;
     private ScoreArea scoreArea;
+    
+    public ScoreArea getScoreArea() {
+        return scoreArea;
+    }
 
     private ModelBox modelBox;
+    private Controller controller;
 
     public SwingView(GameModel model) {
         this.modelBox = new ModelBox(model);
@@ -106,12 +112,12 @@ public class SwingView implements View {
 
     @Override
     public void message(String string) {
-        System.err.println("message");
+        System.err.println("message: " + string);
     }
 
     @Override
     public void popupMessage(String string) {
-        System.err.println("display  msg");
+        Dialogs.showWarning(string);
     }
 
     @Override
@@ -126,6 +132,7 @@ public class SwingView implements View {
 
     @Override
     public void setController(Controller controller) {
+        this.controller = controller;
         gameForm.setController(controller);
     }
 
@@ -133,4 +140,8 @@ public class SwingView implements View {
         return gameArea;
     }
 
+    @Override
+    public Controller getController() {
+        return controller;
+    }
 }

@@ -4,16 +4,21 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 
 public class ModelBox {
     private GameModel model;
+    private Object lock = new Object();
 
     public ModelBox (GameModel model) {
         this.model = model;
     }
 
     public GameModel getModel() {
-        return model;
+        synchronized (lock) {
+            return model;
+        }
     }
 
     public void setModel(GameModel model) {
-        this.model = model;
+        synchronized (lock) {
+            this.model = model;
+        }
     }
 }

@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.gerasimov2.a.game.model;
 
-public class Position {
+public class Position implements java.io.Serializable {
     private int row;
     private int col;
     

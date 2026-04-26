@@ -160,4 +160,9 @@ public class ConsoleView implements View {
     public void setController(Controller controller) {
         this.controller = controller;
     }
+
+    @Override
+    public Controller getController() {
+        return controller;
+    }
 }

@@ -55,12 +55,19 @@ public class DefaultController extends Controller {
     }
 
     private void updateSelection(Position pos) {
-            view.drawSelection(pos); // remove selection         
+        view.drawSelection(pos); // remove selection         
     }
 
     @Override
     public void resetModel() {
         model.restart();
+    }
+
+    @Override
+    public void changeModel(GameModel model) {
+        this.model = model;
+        deselectSecond();
+        deselectFirst();
     }
 }
 
