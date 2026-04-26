@@ -16,12 +16,12 @@ public class GameForm extends JFrame {
     private int height;
     private GameArea gameArea;
     private ScoreArea scoreArea;
-    private GameModel model;
+    private ModelBox modelBox;
 
     public GameForm(String winTitle, int width, int heght, GameModel model, SwingView view) {
         super(winTitle);
 
-        this.model = model;
+        this.modelBox = new ModelBox(model);
         setSize(width, height);
         setLocationRelativeTo(null);
 
@@ -36,8 +36,9 @@ public class GameForm extends JFrame {
         scoreArea = new ScoreArea(model);
         add(scoreArea, BorderLayout.NORTH);
 
-        createMenuBar(view);
-
+        JMenuBar menuBar = new MenuBar(modelBox, view);
+        setJMenuBar(menuBar);
+        
         pack();
 
         setMinimumSize(getSize());
@@ -62,9 +63,5 @@ public class GameForm extends JFrame {
         return scoreArea;
     }
 
-    private void createMenuBar(SwingView view) {
-        JMenuBar menuBar = new MenuBar(model, view);
-        setJMenuBar(menuBar);
-    }
 
 }

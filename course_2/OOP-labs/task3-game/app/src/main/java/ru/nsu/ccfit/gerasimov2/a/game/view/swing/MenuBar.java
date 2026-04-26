@@ -12,26 +12,25 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.UserResult;
 import ru.nsu.ccfit.gerasimov2.a.game.model.UserResultFileManager;
 
 class NewGameItem extends JMenuItem {
-    NewGameItem(SwingView view, Context ctx, String name) {
+    NewGameItem(SwingView view, ModelBox modelBox, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("New game started!");
                 view.getGameArea().setVisible(true);
-                ctx.model.restart();
+                modelBox.getModel().restart();
             }
         });
     }
 }
 
 class ExitItem extends JMenuItem {
-    ExitItem(Context ctx, String name) {
+    ExitItem(ModelBox modelBox, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
@@ -43,21 +42,21 @@ class ExitItem extends JMenuItem {
 }
 
 class GameOverItem extends JMenuItem {
-    GameOverItem(SwingView view, Context ctx, String name) {
+    GameOverItem(SwingView view, ModelBox modelBox, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = Dialogs.askUsername(null);
                 if (username == null || username.isEmpty()) return;
-                System.out.println("Saving results for " + username + ": Score = " + ctx.model.getScore());
+                System.out.println("Saving results for " + username + ": Score = " + modelBox.getModel().getScore());
 
                 try {
-                    ctx.model.saveUserResult(username);
+                    modelBox.getModel().saveUserResult(username);
                 } catch (IOException ex) {
                     System.err.println("Cannot save result: " + ex.getLocalizedMessage());
                 }
-                ctx.model.reset();
+                modelBox.getModel().reset();
                 view.getGameArea().setVisible(false);
             }
         });
@@ -65,7 +64,7 @@ class GameOverItem extends JMenuItem {
 }
 
 class LeaderboardItem extends JMenuItem {
-    LeaderboardItem(Context ctx, String name) {
+    LeaderboardItem(ModelBox modelBox, String name) {
         super(name);
         addActionListener(new ActionListener() {
             @Override
@@ -84,9 +83,8 @@ class LeaderboardItem extends JMenuItem {
 }
 
 public class MenuBar extends JMenuBar {
-    MenuBar(GameModel model, SwingView view) {
+    MenuBar(ModelBox modelBox, SwingView view) {
         setBackground(Color.BLACK);
-        Context ctx = new Context(model);
 
         List<JMenuItem> menuItems = new ArrayList<>();
         // --------------------------Game menu---------------------------------
@@ -94,17 +92,17 @@ public class MenuBar extends JMenuBar {
         add(gameMenu);
         menuItems.add(gameMenu);
 
-        JMenuItem newGameItem = new NewGameItem(view, ctx, "Новая игра!");
+        JMenuItem newGameItem = new NewGameItem(view, modelBox, "Новая игра!");
         gameMenu.add(newGameItem);
         menuItems.add(newGameItem);
         
 
-        JMenuItem exitItem = new ExitItem(ctx, "Выйти в windows");
+        JMenuItem exitItem = new ExitItem(modelBox, "Выйти в windows");
         gameMenu.add(exitItem);
         menuItems.add(exitItem);
         
 
-        JMenuItem gameOverItem = new GameOverItem(view, ctx, "Закончить игру");
+        JMenuItem gameOverItem = new GameOverItem(view, modelBox, "Закончить игру");
         gameMenu.add(gameOverItem);
         menuItems.add(gameOverItem);
 
@@ -113,7 +111,7 @@ public class MenuBar extends JMenuBar {
         add(infoMenu);
         menuItems.add(infoMenu);
         
-        JMenuItem leaderboardItem = new LeaderboardItem(ctx, "Таблица лидеров");
+        JMenuItem leaderboardItem = new LeaderboardItem(modelBox, "Таблица лидеров");
         infoMenu.add(leaderboardItem);
         menuItems.add(leaderboardItem);
 
