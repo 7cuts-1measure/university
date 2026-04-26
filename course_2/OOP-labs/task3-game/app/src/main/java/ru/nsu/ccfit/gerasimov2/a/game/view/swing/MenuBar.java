@@ -16,7 +16,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.UserResult;
 import ru.nsu.ccfit.gerasimov2.a.game.model.UserResultFileManager;
 
 class NewGameItem extends JMenuItem {
-    NewGameItem(Context ctx, String name) {
+    NewGameItem(GameArea gameArea, Context ctx, String name) {
         super(name);
         setForeground(Theme.WHITE);
         setBackground(Color.BLACK);
@@ -25,7 +25,7 @@ class NewGameItem extends JMenuItem {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("New game started!");
-                ctx.gameArea.setVisible(true);
+                gameArea.setVisible(true);
                 ctx.model.restart();
             }
         });
@@ -48,7 +48,7 @@ class ExitItem extends JMenuItem {
 }
 
 class GameOverItem extends JMenuItem {
-    GameOverItem(Context ctx, String name) {
+    GameOverItem(GameArea gameArea, Context ctx, String name) {
         super(name);
         setForeground(Theme.WHITE);
         setBackground(Color.BLACK);
@@ -66,7 +66,7 @@ class GameOverItem extends JMenuItem {
                     System.err.println("Cannot save result: " + ex.getLocalizedMessage());
                 }
                 ctx.model.reset();
-                ctx.gameArea.setVisible(false);
+                gameArea.setVisible(false);
             }
         });
     }
@@ -120,9 +120,9 @@ public class MenuBar extends JMenuBar {
         // --------------------------Игра---------------------------------
         JMenu gameMenu = new GameMenu(ctx, "Игра");
 
-        JMenuItem newGameItem = new NewGameItem(ctx, "Новая игра!");
+        JMenuItem newGameItem = new NewGameItem(gameArea, ctx, "Новая игра!");
         JMenuItem exitItem = new ExitItem(ctx, "Выйти в windows");
-        JMenuItem gameOverItem = new GameOverItem(ctx, "Закончить игру");
+        JMenuItem gameOverItem = new GameOverItem(gameArea, ctx, "Закончить игру");
 
         gameMenu.add(newGameItem);
         gameMenu.add(exitItem);
