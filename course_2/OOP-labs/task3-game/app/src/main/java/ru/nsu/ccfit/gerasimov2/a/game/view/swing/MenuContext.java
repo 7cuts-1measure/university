@@ -15,11 +15,4 @@ public class MenuContext {
         this.model = model;
         this.font = font;
     }
-
-
-    public void gameOver() {
-        gameArea.setVisible(false);
-        //model.saveUserResult();
-        model.reset();
-    } 
 }
