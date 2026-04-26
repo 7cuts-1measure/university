@@ -24,7 +24,6 @@ public class Match3Model extends GameModel {
     private AnimationState currAnimationState = AnimationState.IDLE;
     private Move move;
     private int score;
-    public boolean isAnimating = false;
     private int rows;
     private int cols;
     
@@ -35,7 +34,6 @@ public class Match3Model extends GameModel {
         reset();
         
         gemField = new GemField(cols, rows, gemFactory);
-        isAnimating = true;
         currAnimationState = AnimationState.DESTROY;
     }
 
@@ -44,7 +42,6 @@ public class Match3Model extends GameModel {
     public void reset() {
         score = 0;
         move = null;
-        isAnimating = false;
         currAnimationState = AnimationState.IDLE;
     }
 
@@ -117,7 +114,6 @@ public class Match3Model extends GameModel {
 
     @Override
     public void startSwapAnimation(Position p1, Position p2) {
-        isAnimating = true;
         currAnimationState = AnimationState.SWAP;
         move = new Move(p1, p2);
     }
@@ -126,7 +122,6 @@ public class Match3Model extends GameModel {
     public void nextAnimationStep() {
         switch (currAnimationState) {
             case IDLE:
-                isAnimating = false;
                 return;
             case SWAP:
                 doSwap();
@@ -145,7 +140,6 @@ public class Match3Model extends GameModel {
                     currAnimationState = AnimationState.DESTROY;
                 } else {
                     currAnimationState = AnimationState.IDLE; 
-                    isAnimating = false; /* end animating */
                 }
                 break;
             default:
@@ -171,11 +165,6 @@ public class Match3Model extends GameModel {
     
     private void doFalling() {
         gemField.refillDestroyed();
-    }
-
-    @Override
-    public boolean isAnimating() {
-        return isAnimating;
     }
 
 

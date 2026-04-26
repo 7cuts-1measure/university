@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.AnimationState;
 import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
@@ -124,9 +125,9 @@ public class ConsoleView implements View {
 
 
     private void processFullAnimation() {
-        while (model.isAnimating()) {
-            sleep(Duration.ofMillis(1000));
+        while (model.getAnimationState() != AnimationState.IDLE) {
             model.nextAnimationStep();
+            sleep(Duration.ofMillis(1000));
         }
     }
 
@@ -134,7 +135,7 @@ public class ConsoleView implements View {
     public void start() {
         model.restart();
         while (true) {
-            if (model.isAnimating()) processFullAnimation();
+            processFullAnimation();
             System.out.print("-> ");  // printing prompt
             clearInputStream();
             Position userInput = readInputPosition();
@@ -142,8 +143,7 @@ public class ConsoleView implements View {
                 throw new IllegalStateException("Contoller in null. You need to call setController() to start the game");
             }
             controller.handleInput(userInput);
-            if (model.isAnimating()) model.nextAnimationStep();
-
+            model.nextAnimationStep();  // skip swap animation
         }
     }
 

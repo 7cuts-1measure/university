@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.AnimationState;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameArea extends JPanel {
@@ -45,7 +46,7 @@ public class GameArea extends JPanel {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-                if (!modelBox.getModel().isAnimating()) handleMouseClick(e.getX(), e.getY());
+                if (modelBox.getModel().getAnimationState() == AnimationState.IDLE) handleMouseClick(e.getX(), e.getY());
             }
         }); 
         

@@ -8,7 +8,6 @@ import ru.nsu.ccfit.gerasimov2.a.game.Observable;
 import ru.nsu.ccfit.gerasimov2.a.game.Observer;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
-// TODO: check if i need implement methods form this interface
 public abstract class GameModel implements Observable, java.io.Serializable {
 
     List<Observer> observers;
@@ -32,7 +31,6 @@ public abstract class GameModel implements Observable, java.io.Serializable {
     public abstract void nextAnimationStep();        // переход на один
     public abstract void restart();
     public abstract void reset();
-    public abstract boolean isAnimating();  // TODO whatis it
 
     public final void saveUserResult(String username) throws IOException {
         var userResult = new UserResult(username, getScore());

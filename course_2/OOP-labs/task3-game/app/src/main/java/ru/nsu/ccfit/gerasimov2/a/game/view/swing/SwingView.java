@@ -50,7 +50,7 @@ public class SwingView implements View {
         fallingTimer = new Timer(fallingTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.FALLING) {
+                if (modelBox.getModel().getAnimationState() == AnimationState.FALLING) {
                     modelBox.getModel().nextAnimationStep();
                 }
             }
@@ -61,7 +61,7 @@ public class SwingView implements View {
         destroyTimer = new Timer(destroyTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.DESTROY) {
+                if (modelBox.getModel().getAnimationState() == AnimationState.DESTROY) {
                     modelBox.getModel().nextAnimationStep();
                 }
             }
@@ -71,7 +71,7 @@ public class SwingView implements View {
         swapTimer = new Timer(swapTimerDealyMilliseconds, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (modelBox.getModel().isAnimating() && modelBox.getModel().getAnimationState() == AnimationState.SWAP) {
+                if (modelBox.getModel().getAnimationState() == AnimationState.SWAP) {
                     modelBox.getModel().nextAnimationStep();
                 }
             }
