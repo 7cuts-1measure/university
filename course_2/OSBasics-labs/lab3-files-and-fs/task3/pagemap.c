@@ -62,7 +62,7 @@ void print_one(uint64_t start_addr, int count, FILE *pagemap_file)
 
 void print_pme_in_range(FILE *pagemap_file, uint64_t start_addr, uint64_t end_addr)
 {
-    printf(    "  cnt   ram    swap   file-mapped    wr-prot    excl    soft-dirty pte   pfn (if page exists in RAM)\n");
+    printf("  cnt   ram    swap   file-mapped    wr-prot    excl    soft-dirty pte   pfn (if page exists in RAM)\n");
     int total_pages = (end_addr - start_addr) / PAGE_SIZE;
     
     for (int count = 0; count < CNT_SHOW; count++) {
