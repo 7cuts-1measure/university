@@ -27,7 +27,7 @@ public class Storage<T extends BaseProduct> {
             // OS has spurious wakeup https://en.wikipedia.org/wiki/Spurious_wakeup
             // That means current thread can be awaken not from notify() or notifyall()
             // and storage still can be full
-            while (storage.size() >= capacity) {
+            while (storage.size() == capacity) {
                 try {
                     storage.wait(); // wait until another thread call pop() and removes product
                 } catch (InterruptedException e) {
