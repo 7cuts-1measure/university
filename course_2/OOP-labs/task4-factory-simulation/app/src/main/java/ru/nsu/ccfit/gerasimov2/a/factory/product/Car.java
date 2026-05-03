@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.gerasimov2.a.factory.product;
 
-public class Car extends BaseProduct {
+public class Car extends Product {
 
     public Car(int id, Body body, Motor motor, Accessory accessory) {
         super(id);

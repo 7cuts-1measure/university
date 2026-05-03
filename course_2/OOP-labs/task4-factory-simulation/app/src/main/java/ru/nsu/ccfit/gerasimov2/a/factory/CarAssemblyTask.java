@@ -8,10 +8,10 @@ import ru.nsu.ccfit.gerasimov2.a.factory.storage.Storage;
 
 public class CarAssemblyTask implements Runnable {
 
-    Storage<Motor> motorStorage;
-    Storage<Body> bodyStorage;
-    Storage<Accessory> accessoryStorage;
-    Storage<Car> carStorage;
+    Storage<Motor>          motorStorage;
+    Storage<Body>           bodyStorage;
+    Storage<Accessory>      accessoryStorage;
+    Storage<Car>            carStorage;
     IdGenerator idGenerator = new IdGenerator();
 
     public CarAssemblyTask(Storage<Motor> motorStorage, Storage<Body> bodyStorage,
@@ -32,16 +32,13 @@ public class CarAssemblyTask implements Runnable {
             body      = bodyStorage.pop();
             motor     = motorStorage.pop();
             accessory = accessoryStorage.pop();
+            Car car = new Car(idGenerator.next(), body, motor, accessory);
+            carStorage.put(car);
         } catch (InterruptedException e) {
-            // Retore prodcuts to storage
-            if (body  != null) bodyStorage.put(body);
-            if (motor != null) motorStorage.put(motor);
             Thread.currentThread().interrupt();
             return;
         }
 
-        Car car = new Car(idGenerator.next(), body, motor, accessory);
-        carStorage.put(car);
     }
 
 }

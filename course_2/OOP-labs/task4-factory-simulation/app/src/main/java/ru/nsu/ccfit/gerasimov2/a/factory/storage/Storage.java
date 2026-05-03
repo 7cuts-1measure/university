@@ -3,9 +3,9 @@ package ru.nsu.ccfit.gerasimov2.a.factory.storage;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.nsu.ccfit.gerasimov2.a.factory.product.BaseProduct;
+import ru.nsu.ccfit.gerasimov2.a.factory.product.Product;
 
-public class Storage<T extends BaseProduct> {
+public class Storage<T extends Product> {
     public final int capacity;
     private List<T> storage = new ArrayList<>();
 
@@ -20,7 +20,7 @@ public class Storage<T extends BaseProduct> {
     }
     
 
-    public void put(T product) {
+    public void put(T product) throws InterruptedException {
         if (product == null) return; 
         synchronized(storage) {
             // Use while (condition) istead if (condition) because
@@ -28,12 +28,7 @@ public class Storage<T extends BaseProduct> {
             // That means current thread can be awaken not from notify() or notifyall()
             // and storage still can be full
             while (storage.size() == capacity) {
-                try {
-                    storage.wait(); // wait until another thread call pop() and removes product
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }                
+                storage.wait();
             }
             storage.add(product);
             assert storage.size() <= capacity;
@@ -44,7 +39,7 @@ public class Storage<T extends BaseProduct> {
     public T pop() throws InterruptedException {
         synchronized(storage) {
             while (storage.isEmpty()) {
-                storage.wait(); // wait until another thread call put() and fill the storage
+                storage.wait();
             }
             T item = storage.removeLast();
             storage.notifyAll();
