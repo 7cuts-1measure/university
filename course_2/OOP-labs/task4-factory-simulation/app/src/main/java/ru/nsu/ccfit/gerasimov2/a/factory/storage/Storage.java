@@ -3,7 +3,9 @@ package ru.nsu.ccfit.gerasimov2.a.factory.storage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Storage<T> {
+import ru.nsu.ccfit.gerasimov2.a.factory.product.BaseProduct;
+
+public class Storage<T extends BaseProduct> {
     public final int capacity;
     private List<T> storage = new ArrayList<>();
 
