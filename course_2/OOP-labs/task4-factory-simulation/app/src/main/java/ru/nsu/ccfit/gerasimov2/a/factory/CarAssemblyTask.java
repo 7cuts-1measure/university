@@ -29,9 +29,9 @@ public class CarAssemblyTask implements Runnable {
         Motor motor         = null;
         Accessory accessory = null;
         try {
-            body      = bodyStorage.get();
-            motor     = motorStorage.get();
-            accessory = accessoryStorage.get();
+            body      = bodyStorage.pop();
+            motor     = motorStorage.pop();
+            accessory = accessoryStorage.pop();
         } catch (InterruptedException e) {
             // Retore prodcuts to storage
             if (body  != null) bodyStorage.put(body);

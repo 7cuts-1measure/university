@@ -40,5 +40,5 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'ru.nsu.ccfit.gerasimov2.a.factory.App'
+    mainClass = 'ru.nsu.ccfit.gerasimov2.a.App'
 }
