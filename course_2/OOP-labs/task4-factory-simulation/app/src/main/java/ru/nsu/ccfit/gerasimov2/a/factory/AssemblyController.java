@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.gerasimov2.a.factory;
 
-import static java.lang.System.err;
-
 import ru.nsu.ccfit.gerasimov2.a.factory.product.Accessory;
 import ru.nsu.ccfit.gerasimov2.a.factory.product.Body;
 import ru.nsu.ccfit.gerasimov2.a.factory.product.Car;

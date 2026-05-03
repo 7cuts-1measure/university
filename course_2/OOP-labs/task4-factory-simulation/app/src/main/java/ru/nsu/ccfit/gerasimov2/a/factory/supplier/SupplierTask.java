@@ -2,10 +2,11 @@ package ru.nsu.ccfit.gerasimov2.a.factory.supplier;
 
 import java.time.Duration;
 
+import ru.nsu.ccfit.gerasimov2.a.factory.IdGenerator;
 import ru.nsu.ccfit.gerasimov2.a.factory.product.Product;
 import ru.nsu.ccfit.gerasimov2.a.factory.storage.Storage;
 
-public class Supplier<T extends Product> implements Runnable {
+public class SupplierTask<T extends Product> implements Runnable {
     
     private int productsPerSecond;
     
@@ -13,11 +14,13 @@ public class Supplier<T extends Product> implements Runnable {
 
     private final Creator<T> factory;
 
+    private final IdGenerator idGenerator;
 
-    public Supplier(int productsPerSecond, Storage<T> storage, Creator<T> factory) {
+    public SupplierTask(int productsPerSecond, Storage<T> storage, Creator<T> factory) {
         this.productsPerSecond = productsPerSecond;
         this.storage = storage;
         this.factory = factory;
+        idGenerator = new IdGenerator();
     }
 
 
@@ -28,7 +31,7 @@ public class Supplier<T extends Product> implements Runnable {
 
 
     private void supplyStorage() throws InterruptedException {
-        T product = factory.create();
+        T product = factory.create(idGenerator.next());
         storage.put(product);
     }
     
