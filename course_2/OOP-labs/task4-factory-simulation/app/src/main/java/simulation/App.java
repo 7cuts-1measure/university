@@ -31,6 +31,6 @@ public class App {
 
 
         FactoryModel model = new FactoryModel();
-        model.startSimulation();
+        model.start();
     }
 }

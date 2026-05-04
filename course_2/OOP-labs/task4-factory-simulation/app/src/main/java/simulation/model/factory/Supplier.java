@@ -32,14 +32,15 @@ public class Supplier<T extends Product> extends Thread {
     @Override
     public void run() {
         try {
-            while (true) {
+            while (Thread.interrupted()) {
                 supplyStorage();
                 sleep(sleepDuration());
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) {} 
+        finally {
             log.info("Thread was interrupted");
-            return;
         }
+        return;
     }
 
     private void supplyStorage() throws InterruptedException {

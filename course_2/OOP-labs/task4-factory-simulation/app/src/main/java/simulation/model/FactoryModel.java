@@ -20,17 +20,27 @@ import simulation.model.factory.product.Body;
 import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
 
-public class FactoryModel implements ViewModel{
+public class FactoryModel extends Thread implements ViewModel{
     private final Logger log = LoggerFactory.getLogger(getClass());   
 
+
     private final Storage<Motor> motorStorage;
+    
     private final Storage<Accessory> accessoryStorage;
+    
     private final Storage<Body> bodyStorage;
+    
     private final Storage<Car> carStorage;
 
+    
     private final Supplier<Motor> motorSupplier;
+    
     private final List<Supplier<Accessory>> accessorySuppliers;
+    
     private final Supplier<Body> bodySupplier;
+    
+    private final List<Dealer> dealers;
+
     
     private final CarStorageController carStorageController;
 
@@ -39,19 +49,39 @@ public class FactoryModel implements ViewModel{
     private final ExecutorService workers;
 
     public FactoryModel() {
+        // Storages 
         motorStorage     = new Storage<Motor>(Config.getMotorStorageSize());
         accessoryStorage = new Storage<Accessory>(Config.getAccessoryStorageSize());
         bodyStorage      = new Storage<Body>(Config.getBodyStorageSize());
         carStorage       = new Storage<Car>(Config.getCarStorageSize());
+        
+        // ThreadPool for assembling cars
         workers = Executors.newFixedThreadPool(Config.getThreadsWorkers());
     
-        motorSupplier = new Supplier<Motor>(idGenerator, motorStorage, Motor::new);
-        bodySupplier  = new Supplier<Body>(idGenerator, bodyStorage, Body::new);
-        accessorySuppliers = createAccessorySuppliers();
+        // Threads
+        motorSupplier        = new Supplier<Motor>(idGenerator, motorStorage, Motor::new);
+        bodySupplier         = new Supplier<Body>(idGenerator, bodyStorage, Body::new);
+        accessorySuppliers   = createAccessorySuppliers(idGenerator, accessoryStorage);
         carStorageController = new CarStorageController();
+        dealers              = createDillers(carStorage);
     }
 
-    public void startSimulation() {
+    @Override
+    public void run() {
+        startSimulation();
+    }
+
+
+    private static List<Dealer> createDillers(Storage<Car> carStorage) {
+        List<Dealer> dealers = new ArrayList<>(Config.getThreadsDealers());
+        final int cnt = Config.getThreadsDealers();
+        for (int i = 0; i < cnt; i++) {
+            dealers.add(new Dealer(carStorage));
+        }
+        return dealers;
+    }
+
+    private void startSimulation() {
         log.info("Initializing factory threads");
         motorSupplier.start();
         bodySupplier.start();
@@ -63,15 +93,29 @@ public class FactoryModel implements ViewModel{
 
         log.info("Initialization complete");
 
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {return;}
+
+        interruptFactoryThreads();
+        
         log.info("Factory simulation ended");
     }
 
-    private List<Supplier<Accessory>> createAccessorySuppliers() {
-        List<Supplier<Accessory>> supls = new ArrayList<>();
+    private void interruptFactoryThreads() {
+        motorSupplier.interrupt();
+        bodySupplier.interrupt();
+        accessorySuppliers.forEach(Supplier::interrupt);
+        dealers.forEach(Dealer::start);
+        carStorageController.interrupt();
+    }
+
+    private static List<Supplier<Accessory>> createAccessorySuppliers(IdGenerator gen, Storage<Accessory> accStorage) {
+        List<Supplier<Accessory>> suppliers = new ArrayList<>();
         for (int i = 0; i < Config.getThreadsAccessorySuppliers(); i++) {
-            supls.add(new Supplier<>(idGenerator, accessoryStorage, Accessory::new));
+            suppliers.add(new Supplier<>(gen, accStorage, Accessory::new));
         }
-        return supls;
+        return suppliers;
     }
 
     @Override

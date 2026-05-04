@@ -16,6 +16,7 @@ public class Dealer extends Thread {
 
     @Override
     public void run() {
+        //  TODO
         log.error("Dealer thread is not implemented yet");
     }
 }
