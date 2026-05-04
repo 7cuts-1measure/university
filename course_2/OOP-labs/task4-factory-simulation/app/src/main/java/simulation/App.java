@@ -16,17 +16,10 @@ public class App {
     public static void main(String[] args) {
         SetupLogger.setup();
 
-        // 2. Создаём окно симуляции
         SimulationWindow window = new SimulationWindow();
-        window.appendMessage("=== Симуляция фабрики запущена ===");
-
-        // 3. Пример: создаём модель фабрики и передаём ей окно для отчётов
-        FactoryModel model = new FactoryModel(window);
         
-        // 4. Запускаем симуляцию (у вас, вероятно, какой-то цикл или таймер)
+        FactoryModel model = new FactoryModel();
+        
         model.startSimulation();
-
-        // 5. Логгер продолжает работать параллельно
-        log.info("Симуляция стартовала");
     }
 }
