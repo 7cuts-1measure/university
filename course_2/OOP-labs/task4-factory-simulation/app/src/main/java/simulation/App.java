@@ -30,8 +30,7 @@ public class App {
         System.out.println("Config.getThreadsAccessorySuppliers() = " + Config.getThreadsAccessorySuppliers());
 
 
-        //FactoryModel model = new FactoryModel(config);
-        
-        //model.startSimulation();
+        FactoryModel model = new FactoryModel();
+        model.startSimulation();
     }
 }

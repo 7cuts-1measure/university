@@ -6,12 +6,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Supplier<T> extends Thread {
+import simulation.model.factory.product.Product;
+
+public class Supplier<T extends Product> extends Thread {
     private static final int DEFAULT_PERFORMANCE = 5;
 
     private static final Logger log = LoggerFactory.getLogger(Supplier.class);
 
-    private final IdGenerator idGenerator = new IdGenerator();
+    private final IdGenerator idGenerator;
 
     private final Creator<T> creator;
 
@@ -20,7 +22,8 @@ public class Supplier<T> extends Thread {
     // details per second
     private final AtomicInteger performance = new AtomicInteger(DEFAULT_PERFORMANCE);
 
-    public Supplier(Storage<T> storage, Creator<T> creator) {
+    public Supplier(IdGenerator idGenerator, Storage<T> storage, Creator<T> creator) {
+        this.idGenerator = idGenerator;
         this.performance.set(DEFAULT_PERFORMANCE);
         this.storage = storage;
         this.creator = creator;
@@ -40,8 +43,8 @@ public class Supplier<T> extends Thread {
     }
 
     private void supplyStorage() throws InterruptedException {
-        if (log.isDebugEnabled()) log.debug(getName());
         T product = creator.newProduct(idGenerator.next());
+        log.debug("Created " + product.getName() + " <ID:" + product.getId() + ">");
         storage.put(product);
     }
 

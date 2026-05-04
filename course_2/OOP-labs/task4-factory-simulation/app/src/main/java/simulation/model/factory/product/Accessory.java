@@ -6,4 +6,9 @@ public class Accessory extends Product {
         super(id);
     }
 
+    @Override
+    public String getName() {
+        return "Accessory";
+    }
+
 }

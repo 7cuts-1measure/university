@@ -23,4 +23,9 @@ public class Car extends Product {
     public int getAccessoryId() {
         return accessory.getId();
     }
+
+    @Override
+    public String getName() {
+        return "Name";
+    }
 }
