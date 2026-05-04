@@ -9,16 +9,22 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    id("java")
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven {
+        url = uri("https://jitpack.io")
+    }
+
 }
 
 dependencies {
     // This dependency is used by the application.
     implementation(libs.guava)
+    implementation("com.github.XiamLiTechnologies:SLF4J-Color:0.2.0")
 }
 
 testing {
