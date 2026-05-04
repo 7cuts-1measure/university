@@ -7,9 +7,18 @@
  */
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
     application
-    id("java")
+    java
+    id("com.gradleup.shadow") version "9.1.0"
+}
+
+// Настройка shadowJar (опционально)
+tasks.shadowJar {
+    archiveBaseName.set("app")
+    archiveClassifier.set("") // убираем "-all"
+    manifest {
+        attributes["Main-Class"] = "simulation.App" // укажите свой
+    }
 }
 
 repositories {
