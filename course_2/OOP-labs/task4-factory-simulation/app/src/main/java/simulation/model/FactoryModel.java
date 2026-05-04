@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FactoryModel {
-    private final Logger log = LoggerFactory.getLogger(getClass().getSimpleName());   
+    private final Logger log = LoggerFactory.getLogger(getClass());   
 
     public FactoryModel() {
     }
