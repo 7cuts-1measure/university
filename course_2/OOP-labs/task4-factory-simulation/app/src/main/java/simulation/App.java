@@ -15,9 +15,10 @@ public class App {
 
     public static void main(String[] args) {
         SetupLogger.setup();
+        log.info("Main started");
 
         SimulationWindow window = new SimulationWindow();
-        
+
         FactoryModel model = new FactoryModel();
         
         model.startSimulation();
