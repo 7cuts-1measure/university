@@ -1,6 +1,7 @@
 package simulation.model;
 
 
+import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import simulation.model.factory.CarAssempler;
 import simulation.model.factory.CarStorageController;
 import simulation.model.factory.Dealer;
 import simulation.model.factory.FileLogger;
+import simulation.model.factory.FileLoggerException;
 import simulation.model.factory.IdGenerator;
 import simulation.model.factory.Storage;
 import simulation.model.factory.Supplier;
@@ -55,8 +57,8 @@ public class FactoryModel extends Thread implements ViewModel{
     private final IdGenerator bodyIdGenerator = new IdGenerator();
     private final IdGenerator accessoryIdGenerator = new IdGenerator();
 
-    public FactoryModel() {
-        this.saleLogger = new FileLogger();
+    public FactoryModel() throws FileLoggerException {
+        this.saleLogger = new FileLogger(Config.logFileName());
         // Storages 
         motorStorage     = new Storage<Motor>(Config.getMotorStorageSize());
         accessoryStorage = new Storage<Accessory>(Config.getAccessoryStorageSize());
@@ -107,6 +109,7 @@ public class FactoryModel extends Thread implements ViewModel{
         interruptFactoryThreads();
         
         log.info("Factory simulation ended");
+        
     }
 
     private void interruptFactoryThreads() {

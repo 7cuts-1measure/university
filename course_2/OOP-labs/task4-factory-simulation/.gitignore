@@ -11,3 +11,8 @@ target
 .kotlin
 
 .vscode
+
+
+
+# ingore log file
+*.log

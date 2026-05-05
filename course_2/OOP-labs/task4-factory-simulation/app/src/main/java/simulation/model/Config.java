@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.management.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ public class Config {
     private static final String BODY_STORAGE_CAP          = "BodyStorageSize";
     private static final String CRITICAL_CAR_STORAGE_SIZE = "CriticalCarStorageSize";
     private static final String NUM_REQUESTS              = "NumRequests";
+    private static final String LOG_FILE_NAME             = "LogFileName";
 
     private static final Properties defaultProperties = new Properties();
     private static final Properties userProperties = new Properties();
@@ -137,6 +140,19 @@ public class Config {
         return Integer.parseInt(value); // do not catch runtime exception
     }
 
+    private static String getStringProperty(String key) {
+        String value = userProperties.getProperty(key);
+        if (value != null) {
+            return value;
+        }
+        value = defaultProperties.getProperty(key);
+        if (value == null) {
+            throw new IllegalStateException("Wrong default config. It should have '" + key + "' property");
+        }
+        return value;
+        
+    }
+
     public static boolean logSale() {
         return getIntProperty(LOG_SALE) == 1;
     }
@@ -147,5 +163,9 @@ public class Config {
 
     public static int numRequests() {
         return getIntProperty(NUM_REQUESTS);
+    }
+
+    public static String logFileName() {
+        return getStringProperty(LOG_FILE_NAME);
     }
 }

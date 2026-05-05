@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import simulation.gui.SimulationWindow;
 import simulation.model.Config;
 import simulation.model.FactoryModel;
+import simulation.model.factory.FileLoggerException;
 import slf4jansi.AnsiLogger;
 
 public class App {
@@ -31,7 +32,13 @@ public class App {
         System.out.println("Config.getThreadsAccessorySuppliers() = " + Config.getThreadsAccessorySuppliers());
 
 
-        FactoryModel model = new FactoryModel();
+        FactoryModel model;
+        try {
+            model = new FactoryModel();
+        } catch (FileLoggerException e) {
+            log.error("Cannot fix " + e + ". Terminating...");
+            return;
+        }
         model.start();
     }
 }
