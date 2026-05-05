@@ -58,6 +58,9 @@ public class CarAssempler {
         workers = Executors.newFixedThreadPool(Config.getThreadsWorkers());
     } 
 
+    public int getNumPendingTasks() {
+        return -1;
+    }
     
     public void requestAssembly(int num_requests) {
         range(0, num_requests)

@@ -23,10 +23,10 @@ public class App {
         //SimulationWindow window = new SimulationWindow();
 
 
-        System.out.println("Config.getBodyStorageSize() = "           + Config.getBodyStorageSize());
-        System.out.println("Config.getMotorStorageSize() = "          + Config.getMotorStorageSize());
-        System.out.println("Config.getAccessoryStorageSize() = "      + Config.getAccessoryStorageSize());
-        System.out.println("Config.getCarStorageSize() = "            + Config.getCarStorageSize());
+        System.out.println("Config.getBodyStorageSize() = "           + Config.getBodyStorageCap());
+        System.out.println("Config.getMotorStorageSize() = "          + Config.getMotorStorageCap());
+        System.out.println("Config.getAccessoryStorageSize() = "      + Config.getAccessoryStorageCap());
+        System.out.println("Config.getCarStorageSize() = "            + Config.getCarStorageCap());
         System.out.println("Config.getThreadsWorkers() = "            + Config.getThreadsWorkers());
         System.out.println("Config.getThreadsDealers() = "            + Config.getThreadsDealers());
         System.out.println("Config.getThreadsAccessorySuppliers() = " + Config.getThreadsAccessorySuppliers());

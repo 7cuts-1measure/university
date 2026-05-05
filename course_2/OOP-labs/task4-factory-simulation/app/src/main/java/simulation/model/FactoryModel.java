@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import simulation.ControllerModel;
+import simulation.ViewModel;
 import simulation.model.factory.CarAssempler;
 import simulation.model.factory.CarStorageController;
 import simulation.model.factory.Dealer;
@@ -21,7 +23,7 @@ import simulation.model.factory.product.Body;
 import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
 
-public class FactoryModel extends Thread implements ViewModel{
+public class FactoryModel extends Thread implements ViewModel, ControllerModel{
     private final Logger log = LoggerFactory.getLogger(getClass());   
 
     private static final int DEFAULT_DEALER_PERFORMANCE = 2;
@@ -57,10 +59,10 @@ public class FactoryModel extends Thread implements ViewModel{
     public FactoryModel() throws FileLoggerException {
         this.saleLogger = new FileLogger(Config.logFileName());
         // Storages 
-        motorStorage     = new Storage<Motor>(Config.getMotorStorageSize());
-        accessoryStorage = new Storage<Accessory>(Config.getAccessoryStorageSize());
-        bodyStorage      = new Storage<Body>(Config.getBodyStorageSize());
-        carStorage       = new Storage<Car>(Config.getCarStorageSize());
+        motorStorage     = new Storage<Motor>(Config.getMotorStorageCap());
+        accessoryStorage = new Storage<Accessory>(Config.getAccessoryStorageCap());
+        bodyStorage      = new Storage<Body>(Config.getBodyStorageCap());
+        carStorage       = new Storage<Car>(Config.getCarStorageCap());
             
         // Threads
         motorSupplier        = new Supplier<Motor>(DEFAULT_MOTOR_SUPPLIER_PERFROMANCE, motorIdGenerator, motorStorage, Motor::new);
@@ -127,85 +129,87 @@ public class FactoryModel extends Thread implements ViewModel{
 
     @Override
     public int getMotorSupplierPerformance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMotorSupplierPerformance'");
+        return motorSupplier.getPerformance();
     }
 
     @Override
     public int getBodySupplierPerformance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBodySupplierPerformance'");
+        return bodySupplier.getPerformance();
     }
 
     @Override
     public int getAccessorySupplierPerformance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAccessorySupplierPerformance'");
+        return accessorySuppliers.get(0).getPerformance(); // FIXME: assert somewhere that we have at least one accessory supplier 
     }
 
     @Override
     public int getNumAccessorySuppliers() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNumAccessorySuppliers'");
+        return accessorySuppliers.size();
     }
 
     @Override
-    public int getMotorStorageSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMotorStorageSize'");
+    public int getMotorStorageSize() throws InterruptedException {
+        return motorStorage.size();
     }
 
     @Override
     public int getMotorStorageCap() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMotorStorageCap'");
+        return Config.getMotorStorageCap();
     }
 
     @Override
-    public int getBodySorageSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBodySorageSize'");
+    public int getBodySorageSize() throws InterruptedException {
+        return bodyStorage.size();
     }
 
     @Override
     public int getBodyStorageCap() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBodyStorageCap'");
+        return Config.getBodyStorageCap();
     }
 
     @Override
-    public int getAccessoryStorageSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAccessoryStorageSize'");
+    public int getAccessoryStorageSize() throws InterruptedException {
+        return accessoryStorage.size();
     }
 
     @Override
     public int getAccessoryStorageCap() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAccessoryStorageCap'");
+        return Config.getAccessoryStorageCap();
     }
 
     @Override
-    public int getCarStorageSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCarStorageSize'");
+    public int getCarStorageSize() throws InterruptedException {
+        return carStorage.size();
     }
 
     @Override
     public int getCarStorageCap() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCarStorageCap'");
+        return Config.getCarStorageCap();
     }
 
     @Override
     public int getNumActiveWorkers() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNumActiveWorkers'");
+        return -1;
     }
 
     @Override
     public int getNumTotalWorkets() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNumTotalWorkets'");
+        return Config.getThreadsWorkers();
+    }
+
+    @Override
+    public void setMotorSupplierPerformance(int performance) {
+        motorSupplier.setPerformance(performance);
+    }
+
+    @Override
+    public void setBodySupplierPerformance(int performance) {
+        bodySupplier.setPerformance(performance);
+    }
+
+    @Override
+    public void setAccessorySupplierPerformance(int performance) {
+        accessorySuppliers
+            .forEach(sup -> sup.setPerformance(performance));
     }
 }

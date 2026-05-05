@@ -1,4 +1,4 @@
-package simulation.model;
+package simulation;
 
 /**
  * Interface that view expects from model. It contains all methods to view for draw model state
@@ -11,16 +11,16 @@ public interface ViewModel {
     int getAccessorySupplierPerformance();
     int getNumAccessorySuppliers();
     
-    int getMotorStorageSize();
+    int getMotorStorageSize() throws InterruptedException;
     int getMotorStorageCap();
 
-    int getBodySorageSize();
+    int getBodySorageSize() throws InterruptedException;
     int getBodyStorageCap();
 
-    int getAccessoryStorageSize();
+    int getAccessoryStorageSize() throws InterruptedException;
     int getAccessoryStorageCap();
 
-    int getCarStorageSize();
+    int getCarStorageSize() throws InterruptedException;
     int getCarStorageCap();
 
     int getNumActiveWorkers();

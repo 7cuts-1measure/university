@@ -96,19 +96,19 @@ public class Config {
         }
     }
 
-    public static int getBodyStorageSize() {
+    public static int getBodyStorageCap() {
         return getIntProperty(BODY_STORAGE_CAP);
     }
 
-    public static int getMotorStorageSize() {
+    public static int getMotorStorageCap() {
         return getIntProperty(MOTOR_STORAVE_CAP);
     }
 
-    public static int getAccessoryStorageSize() {
+    public static int getAccessoryStorageCap() {
         return getIntProperty(ACC_STORAGE_CAP);
     }
 
-    public static int getCarStorageSize() {
+    public static int getCarStorageCap() {
         return getIntProperty(CAR_STORAGE_CAP);
     }
 
