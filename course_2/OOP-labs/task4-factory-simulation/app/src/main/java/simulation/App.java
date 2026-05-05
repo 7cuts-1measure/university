@@ -20,7 +20,7 @@ public class App {
         
         log.info("Main started");
 
-        SimulationWindow window = new SimulationWindow();
+        //SimulationWindow window = new SimulationWindow();
 
 
         System.out.println("Config.getBodyStorageSize() = "           + Config.getBodyStorageSize());
