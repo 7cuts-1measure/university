@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import simulation.model.factory.product.Product;
+import slf4jansi.AnsiLogger;
 
 public class Supplier<T extends Product> extends Thread {
-    private static final int DEFAULT_PERFORMANCE = 5;
 
-    private static final Logger log = LoggerFactory.getLogger(Supplier.class);
+    private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(Supplier.class));
 
     private final IdGenerator idGenerator;
 
@@ -20,27 +20,26 @@ public class Supplier<T extends Product> extends Thread {
     private final Storage<T> storage;
 
     // details per second
-    private final AtomicInteger performance = new AtomicInteger(DEFAULT_PERFORMANCE);
+    private final AtomicInteger performance;
 
-    public Supplier(IdGenerator idGenerator, Storage<T> storage, Creator<T> creator) {
+    public Supplier(int perfromance, IdGenerator idGenerator, Storage<T> storage, Creator<T> creator) {
         this.idGenerator = idGenerator;
-        this.performance.set(DEFAULT_PERFORMANCE);
+        this.performance = new AtomicInteger(perfromance);
         this.storage = storage;
         this.creator = creator;
     }
 
     @Override
     public void run() {
-        try {
-            while (Thread.interrupted()) {
+        while (!Thread.interrupted()) {
+            try {
                 supplyStorage();
                 sleep(sleepDuration());
+            } catch (InterruptedException e) {
+                break;
             }
-        } catch (InterruptedException e) {} 
-        finally {
-            log.info("Thread was interrupted");
         }
-        return;
+        log.info("Thread is interrupted");
     }
 
     private void supplyStorage() throws InterruptedException {

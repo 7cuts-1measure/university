@@ -33,7 +33,9 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation(libs.guava)
-    implementation("com.github.XiamLiTechnologies:SLF4J-Color:0.2.0")
+    // Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    implementation("org.slf4j:slf4j-simple:2.0.17")
+    implementation("io.github.luiinge:slf4j-ansi:1.0.0")
 }
 
 testing {
@@ -54,6 +56,10 @@ java {
 }
 
 application {
-    // Define the main class for the application.
     mainClass = "simulation.App"
+    applicationDefaultJvmArgs = listOf(
+        "-Dorg.slf4j.simpleLogger.defaultLogLevel=info",
+        "-Dorg.slf4j.simpleLogger.showDateTime=true",
+        "-Dorg.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss:SSS"
+    )
 }

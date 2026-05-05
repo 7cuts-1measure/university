@@ -1,7 +1,7 @@
 package simulation.model;
 
-import static java.util.stream.IntStream.range;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -10,8 +10,10 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import simulation.model.factory.CarAssempler;
 import simulation.model.factory.CarStorageController;
 import simulation.model.factory.Dealer;
+import simulation.model.factory.FileLogger;
 import simulation.model.factory.IdGenerator;
 import simulation.model.factory.Storage;
 import simulation.model.factory.Supplier;
@@ -23,6 +25,10 @@ import simulation.model.factory.product.Motor;
 public class FactoryModel extends Thread implements ViewModel{
     private final Logger log = LoggerFactory.getLogger(getClass());   
 
+    private static final int DEFAULT_DEALER_PERFORMANCE = 2;
+    private static final int DEFAULT_MOTOR_SUPPLIER_PERFROMANCE = 5;
+    private static final int DEFAULT_BODY_SUPPLIER_PERFROMANCE = 10;
+    private static final int DEFAULT_ACCESSORY_SUPPLIER_PERFORMANCE = 2;
 
     private final Storage<Motor> motorStorage;
     
@@ -32,6 +38,7 @@ public class FactoryModel extends Thread implements ViewModel{
     
     private final Storage<Car> carStorage;
 
+    private final FileLogger saleLogger;
     
     private final Supplier<Motor> motorSupplier;
     
@@ -44,58 +51,58 @@ public class FactoryModel extends Thread implements ViewModel{
     
     private final CarStorageController carStorageController;
 
-    private final IdGenerator idGenerator = new IdGenerator();
-
-    private final ExecutorService workers;
+    private final IdGenerator motorIdGenerator = new IdGenerator();
+    private final IdGenerator bodyIdGenerator = new IdGenerator();
+    private final IdGenerator accessoryIdGenerator = new IdGenerator();
 
     public FactoryModel() {
+        this.saleLogger = new FileLogger();
         // Storages 
         motorStorage     = new Storage<Motor>(Config.getMotorStorageSize());
         accessoryStorage = new Storage<Accessory>(Config.getAccessoryStorageSize());
         bodyStorage      = new Storage<Body>(Config.getBodyStorageSize());
         carStorage       = new Storage<Car>(Config.getCarStorageSize());
-        
-        // ThreadPool for assembling cars
-        workers = Executors.newFixedThreadPool(Config.getThreadsWorkers());
-    
+            
         // Threads
-        motorSupplier        = new Supplier<Motor>(idGenerator, motorStorage, Motor::new);
-        bodySupplier         = new Supplier<Body>(idGenerator, bodyStorage, Body::new);
-        accessorySuppliers   = createAccessorySuppliers(idGenerator, accessoryStorage);
-        carStorageController = new CarStorageController();
-        dealers              = createDillers(carStorage);
+        motorSupplier        = new Supplier<Motor>(DEFAULT_MOTOR_SUPPLIER_PERFROMANCE, motorIdGenerator, motorStorage, Motor::new);
+        bodySupplier         = new Supplier<Body>(DEFAULT_BODY_SUPPLIER_PERFROMANCE, bodyIdGenerator, bodyStorage, Body::new);
+        accessorySuppliers   = createAccessorySuppliers(accessoryIdGenerator, accessoryStorage);
+
+        carStorageController = new CarStorageController(carStorage, new CarAssempler(bodyStorage, motorStorage, accessoryStorage, carStorage));
+        dealers              = createDillers(carStorage, saleLogger);
     }
 
     @Override
     public void run() {
-        startSimulation();
+        try {
+            startSimulation();
+        } catch (InterruptedException e) {
+            log.warn("Thread was interrupted while starting simulation");
+        }
+        log.info("Thread is interrupted");
     }
 
 
-    private static List<Dealer> createDillers(Storage<Car> carStorage) {
+    private static List<Dealer> createDillers(Storage<Car> carStorage, FileLogger saleLogger) {
         List<Dealer> dealers = new ArrayList<>(Config.getThreadsDealers());
         final int cnt = Config.getThreadsDealers();
         for (int i = 0; i < cnt; i++) {
-            dealers.add(new Dealer(carStorage));
+            dealers.add(new Dealer(i, DEFAULT_DEALER_PERFORMANCE, carStorage, saleLogger));
         }
         return dealers;
     }
 
-    private void startSimulation() {
+    private void startSimulation() throws InterruptedException {
         log.info("Initializing factory threads");
         motorSupplier.start();
         bodySupplier.start();
         accessorySuppliers.forEach(Supplier<Accessory>::start);
+        dealers.forEach(Dealer::start);
         carStorageController.start();
-
-        range(0, Config.getThreadsDealers())
-                .forEach(i -> new Dealer(carStorage).start());
 
         log.info("Initialization complete");
 
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {return;}
+        Thread.sleep(Duration.ofSeconds(30));
 
         interruptFactoryThreads();
         
@@ -106,14 +113,14 @@ public class FactoryModel extends Thread implements ViewModel{
         motorSupplier.interrupt();
         bodySupplier.interrupt();
         accessorySuppliers.forEach(Supplier::interrupt);
-        dealers.forEach(Dealer::start);
+        dealers.forEach(Dealer::interrupt);
         carStorageController.interrupt();
     }
 
     private static List<Supplier<Accessory>> createAccessorySuppliers(IdGenerator gen, Storage<Accessory> accStorage) {
         List<Supplier<Accessory>> suppliers = new ArrayList<>();
         for (int i = 0; i < Config.getThreadsAccessorySuppliers(); i++) {
-            suppliers.add(new Supplier<>(gen, accStorage, Accessory::new));
+            suppliers.add(new Supplier<>(DEFAULT_ACCESSORY_SUPPLIER_PERFORMANCE, gen, accStorage, Accessory::new));
         }
         return suppliers;
     }

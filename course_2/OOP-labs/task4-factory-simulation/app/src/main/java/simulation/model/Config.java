@@ -14,6 +14,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import slf4jansi.AnsiLogger;
+
 
 /**
 * Class for loading configuration from properties files.
@@ -21,18 +23,21 @@ import org.slf4j.LoggerFactory;
 * then they are overridden by values ​​from config.properties in the current working directory.
 */
 public class Config {
-    private static final String THREADS_DEALERS_STR             = "ThreadsDealers";
-    private static final String THREADS_ACCESSORY_SUPPLIERS_STR = "ThreadsAccessorySuppliers";
-    private static final String THREADS_WORKERS_STR             = "ThreadsWorkers";
-    private static final String CAR_STORAGE_SIZE_STR            = "carStorageSize";
-    private static final String ACCESSORY_STORAGE_SIZE_STR      = "accessoryStorageSize";
-    private static final String MOTOR_STORAGE_SIZE_STR          = "motorStorageSize";
-    private static final String BODY_STORAGE_SIZE_STR           = "bodyStorageSize";
+    private static final String LOG_SALE                  = "LogSale";
+    private static final String NUM_DEALERS               = "NumDealers";
+    private static final String NUM_ACCESORY_SUPPLIERS    = "NumAccessorySuppliers";
+    private static final String NUM_WORKERS               = "NumWorkers";
+    private static final String CAR_STORAGE_CAP           = "CarStorageSize";
+    private static final String ACC_STORAGE_CAP           = "AccessoryStorageSize";
+    private static final String MOTOR_STORAVE_CAP         = "MotorStorageSize";
+    private static final String BODY_STORAGE_CAP          = "BodyStorageSize";
+    private static final String CRITICAL_CAR_STORAGE_SIZE = "CriticalCarStorageSize";
+    private static final String NUM_REQUESTS              = "NumRequests";
 
     private static final Properties defaultProperties = new Properties();
     private static final Properties userProperties = new Properties();
     private static final Set<String> overriddenKeys = new HashSet<>();
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(Config.class));
 
     static {
         loadDefaultConfig();
@@ -59,13 +64,13 @@ public class Config {
 
     private static List<String> getExpectedKeys() {
         return List.of(
-            BODY_STORAGE_SIZE_STR,
-            MOTOR_STORAGE_SIZE_STR,
-            ACCESSORY_STORAGE_SIZE_STR,
-            CAR_STORAGE_SIZE_STR,
-            THREADS_WORKERS_STR,
-            THREADS_ACCESSORY_SUPPLIERS_STR,
-            THREADS_DEALERS_STR
+            BODY_STORAGE_CAP,
+            MOTOR_STORAVE_CAP,
+            ACC_STORAGE_CAP,
+            CAR_STORAGE_CAP,
+            NUM_WORKERS,
+            NUM_ACCESORY_SUPPLIERS,
+            NUM_DEALERS
         );
     }
 
@@ -91,31 +96,31 @@ public class Config {
     }
 
     public static int getBodyStorageSize() {
-        return getIntProperty(BODY_STORAGE_SIZE_STR);
+        return getIntProperty(BODY_STORAGE_CAP);
     }
 
     public static int getMotorStorageSize() {
-        return getIntProperty(MOTOR_STORAGE_SIZE_STR);
+        return getIntProperty(MOTOR_STORAVE_CAP);
     }
 
     public static int getAccessoryStorageSize() {
-        return getIntProperty(ACCESSORY_STORAGE_SIZE_STR);
+        return getIntProperty(ACC_STORAGE_CAP);
     }
 
     public static int getCarStorageSize() {
-        return getIntProperty(CAR_STORAGE_SIZE_STR);
+        return getIntProperty(CAR_STORAGE_CAP);
     }
 
     public static int getThreadsWorkers() {
-        return getIntProperty(THREADS_WORKERS_STR);
+        return getIntProperty(NUM_WORKERS);
     }
 
     public static int getThreadsAccessorySuppliers() {
-        return getIntProperty(THREADS_ACCESSORY_SUPPLIERS_STR);
+        return getIntProperty(NUM_ACCESORY_SUPPLIERS);
     }
 
     public static int getThreadsDealers() {
-        return getIntProperty(THREADS_DEALERS_STR);
+        return getIntProperty(NUM_DEALERS);
     }
 
     private static int getIntProperty(String key) {
@@ -130,5 +135,17 @@ public class Config {
         }
         value = defaultProperties.getProperty(key);
         return Integer.parseInt(value); // do not catch runtime exception
+    }
+
+    public static boolean logSale() {
+        return getIntProperty(LOG_SALE) == 1;
+    }
+
+    public static int getCriticalCarStorageSize() {
+        return getIntProperty(CRITICAL_CAR_STORAGE_SIZE);
+    }
+
+    public static int numRequests() {
+        return getIntProperty(NUM_REQUESTS);
     }
 }
