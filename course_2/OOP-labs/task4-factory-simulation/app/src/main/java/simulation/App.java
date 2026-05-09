@@ -20,8 +20,7 @@ public class App {
         
         log.info("Main started");
 
-        //SimulationWindow window = new SimulationWindow();
-
+        
 
         System.out.println("Config.getBodyStorageSize() = "           + Config.getBodyStorageCap());
         System.out.println("Config.getMotorStorageSize() = "          + Config.getMotorStorageCap());
@@ -35,6 +34,7 @@ public class App {
         FactoryModel model;
         try {
             model = new FactoryModel();
+            SimulationWindow window = new SimulationWindow(model);
         } catch (FileLoggerException e) {
             log.error("Cannot fix " + e + ". Terminating...");
             return;

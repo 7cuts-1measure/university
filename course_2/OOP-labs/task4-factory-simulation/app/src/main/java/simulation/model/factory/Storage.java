@@ -1,57 +1,68 @@
 package simulation.model.factory;
 
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import simulation.model.factory.product.Product;
-
 
 public class Storage<T extends Product> {
     public final int capacity;
     private List<T> storage = new ArrayList<>();
 
-    private final Object storageLock = new Object();
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition notFull = lock.newCondition();
+    private final Condition notEmpty = lock.newCondition();
 
     public Storage(int capacity) {
         this.capacity = capacity;
     }
-    
 
     public void put(T product) throws InterruptedException {
-        if (product == null) return; 
-        synchronized(storageLock) {
-            // Use while (condition) istead if (condition) because
-            // OS has spurious wakeup https://en.wikipedia.org/wiki/Spurious_wakeup
-            // That means current thread can be awaken not from notify() or notifyall()
-            // and storage still can be full
+        if (product == null)
+            return;
+        lock.lockInterruptibly();
+        try {
             while (storage.size() == capacity) {
-                storageLock.wait();
+                notFull.await();
             }
             storage.add(product);
-            assert storage.size() <= capacity;
-            storageLock.notifyAll(); 
+            notEmpty.signal();
+        } finally {
+            lock.unlock();
         }
     }
 
     public T take() throws InterruptedException {
-        synchronized(storageLock) {
-            while (storage.isEmpty()) {
-                storageLock.wait();
+        lock.lockInterruptibly();
+        try {
+            while (storage.size() == 0) {
+                notEmpty.await();
             }
-            T item = storage.removeLast();
-            storageLock.notifyAll();
-            return item;
+            T product = storage.removeLast();
+            notFull.signalAll();
+            return product;
+        } finally {
+            lock.unlock();
         }
     }
 
-    public Object getStorageLock() {
-        return storageLock;
+    public int size() throws InterruptedException {
+        lock.lockInterruptibly();
+        try {
+            return storage.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public int size() throws InterruptedException {
-        synchronized(storageLock) {
-            return storage.size();
+    public void waitTake() throws InterruptedException {
+        lock.lockInterruptibly();
+        try {
+            notFull.await();
+        } finally {
+            lock.unlock();
         }
     }
 }

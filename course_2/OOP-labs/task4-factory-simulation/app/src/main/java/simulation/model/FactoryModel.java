@@ -1,15 +1,12 @@
 package simulation.model;
 
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import simulation.ControllerModel;
-import simulation.ViewModel;
 import simulation.model.factory.CarAssempler;
 import simulation.model.factory.CarStorageController;
 import simulation.model.factory.Dealer;
@@ -23,7 +20,7 @@ import simulation.model.factory.product.Body;
 import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
 
-public class FactoryModel extends Thread implements ViewModel, ControllerModel{
+public class FactoryModel extends Thread implements Model{
     private final Logger log = LoggerFactory.getLogger(getClass());   
 
     private static final int DEFAULT_DEALER_PERFORMANCE = 2;
@@ -78,6 +75,7 @@ public class FactoryModel extends Thread implements ViewModel, ControllerModel{
         try {
             startSimulation();
         } catch (InterruptedException e) {
+            interruptFactoryThreads();
             log.warn("Thread was interrupted while starting simulation");
         }
         log.info("Thread is interrupted");
@@ -103,11 +101,11 @@ public class FactoryModel extends Thread implements ViewModel, ControllerModel{
 
         log.info("Initialization complete");
 
-        Thread.sleep(Duration.ofSeconds(30));
+//        Thread.sleep(Duration.ofSeconds(30));
 
-        interruptFactoryThreads();
+//        interruptFactoryThreads();
         
-        log.info("Factory simulation ended");
+//        log.info("Factory simulation ended");
         
     }
 

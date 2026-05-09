@@ -34,12 +34,20 @@ public class Supplier<T extends Product> extends Thread {
         while (!Thread.interrupted()) {
             try {
                 supplyStorage();
-                sleep(sleepDuration());
+                waitForNextCycle();
             } catch (InterruptedException e) {
                 break;
             }
         }
         log.info("Thread is interrupted");
+    }
+
+    private synchronized void waitForNextCycle() throws InterruptedException {
+        long timeout = sleepDuration().toMillis();
+        if (timeout > 0)
+            wait(timeout);
+        else 
+            wait();
     }
 
     private void supplyStorage() throws InterruptedException {
@@ -50,11 +58,20 @@ public class Supplier<T extends Product> extends Thread {
 
     public void setPerformance(int performance) {
         this.performance.set(performance);
+        synchronized (this) {
+            notify();
+        }
     }
 
+    /**
+     * returns 0 if performance = 0. that means infinity sleep.
+     * @return time that process should sleep to achieve its perfromance
+     */
     private Duration sleepDuration() {
         final int millisInSecond = 1000;
-        return Duration.ofMillis(millisInSecond / performance.get());
+        int perf = performance.get();
+        
+        return perf == 0 ? Duration.ofMillis(0) : Duration.ofMillis(millisInSecond / perf);
     }
 
     public int getPerformance() {
