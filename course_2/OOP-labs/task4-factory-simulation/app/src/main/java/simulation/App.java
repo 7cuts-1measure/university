@@ -2,43 +2,27 @@ package simulation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import slf4jansi.AnsiLogger;
 
 import simulation.gui.SimulationWindow;
-import simulation.model.Config;
 import simulation.model.FactoryModel;
 import simulation.model.factory.FileLoggerException;
-import slf4jansi.AnsiLogger;
 
 public class App {
     private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(App.class));
 
-    public String getGreeting() {
-        return "Hello World!";
-    }
-
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) {        
         log.info("Main started");
 
-        
-
-        System.out.println("Config.getBodyStorageSize() = "           + Config.getBodyStorageCap());
-        System.out.println("Config.getMotorStorageSize() = "          + Config.getMotorStorageCap());
-        System.out.println("Config.getAccessoryStorageSize() = "      + Config.getAccessoryStorageCap());
-        System.out.println("Config.getCarStorageSize() = "            + Config.getCarStorageCap());
-        System.out.println("Config.getThreadsWorkers() = "            + Config.getThreadsWorkers());
-        System.out.println("Config.getThreadsDealers() = "            + Config.getThreadsDealers());
-        System.out.println("Config.getThreadsAccessorySuppliers() = " + Config.getThreadsAccessorySuppliers());
-
-
-        FactoryModel model;
         try {
-            model = new FactoryModel();
+            FactoryModel model = new FactoryModel();
             SimulationWindow window = new SimulationWindow(model);
+            model.start();
+            window.show();
         } catch (FileLoggerException e) {
             log.error("Cannot fix " + e + ". Terminating...");
             return;
         }
-        model.start();
+
     }
 }

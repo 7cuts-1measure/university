@@ -53,6 +53,10 @@ public class SimulationWindow {
         });
     }
 
+    public void show() {
+        SwingUtilities.invokeLater(() -> {frame.setVisible(true);});
+    }
+
     private void createWindow() {
         frame = new JFrame("Factory Simulation");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -76,7 +80,6 @@ public class SimulationWindow {
 
         frame.pack();
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
         log.info("Simulation window created with sliders");
     }
 
@@ -217,15 +220,5 @@ public class SimulationWindow {
 
     private String storageMessage(int size, int cap) {
         return size + " / " + cap;
-    }
-
-    /**
-     * Остановить обновление GUI и закрыть окно.
-     */
-    public void stop() {
-        updater.shutdownNow();
-        if (frame != null) {
-            frame.dispose();
-        }
     }
 }
