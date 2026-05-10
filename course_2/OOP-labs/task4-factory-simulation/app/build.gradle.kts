@@ -58,7 +58,7 @@ java {
 application {
     mainClass = "simulation.App"
     applicationDefaultJvmArgs = listOf(
-        "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug",
+        "-Dorg.slf4j.simpleLogger.defaultLogLevel=info",
         "-Dorg.slf4j.simpleLogger.showDateTime=true",
         "-Dorg.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss:SSS"
     )

@@ -25,4 +25,6 @@ public interface ViewModel {
 
     int getNumPendingTasks();
     int getNumTotalCarsAssembled();
+
+    void shutdown();
 }

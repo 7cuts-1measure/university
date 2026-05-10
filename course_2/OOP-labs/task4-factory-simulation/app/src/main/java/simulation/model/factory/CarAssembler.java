@@ -41,6 +41,9 @@ public class CarAssembler {
                 carStorage.put(car);
             } catch (InterruptedException e) {
                 log.info("Thread was iterrupted during running car assemnly task");
+            } finally {
+                log.info("Thread is interrupted");
+                workers.shutdown();
             }
 
         }
@@ -68,6 +71,10 @@ public class CarAssembler {
 
     public int getNumPendingTasks() {
         return pendingTasks.get();
+    }
+
+    public void shutdown() {
+        workers.shutdown();
     }
 
     public void requestAssembly(int num_requests) throws InterruptedException {

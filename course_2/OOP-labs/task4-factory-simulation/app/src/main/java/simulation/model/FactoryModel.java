@@ -3,6 +3,7 @@ package simulation.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,8 @@ public class FactoryModel extends Thread implements Model{
     
     private final List<Dealer> dealers;
 
-    
+    private AtomicBoolean isRunning = new AtomicBoolean(true);
+
     private final CarStorageController carStorageController;
     private final CarAssembler carAssembler;
 
@@ -76,12 +78,12 @@ public class FactoryModel extends Thread implements Model{
     @Override
     public void run() {
         try {
-            startSimulation();
+            simulate();
         } catch (InterruptedException e) {
-            interruptFactoryThreads();
+            shutdown();
             log.warn("Thread was interrupted while starting simulation");
         }
-        log.info("Thread is interrupted");
+        log.info("{!warn}Thread is interrupted");
     }
 
 
@@ -94,25 +96,25 @@ public class FactoryModel extends Thread implements Model{
         return dealers;
     }
 
-    private void startSimulation() throws InterruptedException {
+    private synchronized void simulate() throws InterruptedException {
+        if (isRunning.get() == false) {
+            log.info("terminated before run");
+            return;
+        }
         log.info("Initializing factory threads");
         motorSupplier.start();
         bodySupplier.start();
         accessorySuppliers.forEach(Supplier<Accessory>::start);
         dealers.forEach(Dealer::start);
         carStorageController.start();
-
-        log.info("Initialization complete");
-
-//        Thread.sleep(Duration.ofSeconds(30));
-
-//        interruptFactoryThreads();
-        
-//        log.info("Factory simulation ended");
-        
+        log.info("Initialization complete");        
     }
 
-    private void interruptFactoryThreads() {
+    public synchronized void shutdown() {
+        boolean r = isRunning.getAndSet(false);
+        if (r == false) {
+            return;
+        }
         motorSupplier.interrupt();
         bodySupplier.interrupt();
         accessorySuppliers.forEach(Supplier::interrupt);

@@ -1,6 +1,8 @@
 package simulation.gui;
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Hashtable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,9 +57,17 @@ public class SimulationWindow {
     }
 
     private void createWindow() {
+        JFrame.setDefaultLookAndFeelDecorated(true);
         frame = new JFrame("Factory Simulation");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setLayout(new BorderLayout(10, 10));
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                model.shutdown();
+                updater.shutdownNow();
+            }
+        });
 
         JPanel infoPanel = createInfoPanel();
         frame.add(infoPanel, BorderLayout.NORTH);

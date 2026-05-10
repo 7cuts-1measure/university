@@ -62,7 +62,7 @@ public class Dealer extends Thread {
                 break;
             }
         }
-        log.info("{!warn}Thread is interrupted");
+        log.info("Thread is interrupted");
     }
 
     private void sale(Car car) {
@@ -72,7 +72,7 @@ public class Dealer extends Thread {
     private void logSale(Car car) {
         String msg = logMessage(car);
         
-        log.info("Sale: " + msg);
+        log.debug("Sale: " + msg);
         fileLogger.log(msg);
     }
 

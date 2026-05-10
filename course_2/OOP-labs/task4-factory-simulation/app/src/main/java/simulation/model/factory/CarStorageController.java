@@ -29,6 +29,7 @@ public class CarStorageController extends Thread {
             try {
                 carStorage.waitTake();
             } catch (InterruptedException e) {
+                carAssembler.shutdown();
                 break;
             }
             checkStorageSize();
@@ -47,6 +48,7 @@ public class CarStorageController extends Thread {
                 requestAssembly(NUM_REQUESTS);
             }
         } catch (InterruptedException e) {
+            carAssembler.shutdown();
             interrupt();
         }
     }
