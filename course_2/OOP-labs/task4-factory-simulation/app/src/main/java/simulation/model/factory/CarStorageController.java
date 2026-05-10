@@ -51,7 +51,7 @@ public class CarStorageController extends Thread {
         }
     }
 
-    private void requestAssembly(int num_requests) {
+    private void requestAssembly(int num_requests) throws InterruptedException {
         carAssembler.requestAssembly(num_requests);
     }
 }

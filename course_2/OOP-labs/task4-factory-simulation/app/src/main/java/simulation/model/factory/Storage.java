@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import simulation.model.factory.product.Product;
 
-public class Storage<T extends Product> {
+public class Storage<T> {
     public final int capacity;
     private List<T> storage = new ArrayList<>();
 

@@ -1,10 +1,6 @@
 package simulation.model.factory;
 
-import static java.util.stream.IntStream.range;
-
 import java.time.Duration;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -15,6 +11,7 @@ import simulation.model.factory.product.Accessory;
 import simulation.model.factory.product.Body;
 import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
+import simulation.model.threadpool.TaskRunner;
 import slf4jansi.AnsiLogger;
 
 public class CarAssembler {
@@ -49,7 +46,7 @@ public class CarAssembler {
         }
     };
 
-    private final Executor workers;
+    private final TaskRunner workers;
 
     private final Storage<Body> bodyStorage;
 
@@ -66,18 +63,19 @@ public class CarAssembler {
         this.accessoryStorage = accessoryStorage;
         this.carStorage       = carStorage;
         pendingTasks          = new AtomicInteger(0);
-        workers               = Executors.newFixedThreadPool(Config.getThreadsWorkers());
+        workers               = new TaskRunner(Config.getThreadsWorkers());
     }
 
     public int getNumPendingTasks() {
         return pendingTasks.get();
     }
 
-    public void requestAssembly(int num_requests) {
+    public void requestAssembly(int num_requests) throws InterruptedException {
         pendingTasks.set(num_requests);
         total.addAndGet(num_requests);
-        range(0, num_requests)
-                .forEach(i -> workers.execute(CAR_ASSMEBLY_TASK));
+        for (int i = 0; i < num_requests; i++) {
+            workers.submit(CAR_ASSMEBLY_TASK);
+        }
     }
 
     public int totalCarsAssembled() {
