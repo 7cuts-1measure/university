@@ -17,8 +17,8 @@ public class BlockComponent extends JPanel {
 
     private static final Color BORDER_COLOR = Color.BLACK;
 
-    private String title;      // название блока (внизу)
-    private String message;    // сообщение (по центру)
+    private String title;
+    private String message;
 
     public BlockComponent(String title, String message) {
         this.title = title;
@@ -43,7 +43,6 @@ public class BlockComponent extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        
         drawBorder(g2d);
         int lineY = drawLowerLine(g2d);
         drowTitleAtBottom(g2d, lineY);
@@ -58,7 +57,6 @@ public class BlockComponent extends JPanel {
             int msgWidth = fm.stringWidth(message);
             int msgX = (w - msgWidth) / 2;
 
-            // Центрируем по вертикали между верхом блока и чертой
             int centerAreaY = (lineY - 20) / 2 + 10;
             int msgY = centerAreaY + fm.getAscent() / 2;
             g2d.setColor(MESSAGE_COLOR);
@@ -72,7 +70,7 @@ public class BlockComponent extends JPanel {
             FontMetrics fm = g2d.getFontMetrics();
             int titleWidth = fm.stringWidth(title);
             int titleX = (w - titleWidth) / 2;
-            int titleY = lineY + 20;   // небольшой отступ от черты
+            int titleY = lineY + 20; 
             g2d.setColor(TITLE_COLOR);
             g2d.drawString(title, titleX, titleY);
         }

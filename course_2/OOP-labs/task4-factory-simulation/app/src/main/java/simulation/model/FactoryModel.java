@@ -140,7 +140,7 @@ public class FactoryModel extends Thread implements Model{
 
     @Override
     public int getAccessorySupplierPerformance() {
-        return accessorySuppliers.get(0).getPerformance(); // FIXME: assert somewhere that we have at least one accessory supplier 
+        return accessorySuppliers.get(0).getPerformance(); 
     }
 
     @Override

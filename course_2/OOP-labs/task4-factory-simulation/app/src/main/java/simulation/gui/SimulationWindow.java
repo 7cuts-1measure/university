@@ -18,17 +18,14 @@ public class SimulationWindow {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final Model model;
 
-    // Блоки складов
     private final BlockComponent motorBlock;
     private final BlockComponent bodyBlock;
     private final BlockComponent accessoryBlock;
     private final BlockComponent carBlock;
 
-    // Компоненты для отображения дополнительной информации
     private JLabel pendingTasksLabel;
     private JLabel totalCarsLabel;
 
-    // Ползунки
     private JSlider motorSlider;
     private JSlider bodySlider;
     private JSlider accessorySlider;
@@ -62,11 +59,9 @@ public class SimulationWindow {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout(10, 10));
 
-        // Верхняя панель с информацией о pending tasks и total cars
         JPanel infoPanel = createInfoPanel();
         frame.add(infoPanel, BorderLayout.NORTH);
 
-        // Центральная панель со складами
         JPanel storagePanel = new JPanel(new GridLayout(2, 2, 10, 10));
         storagePanel.add(motorBlock);
         storagePanel.add(bodyBlock);
@@ -74,7 +69,6 @@ public class SimulationWindow {
         storagePanel.add(carBlock);
         frame.add(storagePanel, BorderLayout.CENTER);
 
-        // Нижняя панель с ползунками
         JPanel controlPanel = createControlPanel();
         frame.add(controlPanel, BorderLayout.SOUTH);
 
@@ -90,7 +84,6 @@ public class SimulationWindow {
         pendingTasksLabel = new JLabel("Pending tasks: ");
         totalCarsLabel = new JLabel("Total cars assembled: ");
 
-        // Можно задать фиксированную ширину, чтобы панель не дёргалась при обновлении
         pendingTasksLabel.setPreferredSize(new Dimension(200, 25));
         totalCarsLabel.setPreferredSize(new Dimension(200, 25));
 
@@ -182,7 +175,6 @@ public class SimulationWindow {
     private void startUpdater() {
         updater.scheduleAtFixedRate(() -> {
             try {
-                // Данные складов
                 final int motorSize = model.getMotorStorageSize();
                 final int motorCap = model.getMotorStorageCap();
                 final String motorMsg = storageMessage(motorSize, motorCap);
@@ -199,7 +191,6 @@ public class SimulationWindow {
                 final int carCap = model.getCarStorageCap();
                 final String carMsg = storageMessage(carSize, carCap);
 
-                // Дополнительная статистика
                 final int pendingTasks = model.getNumPendingTasks();
                 final int totalCars = model.getNumTotalCarsAssembled();
 
