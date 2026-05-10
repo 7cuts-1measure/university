@@ -24,6 +24,10 @@ public class SimulationWindow {
     private final BlockComponent accessoryBlock;
     private final BlockComponent carBlock;
 
+    // Компоненты для отображения дополнительной информации
+    private JLabel pendingTasksLabel;
+    private JLabel totalCarsLabel;
+
     // Ползунки
     private JSlider motorSlider;
     private JSlider bodySlider;
@@ -54,7 +58,11 @@ public class SimulationWindow {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout(10, 10));
 
-        // Панель с блоками складов (Grid 2x2)
+        // Верхняя панель с информацией о pending tasks и total cars
+        JPanel infoPanel = createInfoPanel();
+        frame.add(infoPanel, BorderLayout.NORTH);
+
+        // Центральная панель со складами
         JPanel storagePanel = new JPanel(new GridLayout(2, 2, 10, 10));
         storagePanel.add(motorBlock);
         storagePanel.add(bodyBlock);
@@ -62,7 +70,7 @@ public class SimulationWindow {
         storagePanel.add(carBlock);
         frame.add(storagePanel, BorderLayout.CENTER);
 
-        // Панель управления (ползунки)
+        // Нижняя панель с ползунками
         JPanel controlPanel = createControlPanel();
         frame.add(controlPanel, BorderLayout.SOUTH);
 
@@ -72,11 +80,27 @@ public class SimulationWindow {
         log.info("Simulation window created with sliders");
     }
 
+    private JPanel createInfoPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Statistics"));
+
+        pendingTasksLabel = new JLabel("Pending tasks: ");
+        totalCarsLabel = new JLabel("Total cars assembled: ");
+
+        // Можно задать фиксированную ширину, чтобы панель не дёргалась при обновлении
+        pendingTasksLabel.setPreferredSize(new Dimension(200, 25));
+        totalCarsLabel.setPreferredSize(new Dimension(200, 25));
+
+        panel.add(pendingTasksLabel);
+        panel.add(totalCarsLabel);
+
+        return panel;
+    }
+
     private JPanel createControlPanel() {
         JPanel panel = new JPanel(new GridLayout(3, 1, 5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("Supplier's perfromance"));
+        panel.setBorder(BorderFactory.createTitledBorder("Supplier's performance"));
 
-        // Ползунок для моторов
         motorSlider = createSlider(
             "Motors",
             model.getMotorSupplierPerformance(),
@@ -85,7 +109,6 @@ public class SimulationWindow {
         motorSlider.addChangeListener(this::onMotorSliderChanged);
         panel.add(createSliderRow("Motors", motorSlider));
 
-        // Ползунок для кузовов
         bodySlider = createSlider(
             "Bodys",
             model.getBodySupplierPerformance(),
@@ -111,7 +134,7 @@ public class SimulationWindow {
         slider.setMajorTickSpacing(majorTick);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
-        // Добавляем метки только для основных делений
+
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         for (int i = min; i <= max; i += majorTick) {
             labelTable.put(i, new JLabel(String.valueOf(i)));
@@ -156,6 +179,7 @@ public class SimulationWindow {
     private void startUpdater() {
         updater.scheduleAtFixedRate(() -> {
             try {
+                // Данные складов
                 final int motorSize = model.getMotorStorageSize();
                 final int motorCap = model.getMotorStorageCap();
                 final String motorMsg = storageMessage(motorSize, motorCap);
@@ -172,11 +196,18 @@ public class SimulationWindow {
                 final int carCap = model.getCarStorageCap();
                 final String carMsg = storageMessage(carSize, carCap);
 
+                // Дополнительная статистика
+                final int pendingTasks = model.getNumPendingTasks();
+                final int totalCars = model.getNumTotalCarsAssembled();
+
                 SwingUtilities.invokeLater(() -> {
                     motorBlock.setMessage(motorMsg);
                     bodyBlock.setMessage(bodyMsg);
                     accessoryBlock.setMessage(accMsg);
                     carBlock.setMessage(carMsg);
+
+                    pendingTasksLabel.setText("Pending tasks: " + pendingTasks);
+                    totalCarsLabel.setText("Total cars assembled: " + totalCars);
                 });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

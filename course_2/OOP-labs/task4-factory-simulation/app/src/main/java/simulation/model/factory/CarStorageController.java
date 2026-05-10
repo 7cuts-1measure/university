@@ -12,10 +12,10 @@ public class CarStorageController extends Thread {
     private static final int CRITICAL_STORAGE_SIZE = Config.getCriticalCarStorageSize();
     private static final int NUM_REQUESTS = Config.numRequests();
 
-    private final CarAssempler carAssembler;
+    private final CarAssembler carAssembler;
     private final Storage<Car> carStorage;
 
-    public CarStorageController(Storage<Car> carStorage, CarAssempler carAssempler) {
+    public CarStorageController(Storage<Car> carStorage, CarAssembler carAssempler) {
         this.carAssembler = carAssempler;
         this.carStorage = carStorage;
     }
@@ -42,15 +42,16 @@ public class CarStorageController extends Thread {
             boolean assemblyRequestDone = carAssembler.getNumPendingTasks() == 0;
             boolean criticalSize = carStorage.size() < CRITICAL_STORAGE_SIZE;
             if (assemblyRequestDone && criticalSize) {
-                log.debug("{!warn} request car assembly");
-                requestAssembly();
+                log.debug("{!warn} request {} car assembly tasks", NUM_REQUESTS);
+                log.debug("{!warn} storageSize = " + carStorage.size());
+                requestAssembly(NUM_REQUESTS);
             }
         } catch (InterruptedException e) {
             interrupt();
         }
     }
 
-    private void requestAssembly() {
-        carAssembler.requestAssembly(NUM_REQUESTS);
+    private void requestAssembly(int num_requests) {
+        carAssembler.requestAssembly(num_requests);
     }
 }

@@ -52,7 +52,6 @@ public class Supplier<T extends Product> extends Thread {
 
     private void supplyStorage() throws InterruptedException {
         T product = creator.newProduct(idGenerator.next());
-        log.debug("Created " + product.getName() + " <ID:" + product.getId() + ">");
         storage.put(product);
     }
 

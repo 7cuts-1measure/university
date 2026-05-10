@@ -23,6 +23,6 @@ public interface ViewModel {
     int getCarStorageSize() throws InterruptedException;
     int getCarStorageCap();
 
-    int getNumActiveWorkers();
-    int getNumTotalWorkets();
+    int getNumPendingTasks();
+    int getNumTotalCarsAssembled();
 }

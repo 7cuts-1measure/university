@@ -2,6 +2,7 @@ package simulation.model.factory;
 
 import static java.util.stream.IntStream.range;
 
+import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,12 +17,15 @@ import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
 import slf4jansi.AnsiLogger;
 
-public class CarAssempler {
+public class CarAssembler {
     private final IdGenerator idGenerator = new IdGenerator();
 
-    private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(CarAssempler.class));
+    private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(CarAssembler.class));
+
+    private final Duration ASSEMBLY_EMULATING_TIME = Duration.ofMillis(20);
 
     private final AtomicInteger pendingTasks;
+    private final AtomicInteger total = new AtomicInteger();
 
     private final Runnable CAR_ASSMEBLY_TASK = new Runnable() {
         @Override
@@ -32,7 +36,10 @@ public class CarAssempler {
                 Motor motor = motorStorage.take();
                 Accessory accessory = accessoryStorage.take();
                 Car car = new Car(idGenerator.next(), body, motor, accessory);
-                log.debug("Assemblied car " + car.getId());
+                
+                // emulating assemblin0g
+                Thread.sleep(ASSEMBLY_EMULATING_TIME);
+                
                 pendingTasks.decrementAndGet();
                 carStorage.put(car);
             } catch (InterruptedException e) {
@@ -52,7 +59,7 @@ public class CarAssempler {
 
     private final Storage<Car> carStorage;
 
-    public CarAssempler(Storage<Body> bodyStorage, Storage<Motor> motorStorage, Storage<Accessory> accessoryStorage,
+    public CarAssembler(Storage<Body> bodyStorage, Storage<Motor> motorStorage, Storage<Accessory> accessoryStorage,
             Storage<Car> carStorage) {
         this.bodyStorage      = bodyStorage;
         this.motorStorage     = motorStorage;
@@ -68,8 +75,13 @@ public class CarAssempler {
 
     public void requestAssembly(int num_requests) {
         pendingTasks.set(num_requests);
+        total.addAndGet(num_requests);
         range(0, num_requests)
                 .forEach(i -> workers.execute(CAR_ASSMEBLY_TASK));
+    }
+
+    public int totalCarsAssembled() {
+        return total.get();
     }
 
 }

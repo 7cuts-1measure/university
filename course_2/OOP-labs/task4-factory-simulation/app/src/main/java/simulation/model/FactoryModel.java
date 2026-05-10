@@ -7,7 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import simulation.model.factory.CarAssempler;
+import simulation.model.factory.CarAssembler;
 import simulation.model.factory.CarStorageController;
 import simulation.model.factory.Dealer;
 import simulation.model.factory.FileLogger;
@@ -48,10 +48,12 @@ public class FactoryModel extends Thread implements Model{
 
     
     private final CarStorageController carStorageController;
+    private final CarAssembler carAssembler;
 
     private final IdGenerator motorIdGenerator = new IdGenerator();
     private final IdGenerator bodyIdGenerator = new IdGenerator();
     private final IdGenerator accessoryIdGenerator = new IdGenerator();
+
 
     public FactoryModel() throws FileLoggerException {
         this.saleLogger = new FileLogger(Config.logFileName());
@@ -66,7 +68,8 @@ public class FactoryModel extends Thread implements Model{
         bodySupplier         = new Supplier<Body>(DEFAULT_BODY_SUPPLIER_PERFROMANCE, bodyIdGenerator, bodyStorage, Body::new);
         accessorySuppliers   = createAccessorySuppliers(accessoryIdGenerator, accessoryStorage);
 
-        carStorageController = new CarStorageController(carStorage, new CarAssempler(bodyStorage, motorStorage, accessoryStorage, carStorage));
+        carAssembler         = new CarAssembler(bodyStorage, motorStorage, accessoryStorage, carStorage);
+        carStorageController = new CarStorageController(carStorage, carAssembler);
         dealers              = createDillers(carStorage, saleLogger);
     }
 
@@ -186,13 +189,13 @@ public class FactoryModel extends Thread implements Model{
     }
 
     @Override
-    public int getNumActiveWorkers() {
-        return -1;
+    public int getNumPendingTasks() {
+        return carAssembler.getNumPendingTasks();
     }
 
     @Override
-    public int getNumTotalWorkets() {
-        return Config.getThreadsWorkers();
+    public int getNumTotalCarsAssembled() {
+        return carAssembler.totalCarsAssembled();
     }
 
     @Override
