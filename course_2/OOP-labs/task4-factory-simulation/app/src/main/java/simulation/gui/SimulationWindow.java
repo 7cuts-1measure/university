@@ -64,6 +64,7 @@ public class SimulationWindow {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                log.info("{!warn}Window closing");
                 model.shutdown();
                 updater.shutdownNow();
             }
@@ -84,7 +85,7 @@ public class SimulationWindow {
 
         frame.pack();
         frame.setLocationRelativeTo(null);
-        log.info("Simulation window created with sliders");
+        log.info("Simulation window created");
     }
 
     private JPanel createInfoPanel() {

@@ -1,10 +1,8 @@
 package simulation.model.threadpool;
 
 import static java.lang.Thread.interrupted;
-import static java.util.stream.IntStream.range;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import simulation.model.factory.Storage;

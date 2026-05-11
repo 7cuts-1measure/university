@@ -14,15 +14,15 @@ public class App {
     public static void main(String[] args) {        
         log.info("Main started");
 
+        FactoryModel model = null; 
         try {
-            FactoryModel model = new FactoryModel();
+            model = new FactoryModel();
             SimulationWindow window = new SimulationWindow(model);
-            model.start();
             window.show();
+            model.start();
         } catch (FileLoggerException e) {
             log.error("Cannot fix " + e + ". Terminating...");
             return;
         }
-
     }
 }

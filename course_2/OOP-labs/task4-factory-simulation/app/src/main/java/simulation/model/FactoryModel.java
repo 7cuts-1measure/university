@@ -20,9 +20,10 @@ import simulation.model.factory.product.Accessory;
 import simulation.model.factory.product.Body;
 import simulation.model.factory.product.Car;
 import simulation.model.factory.product.Motor;
+import slf4jansi.AnsiLogger;
 
 public class FactoryModel extends Thread implements Model{
-    private final Logger log = LoggerFactory.getLogger(getClass());   
+    private final Logger log = AnsiLogger.of(LoggerFactory.getLogger(getClass()));   
 
     private static final int DEFAULT_DEALER_PERFORMANCE = 2;
     private static final int DEFAULT_MOTOR_SUPPLIER_PERFROMANCE = 5;
@@ -83,7 +84,7 @@ public class FactoryModel extends Thread implements Model{
             shutdown();
             log.warn("Thread was interrupted while starting simulation");
         }
-        log.info("{!warn}Thread is interrupted");
+        log.info("Thread is interrupted");
     }
 
 
@@ -98,7 +99,7 @@ public class FactoryModel extends Thread implements Model{
 
     private synchronized void simulate() throws InterruptedException {
         if (isRunning.get() == false) {
-            log.info("terminated before run");
+            log.warn("terminated before run");
             return;
         }
         log.info("Initializing factory threads");
@@ -111,15 +112,21 @@ public class FactoryModel extends Thread implements Model{
     }
 
     public synchronized void shutdown() {
+        log.info("Shutdown is called by " + Thread.currentThread().getName());
         boolean r = isRunning.getAndSet(false);
         if (r == false) {
             return;
         }
+
+        
+        carStorageController.interrupt();
+        carAssembler.shutdown();
+
         motorSupplier.interrupt();
         bodySupplier.interrupt();
         accessorySuppliers.forEach(Supplier::interrupt);
+        
         dealers.forEach(Dealer::interrupt);
-        carStorageController.interrupt();
     }
 
     private static List<Supplier<Accessory>> createAccessorySuppliers(IdGenerator gen, Storage<Accessory> accStorage) {
@@ -142,7 +149,11 @@ public class FactoryModel extends Thread implements Model{
 
     @Override
     public int getAccessorySupplierPerformance() {
+        if (accessorySuppliers.size() == 0) {
+            return 0;
+        }
         return accessorySuppliers.get(0).getPerformance(); 
+        
     }
 
     @Override

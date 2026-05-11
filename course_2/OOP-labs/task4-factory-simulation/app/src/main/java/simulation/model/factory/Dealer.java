@@ -57,12 +57,11 @@ public class Dealer extends Thread {
                 sale(car);
                 Thread.sleep(sleepDuration());
             } catch (InterruptedException e) {
-                interrupt();
                 fileLogger.close();
-                break;
+                interrupt();
             }
         }
-        log.info("Thread is interrupted");
+        log.info("Dealer is interrupted");
     }
 
     private void sale(Car car) {
