@@ -32,22 +32,20 @@ int main() {
             pid_t ppid = getppid();
             printf("parent:\t%d\n", ppid);
             printf("child:\t%d\n", pid);
-            sleep(15);
-
             printf("vars child: local=%x, global=%x\n", local, global);
+            sleep(10);
             
             local = 0xCCCC;
             global = 0xDDDD;
             
             printf("vars child: local=%x, global=%x\n", local, global);
 
-            sleep(20);
-            
+            sleep(5);    
             puts("child: exit");
             exit(5);
         }
         default: {
-            sleep(15);
+            sleep(20);
             printf("vars parent: local=%x, global=%x\n", local, global);
 
             int status;
