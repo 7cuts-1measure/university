@@ -16,7 +16,7 @@ int main() {
         case 0: {
             pid_t pid = getpid();
             printf("child pid:\t%d\n", pid);
-
+            sleep(10);
             puts("child: call exit(5)");
             exit(5);
         }
