@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <bits/types/siginfo_t.h>
+#include <bits/types/sigset_t.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,65 +9,66 @@
 #include <err.h>
 #include <fcntl.h>
 
+// theese vars should be inited before send/recv jobs
+void *buf;
+size_t buf_size;
+sigset_t mask;
+sigset_t old;
 volatile sig_atomic_t allow_read = false;
-volatile sig_atomic_t pid_allow_read;
 volatile sig_atomic_t allow_write = true;
-volatile sig_atomic_t pid_allow_write;
+volatile sig_atomic_t partner_pid;
 
-void check_order(unsigned num, unsigned prev_num) {
-    if (num != prev_num + 1)
-        printf("Wrong next number: %d -> %d. Diff = %d\n", prev_num, num, num - prev_num);
+
+void check_order(unsigned next, unsigned prev) {
+    if (next != prev + 1)
+        printf("Wrong next number: %d -> %d. Diff = %d\n", prev, next, next - prev);
 }
 
 
-void allow_read_handler(int signo, siginfo_t *siginfo, void *context) {
-    
-    if (signo == SIGUSR1) {
-        pid_allow_read = siginfo->si_pid;
+void allow_read_handler(int signo, siginfo_t *siginfo, void *context) {   
+    if (signo == SIGUSR1 && siginfo->si_pid == partner_pid) {
         allow_read = true;
     }
 }
 
 void allow_write_handler(int signo, siginfo_t *siginfo, void *context) {
-    if (signo == SIGUSR1) {
+    if (signo == SIGUSR1 && siginfo->si_pid == partner_pid) {
         allow_write = true;
-        pid_allow_write = siginfo->si_pid;
     }
 }
 
-unsigned child_recv_num(const unsigned *ptr, pid_t ppid, const sigset_t *old) {
-    while (!allow_read || pid_allow_read != ppid) {
-        sigsuspend(old);   // unblock SIGUSR1
+unsigned child_recv_num(const unsigned *ptr) {
+    while (!allow_read) {
+        sigsuspend(&old);   // unblock SIGUSR1
     }
     
     unsigned num = *ptr;
     allow_read = false;
 
-    if (kill(ppid, SIGUSR1) == -1) {
-        err(1, "SIGUSR1 to parent (%d)", ppid);
+    if (kill(partner_pid, SIGUSR1) == -1) {
+        err(1, "SIGUSR1 to parent (%d)", partner_pid);
     }
     return num;
 }
 
 
-void parent_send_num(unsigned *ptr, unsigned num,  pid_t cpid, sigset_t *old) {
+void parent_send_num(unsigned *ptr, unsigned num) {
     *ptr = num;
     allow_write = false;
 
-    if (kill(cpid, SIGUSR1) == -1) {
-        err(1, "SIGUSR1 to %d", cpid);
+    if (kill(partner_pid, SIGUSR1) == -1) {
+        err(1, "SIGUSR1 to %d", partner_pid);
     }
-    while (!allow_write || pid_allow_write != cpid) {
-        sigsuspend(old);   // unblock SIGUSR1
+    while (!allow_write) {
+        sigsuspend(&old);   // unblock SIGUSR1
     }
 }
 
-void child_work(void *buf, size_t size, sigset_t *old) {
-    assert(size % sizeof(unsigned int) == 0);
+
+void child_work() {
     pid_t ppid = getppid();
     printf("child: %d\n" "parent: %d\n", getpid(), ppid);
 
-    
     struct sigaction sa =  {
         .sa_handler = NULL,
         .sa_mask = 0,
@@ -79,43 +81,42 @@ void child_work(void *buf, size_t size, sigset_t *old) {
     unsigned num;
     unsigned *ptr = buf;
 
-    const size_t elems = size / sizeof(num);
+    const size_t elems = buf_size / sizeof(num);
     for (int i = 0; ; i++) {
-        num = child_recv_num(&ptr[i % elems], ppid, old);
+        num = child_recv_num(&ptr[i % elems]);
         check_order(num, prev_num);
         prev_num = num;
     }
 }
 
 
-void parent_work(void *buf, size_t size, pid_t cpid, sigset_t *old) {
-    struct sigaction sa =  {
+void parent_work() {
+    struct sigaction sa_usr1 =  {
         .sa_handler = NULL,
         .sa_mask = 0,
         .sa_flags = SA_SIGINFO,
         .sa_sigaction = allow_write_handler
     };
-    sigaction(SIGUSR1, &sa, NULL);
-    pid_allow_write = cpid;
 
-    assert(size % sizeof(unsigned int) == 0);
-    unsigned *ptr = buf; 
+    sigaction(SIGUSR1, &sa_usr1, NULL);
+
+    unsigned *ptr = buf;
+    const size_t elems = buf_size / sizeof(unsigned);
     
-    const size_t elems = size / sizeof(unsigned);
     for (unsigned i = 0; ; i++) {
-        parent_send_num(&ptr[i % elems], i, cpid, old);
+        parent_send_num(&ptr[i % elems], i);
     }
 }
 
+
 int main() {
-    sigset_t mask, old;
     sigemptyset(&mask);
     sigaddset(&mask, SIGUSR1);  // block SIGUSR1
     sigprocmask(SIG_BLOCK, &mask, &old);
+ 
+    buf_size = sysconf(_SC_PAGESIZE);
     
-    const int PAGE_SIZE = sysconf(_SC_PAGESIZE);
-    
-    void *buf = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    buf = mmap(NULL, buf_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (buf == MAP_FAILED) {
         err(1, "Failed to map");
     }
@@ -125,9 +126,11 @@ int main() {
         case -1:
             err(1, "fork");
         case 0:
-            child_work(buf, PAGE_SIZE, &old);
+            partner_pid = getppid();
+            child_work();
         default:
-            parent_work(buf, PAGE_SIZE, pid, &old);
+            partner_pid = pid;
+            parent_work();
     } 
     assert(0);
 }
