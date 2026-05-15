@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <err.h>
@@ -12,7 +13,6 @@
 // theese vars should be inited before send/recv jobs
 void *buf;
 size_t buf_size;
-sigset_t mask;
 sigset_t old;
 volatile sig_atomic_t allow_read = false;
 volatile sig_atomic_t allow_write = true;
@@ -70,7 +70,6 @@ void child_work() {
     printf("child: %d\n" "parent: %d\n", getpid(), ppid);
 
     struct sigaction sa =  {
-        .sa_handler = NULL,
         .sa_mask = 0,
         .sa_flags = SA_SIGINFO,
         .sa_sigaction = allow_read_handler
@@ -92,7 +91,6 @@ void child_work() {
 
 void parent_work() {
     struct sigaction sa_usr1 =  {
-        .sa_handler = NULL,
         .sa_mask = 0,
         .sa_flags = SA_SIGINFO,
         .sa_sigaction = allow_write_handler
@@ -109,11 +107,63 @@ void parent_work() {
 }
 
 
+void terminate_handler(int signo, siginfo_t *info, void *context) {
+    
+    if (info->si_pid == partner_pid) {
+        bool is_child = getppid() == partner_pid;
+        if (is_child) {
+            char msg[] = "Reader: Terminating because Writer was interrupted\n";
+            write(1, msg, sizeof(msg));
+        } else {
+            char msg[] = "Writer: Terminating because Reader was interrupted\n";
+            write(1, msg, sizeof(msg));
+        }
+    } else {
+        // got SIGTERM but not from the partner
+        char msg[] = "Caught SIGTERM not from partner. Still terminating\n";
+        kill(partner_pid, SIGTERM); 
+        write(1, msg, sizeof(msg));
+    }
+    munmap(buf, buf_size);
+    exit(0);
+}
+
+void interrupt_handler(int signo, siginfo_t *info, void *context) {
+    bool is_parent = getppid() != partner_pid;
+    if (is_parent) {
+        char msg[] = "\nWriter: interrupting...\n";
+        write(1, msg, sizeof(msg));
+    } else {
+        char msg[] = "\nReader: interrupting...\n";
+        write(1, msg, sizeof(msg));
+    }
+    kill(partner_pid, SIGTERM);
+    munmap(buf, buf_size);
+    exit(0);
+}
+
 int main() {
+    sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask, SIGUSR1);  // block SIGUSR1
     sigprocmask(SIG_BLOCK, &mask, &old);
- 
+    
+    struct sigaction sa_int = {
+        .sa_mask = 0,
+        .sa_flags = SA_SIGINFO,
+        .sa_sigaction = interrupt_handler 
+    };
+
+    sigaddset(&mask, SIGINT);
+    struct sigaction sa_term = {
+        .sa_mask = mask,
+        .sa_flags = SA_SIGINFO,
+        .sa_sigaction = terminate_handler
+    };
+
+    sigaction(SIGTERM, &sa_term, NULL);
+    sigaction(SIGINT, &sa_int, NULL);
+
     buf_size = sysconf(_SC_PAGESIZE);
     
     buf = mmap(NULL, buf_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
