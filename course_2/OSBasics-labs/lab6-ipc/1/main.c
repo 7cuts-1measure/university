@@ -88,9 +88,8 @@ int main() {
     sigaddset(&mask, SIGUSR1);  // block SIGUSR1
     sigprocmask(SIG_BLOCK, &mask, &old);
     
-    
     const int PAGE_SIZE = sysconf(_SC_PAGESIZE);
-
+    
     void *buf = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (buf == MAP_FAILED) {
         err(1, "Failed to map");
@@ -105,6 +104,5 @@ int main() {
         default:
             parent_work(buf, PAGE_SIZE, pid, old);
     } 
-    puts("why it here ???");
-
+    assert(0);
 }
