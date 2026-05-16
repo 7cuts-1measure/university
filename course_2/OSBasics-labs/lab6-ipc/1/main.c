@@ -14,12 +14,15 @@
 void *buf;
 size_t buf_size;
 sigset_t old;
-volatile sig_atomic_t allow_read = false;
-volatile sig_atomic_t allow_write = true;
-volatile sig_atomic_t partner_pid;
+pid_t partner_pid;
+
+// vars for signals 
+bool allow_read = false;
+bool allow_write = true;
 
 
 void check_order(unsigned next, unsigned prev) {
+    //printf("%d->%d\n", prev, next);
     if (next != prev + 1)
         printf("Wrong next number: %d -> %d. Diff = %d\n", prev, next, next - prev);
 }
@@ -31,11 +34,13 @@ void allow_read_handler(int signo, siginfo_t *siginfo, void *context) {
     }
 }
 
+
 void allow_write_handler(int signo, siginfo_t *siginfo, void *context) {
-    if (signo == SIGUSR1 && siginfo->si_pid == partner_pid) {
+    if (signo == SIGUSR1 && siginfo->si_pid == partner_pid ) {
         allow_write = true;
     }
 }
+
 
 unsigned child_recv_num(const unsigned *ptr) {
     while (!allow_read) {

@@ -17,21 +17,23 @@
 int fields[2];
 size_t buf_size;
 sigset_t old;
-volatile sig_atomic_t allow_read = false;
-volatile sig_atomic_t allow_write = true;
-volatile sig_atomic_t partner_pid;
 
-void check_order(unsigned next, unsigned prev) {
+// ONLY LOCAL
+bool allow_read = false;
+bool allow_write = true;
+pid_t partner_pid;
+
+void check_order(unsigned int next, unsigned prev) {
     if (next != prev + 1)
         printf("Wrong next number: %d -> %d. Diff = %d\n", prev, next, next - prev);
 }
 
-unsigned child_recv_num(const unsigned *ptr) {
+unsigned int child_recv_num(const unsigned int *ptr) {
     while (!allow_read) {
         sigsuspend(&old);   // unblock SIGUSR1
     }
     
-    unsigned num = *ptr;
+    unsigned int num = *ptr;
     allow_read = false;
 
     if (kill(partner_pid, SIGUSR1) == -1) {
@@ -41,7 +43,7 @@ unsigned child_recv_num(const unsigned *ptr) {
 }
 
 
-void parent_send_num(unsigned *ptr, unsigned num) {
+void parent_send_num(unsigned int *ptr, unsigned int num) {
     *ptr = num;
     allow_write = false;
 
@@ -60,8 +62,8 @@ void child_work() {
 
     close(fields[1]);
 
-    unsigned prev_num = -1;
-    unsigned num;
+    unsigned int prev_num = -1;
+    unsigned int num;
     
     for (;;) {
         ssize_t nread = (read(fields[0], &num, sizeof(num)));
@@ -82,7 +84,7 @@ void child_work() {
 void parent_work() {
     close(fields[0]);  // do not need it
     
-    for (unsigned i = 0; ; i++) {
+    for (unsigned int i = 0; ; i++) {
         write(fields[1], &i, sizeof(i));
     }
 }
