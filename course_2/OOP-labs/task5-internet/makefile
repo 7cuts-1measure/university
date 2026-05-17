@@ -23,18 +23,17 @@ all: server.jar client.jar
 # Создание server.jar
 server.jar: compile-server
 	$(JAR) cfe $(JAR_DIR)/server.jar server.ServerApp -C $(BUILD_DIR) server -C $(BUILD_DIR) common
-	@echo ":: Created $(JAR_DIR)/server.jar"
+	@echo "Created $(JAR_DIR)/server.jar"
 
 # Создание client.jar
 client.jar: compile-client
 	$(JAR) cfe $(JAR_DIR)/client.jar client.ClientApp -C $(BUILD_DIR) client -C $(BUILD_DIR) common
-	@echo ":: Created $(JAR_DIR)/client.jar"
+	@echo "Created $(JAR_DIR)/client.jar"
 
 # Компиляция общих классов (нужна для server и client)
 compile-common:
 	mkdir -p $(BUILD_DIR)
 	if [ -n "$(COMMON_JAVA)" ]; then $(JC) $(JFLAGS) $(COMMON_JAVA); else true; fi
-
 # Компиляция сервера (зависит от common)
 compile-server: compile-common
 	mkdir -p $(BUILD_DIR)
