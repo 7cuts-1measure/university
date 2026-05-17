@@ -21,7 +21,7 @@ bool allow_read = false;
 bool allow_write = true;
 
 
-void check_order(unsigned next, unsigned prev) {
+void check_order(unsigned int next, unsigned int prev) {
     //printf("%d->%d\n", prev, next);
     if (next != prev + 1)
         printf("Wrong next number: %d -> %d. Diff = %d\n", prev, next, next - prev);
@@ -42,12 +42,12 @@ void allow_write_handler(int signo, siginfo_t *siginfo, void *context) {
 }
 
 
-unsigned child_recv_num(const unsigned *ptr) {
+unsigned int child_recv_num(const unsigned int *ptr) {
     while (!allow_read) {
         sigsuspend(&old);   // unblock SIGUSR1
     }
     
-    unsigned num = *ptr;
+    unsigned int num = *ptr;
     allow_read = false;
 
     if (kill(partner_pid, SIGUSR1) == -1) {
@@ -57,7 +57,7 @@ unsigned child_recv_num(const unsigned *ptr) {
 }
 
 
-void parent_send_num(unsigned *ptr, unsigned num) {
+void parent_send_num(unsigned int *ptr, unsigned int num) {
     *ptr = num;
     allow_write = false;
 
@@ -81,9 +81,9 @@ void child_work() {
     };
     sigaction(SIGUSR1, &sa, NULL);
          
-    unsigned prev_num = -1;
-    unsigned num;
-    unsigned *ptr = buf;
+    unsigned int prev_num = -1;
+    unsigned int num;
+    unsigned int *ptr = buf;
 
     const size_t elems = buf_size / sizeof(num);
     for (int i = 0; ; i++) {
@@ -103,10 +103,10 @@ void parent_work() {
 
     sigaction(SIGUSR1, &sa_usr1, NULL);
 
-    unsigned *ptr = buf;
-    const size_t elems = buf_size / sizeof(unsigned);
+    unsigned int *ptr = buf;
+    const size_t elems = buf_size / sizeof(unsigned int);
     
-    for (unsigned i = 0; ; i++) {
+    for (unsigned int i = 0; ; i++) {
         parent_send_num(&ptr[i % elems], i);
     }
 }

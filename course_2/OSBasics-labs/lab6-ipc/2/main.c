@@ -71,8 +71,6 @@ void child_work() {
             err(1, "read pipe");
         }
         if (nread == 0) {
-            // EOF (Writer closed the pipe)
-            puts("child: pipe closed");
             close(fields[0]);
         }
         check_order(num, prev_num);
