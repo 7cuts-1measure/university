@@ -37,6 +37,7 @@ typedef struct {
 } Connections;
 // ---------------------------------- //
 
+
 void add_connection(Connections *c, struct pollfd fd) {
     assert(c != NULL);
     assert(c->count <= c->capacity);
@@ -71,6 +72,7 @@ void cleanup() {
     }
 }
 
+
 void interrupt_and_terminate_handler(int signo) {
     if (signo != SIGTERM && signo != SIGINT) {
         return;
@@ -84,6 +86,7 @@ void interrupt_and_terminate_handler(int signo) {
     
     exit(0);    // invoke cleanup() bc we register it via atexit()
 }
+
 
 // signal handlers calls exit(2) for quiting. 
 // don't forget to add cleanup fucntion by atexit(2) 
@@ -100,6 +103,7 @@ void register_signal_handlers() {
     sigaction(SIGINT, &act, NULL);
     sigaction(SIGTERM, &act, NULL);
 }
+
 
 void do_echo_ones(int *client_fd) {
     char msg[MSG_LEN];
