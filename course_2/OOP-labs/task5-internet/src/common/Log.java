@@ -13,7 +13,7 @@ public class Log {
 
     public Log(LogLevel level) {
         this.level = level;
-        out = System.out;
+        out = System.err;
     }
 
     public void info(String msg) {
