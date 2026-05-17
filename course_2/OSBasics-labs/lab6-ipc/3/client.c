@@ -31,7 +31,7 @@ void interrupt_and_terminate_handler(int signo) {
 
 void sigpipe_handler(int signo) {
     if (signo == SIGPIPE) {
-        write(2, "WARN: Connection was unexpactedly closed\n", 41);
+        write(2, "Connection was closed\n", 22);
         exit(1);
     }
 }
