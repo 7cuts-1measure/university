@@ -46,11 +46,11 @@ compile-client: compile-common
 
 # Запуск сервера (удобная цель)
 run-server: server.jar
-	java -jar $(JAR_DIR)/server.jar
+	java -jar $(JAR_DIR)/server.jar $(ARGS)
 
 # Запуск клиента
 run-client: client.jar
-	java -jar $(JAR_DIR)/client.jar
+	java -jar $(JAR_DIR)/client.jar $(ARGS)
 
 # Очистка
 clean:
