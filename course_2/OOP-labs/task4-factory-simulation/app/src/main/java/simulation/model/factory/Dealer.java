@@ -24,10 +24,21 @@ public class Dealer extends Thread {
 
     private final FileLogger fileLogger;
 
-    public Dealer(int number, Storage<Car> carStorage, FileLogger fileLogger) {
+    private AtomicInteger performance;
+
+    public Dealer(int number, int performance, Storage<Car> carStorage, FileLogger fileLogger) {
+        this.performance = new AtomicInteger(performance);
         this.carStorage = carStorage;
         this.number = number;
         this.fileLogger = fileLogger;
+    }
+
+    public int getPerformance() {
+        return performance.get();
+    }
+
+    public void setPerformance(int performance) {
+        this.performance.set(performance);
     }
 
     public boolean getIsLogSale() {
@@ -44,6 +55,7 @@ public class Dealer extends Thread {
             try {
                 Car car = carStorage.take();
                 sale(car);
+                Thread.sleep(sleepDuration());
             } catch (InterruptedException e) {
                 fileLogger.close();
                 interrupt();
@@ -67,5 +79,10 @@ public class Dealer extends Thread {
         return format("Dealer %d: Auto %d: (Body %d: Motor %d: Accessory %d)",
                 number, car.getId(),
                 car.getBodyId(), car.getMotorId(), car.getAccessoryId());
+    }
+
+    private Duration sleepDuration() {
+        final int millisInSecond = 1000;
+        return Duration.ofMillis(millisInSecond / performance.get());
     }
 }
