@@ -12,7 +12,8 @@ target
 
 .vscode
 
-
+app/build
+app/bin
 
 # ingore log file
 *.log
