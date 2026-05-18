@@ -24,15 +24,14 @@ public class CarStorageController extends Thread {
     public void run() {
         log.info("Thread started");
 
-        checkStorageSize();
         while (!interrupted()) {
             try {
+                checkStorageSize();
                 carStorage.waitTake();
             } catch (InterruptedException e) {
                 carAssembler.shutdown();
                 break;
             }
-            checkStorageSize();
         }
 
         log.info("Thread terminated");
@@ -42,7 +41,7 @@ public class CarStorageController extends Thread {
         try {
             boolean assemblyRequestDone = carAssembler.getNumPendingTasks() == 0;
             boolean criticalSize = carStorage.size() < CRITICAL_STORAGE_SIZE;
-            if (assemblyRequestDone && criticalSize) {
+            if (assemblyRequestDone &&  criticalSize) {
                 requestAssembly(NUM_REQUESTS);
             }
         } catch (InterruptedException e) {
