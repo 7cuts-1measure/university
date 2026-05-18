@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import common.Log;
-import common.LogLevel;
+import common.logging.Log;
+import common.logging.LogLevel;
 
 class ClientHandler implements Runnable {
     private final Socket socket;

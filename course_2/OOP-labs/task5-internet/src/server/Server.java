@@ -6,8 +6,8 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import common.Log;
-import common.LogLevel;
+import common.logging.Log;
+import common.logging.LogLevel;
 
 class Server {
     private final int portNumber;
