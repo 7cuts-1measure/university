@@ -40,11 +40,9 @@ public class CarStorageController extends Thread {
 
     private void checkStorageSize() {
         try {
-            boolean assemblyRequestDone = carAssembler.getNumPendingTasks() == 0;
-            boolean criticalSize = carStorage.size() < CRITICAL_STORAGE_SIZE;
+            final boolean assemblyRequestDone = carAssembler.getNumPendingTasks() == 0;
+            final boolean criticalSize = carStorage.size() < CRITICAL_STORAGE_SIZE;
             if (assemblyRequestDone && criticalSize) {
-                log.debug("{!warn} request {} car assembly tasks", NUM_REQUESTS);
-                log.debug("{!warn} storageSize = " + carStorage.size());
                 requestAssembly(NUM_REQUESTS);
             }
         } catch (InterruptedException e) {

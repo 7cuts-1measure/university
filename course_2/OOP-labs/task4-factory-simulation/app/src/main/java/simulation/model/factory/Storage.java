@@ -40,7 +40,7 @@ public class Storage<T> {
                 notEmpty.await();
             }
             T product = storage.removeLast();
-            notFull.signalAll();
+            notFull.signal();
             return product;
         } finally {
             lock.unlock();

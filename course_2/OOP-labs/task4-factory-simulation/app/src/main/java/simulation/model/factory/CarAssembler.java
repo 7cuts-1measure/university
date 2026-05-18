@@ -19,8 +19,6 @@ public class CarAssembler {
 
     private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(CarAssembler.class));
 
-    private final Duration ASSEMBLY_EMULATING_TIME = Duration.ofMillis(200);
-
     private final AtomicInteger pendingTasks;
     private final AtomicInteger total = new AtomicInteger();
 
@@ -33,14 +31,11 @@ public class CarAssembler {
                 Accessory accessory = accessoryStorage.take();
                 Car car = new Car(idGenerator.next(), body, motor, accessory);
                 
-                // emulating assemblin0g
-                Thread.sleep(ASSEMBLY_EMULATING_TIME);
-                
                 pendingTasks.decrementAndGet();
                 total.incrementAndGet();
                 carStorage.put(car);
             } catch (InterruptedException e) {
-                log.info("Worker is iterrupted");
+                log.info("Worker was iterrupted during task execution");
                 Thread.currentThread().interrupt(); // IMPORTANT: restore interrupt flag!!
             }
 

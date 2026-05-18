@@ -34,9 +34,9 @@ public class SimulationWindow {
     private final ScheduledExecutorService updater = Executors.newSingleThreadScheduledExecutor();
 
     private final int MIN_SLIDER_VALUE = 0;
-    private final int MAX_SLIDER_VALUE = 30;
-    private final int SLIDER_MAJOR_STEP = 5;
-    private final int SLIDER_MINOR_STEP = 1;
+    private final int MAX_SLIDER_VALUE = 3000;
+    private final int SLIDER_MAJOR_STEP = 500;
+    private final int SLIDER_MINOR_STEP = 100;
 
     public SimulationWindow(Model model) {
         this.model = model;

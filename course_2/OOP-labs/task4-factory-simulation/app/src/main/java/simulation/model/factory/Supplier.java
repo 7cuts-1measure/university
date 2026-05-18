@@ -46,8 +46,6 @@ public class Supplier<T extends Product> extends Thread {
         long timeout = sleepDuration().toMillis();
         if (timeout > 0)
             wait(timeout);
-        else 
-            wait();
     }
 
     private void supplyStorage() throws InterruptedException {
@@ -58,19 +56,21 @@ public class Supplier<T extends Product> extends Thread {
     public void setPerformance(int performance) {
         this.performance.set(performance);
         synchronized (this) {
+            log.info("set perfromance to " + performance);
             notify();
         }
     }
-
-    /**
-     * returns 0 if performance = 0. that means infinity sleep.
-     * @return time that process should sleep to achieve its perfromance
-     */
+    
     private Duration sleepDuration() {
-        final int millisInSecond = 1000;
+        final long nanosInSecond = 1_000_000_000L;
         int perf = performance.get();
         
-        return perf == 0 ? Duration.ofMillis(0) : Duration.ofMillis(millisInSecond / perf);
+        if (perf == 0) {
+            return Duration.ofDays(9999999999L);
+        }
+        
+        long nanos = nanosInSecond / perf;
+        return Duration.ofNanos(nanos);
     }
 
     public int getPerformance() {

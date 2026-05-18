@@ -7,12 +7,15 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import simulation.model.Config;
 import slf4jansi.AnsiLogger;
 
 public class FileLogger {
     private static final Logger log = AnsiLogger.of(LoggerFactory.getLogger(FileLogger.class));
 
     private final PrintStream ps; 
+
+    private boolean isLogging = Config.logSale();
 
     private boolean isClosed = false;
 
@@ -25,7 +28,8 @@ public class FileLogger {
     }
 
     public void log(String message) {
-        ps.println(message);        
+        if (isLogging) 
+            ps.println(message);        
     }
 
     public synchronized void close() {
