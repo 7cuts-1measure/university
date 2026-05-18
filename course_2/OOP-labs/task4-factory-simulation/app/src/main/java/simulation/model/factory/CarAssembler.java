@@ -70,7 +70,7 @@ public class CarAssembler {
     }
 
     public void requestAssembly(int num_requests) throws InterruptedException {
-        pendingTasks.set(num_requests);
+        pendingTasks.addAndGet(num_requests);
         for (int i = 0; i < num_requests; i++) {
             workers.submit(CAR_ASSMEBLY_TASK);
         }

@@ -25,7 +25,6 @@ import slf4jansi.AnsiLogger;
 public class FactoryModel extends Thread implements Model{
     private final Logger log = AnsiLogger.of(LoggerFactory.getLogger(getClass()));   
 
-    private static final int DEFAULT_DEALER_PERFORMANCE = 2;
     private static final int DEFAULT_MOTOR_SUPPLIER_PERFROMANCE = 5;
     private static final int DEFAULT_BODY_SUPPLIER_PERFROMANCE = 10;
     private static final int DEFAULT_ACCESSORY_SUPPLIER_PERFORMANCE = 2;
@@ -92,7 +91,7 @@ public class FactoryModel extends Thread implements Model{
         List<Dealer> dealers = new ArrayList<>(Config.getThreadsDealers());
         final int cnt = Config.getThreadsDealers();
         for (int i = 0; i < cnt; i++) {
-            dealers.add(new Dealer(i, DEFAULT_DEALER_PERFORMANCE, carStorage, saleLogger));
+            dealers.add(new Dealer(i, carStorage, saleLogger));
         }
         return dealers;
     }

@@ -15,7 +15,7 @@ public class TaskRunner {
    
     public TaskRunner(int numThreads) {
         this.numThreads = numThreads;
-        tasks = new Storage<>(this.numThreads);
+        tasks = new Storage<>(Integer.MAX_VALUE);
         threads = new ArrayList<Thread>(numThreads);
         
         startThreads();

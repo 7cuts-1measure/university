@@ -2,7 +2,6 @@ package simulation.model.factory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -68,8 +67,9 @@ public class Storage<T> {
             if (wasTakenBefore) {
                 wasTakenBefore = false;
                 return;
+            } else {
+                notFull.await(); 
             }
-            notFull.await();
         } finally {
             lock.unlock();
         }
