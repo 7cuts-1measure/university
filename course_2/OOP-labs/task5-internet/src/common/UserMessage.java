@@ -2,12 +2,16 @@ package common;
 
 import java.util.Date;
 
-public class Message {
+public class UserMessage {
     private final String text;
     private Date dateArrived = null;
 
-    public Message(String text) {
+    public UserMessage(String text) {
         this.text = text;
+    }
+
+    public String getText() {
+        return text;
     }
 
     public void setDateArrived(Date date) {
