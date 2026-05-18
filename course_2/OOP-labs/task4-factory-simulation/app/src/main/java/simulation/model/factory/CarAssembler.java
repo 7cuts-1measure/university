@@ -1,6 +1,5 @@
 package simulation.model.factory;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
