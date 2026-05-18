@@ -2,7 +2,6 @@ package simulation.model.factory;
 
 import static java.lang.String.format;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,7 +54,6 @@ public class Dealer extends Thread {
             try {
                 Car car = carStorage.take();
                 sale(car);
-                Thread.sleep(sleepDuration());
             } catch (InterruptedException e) {
                 fileLogger.close();
                 interrupt();
@@ -79,10 +77,5 @@ public class Dealer extends Thread {
         return format("Dealer %d: Auto %d: (Body %d: Motor %d: Accessory %d)",
                 number, car.getId(),
                 car.getBodyId(), car.getMotorId(), car.getAccessoryId());
-    }
-
-    private Duration sleepDuration() {
-        final int millisInSecond = 1000;
-        return Duration.ofMillis(millisInSecond / performance.get());
     }
 }
