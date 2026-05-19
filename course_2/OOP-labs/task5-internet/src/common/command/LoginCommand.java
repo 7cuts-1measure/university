@@ -1,6 +1,6 @@
 package common.message;
 
-public class LoginMessage implements Message{
+public class LoginCommand implements Command{
     
     private final String userName;
 
@@ -15,7 +15,7 @@ public class LoginMessage implements Message{
         return clientName;
     }
 
-    public LoginMessage(String userName, String clientName) {
+    public LoginCommand(String userName, String clientName) {
         this.userName = userName;
         this.clientName = clientName;
     }

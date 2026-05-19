@@ -1,8 +1,8 @@
 package common.message;
 
-public class ChatMessage implements Message {
+public class MessageCommand implements Command {
 
-    public ChatMessage(String sessionId, String text) {
+    public MessageCommand(String sessionId, String text) {
         this.sessionId = sessionId;
         this.text = text;
     }

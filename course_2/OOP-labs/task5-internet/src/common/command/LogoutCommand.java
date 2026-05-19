@@ -1,10 +1,10 @@
 package common.message;
 
-public class ListUsersMessage implements Message {
 
+public class LogoutCommand implements Command {
     private final String sessionId;
 
-    public ListUsersMessage(String sessionId) {
+    public LogoutCommand(String sessionId) {
         this.sessionId = sessionId;
     }
 
