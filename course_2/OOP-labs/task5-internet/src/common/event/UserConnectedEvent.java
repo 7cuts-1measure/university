@@ -1,6 +1,6 @@
 package common.event;
 
-public class UserConnectedEvent implements UserEvent {
+public class UserConnectedEvent implements Event {
 
     private final String userName;
 

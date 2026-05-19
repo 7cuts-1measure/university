@@ -6,20 +6,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import common.message.Message;
-
-public class ObjectMessageProtocol implements MessageProtocol{
+public class ObjectProtocol implements Protocol{
 
     @Override
-    public void sendMessage(OutputStream out, Message msg) throws IOException {
+    public void sendMessage(OutputStream out, Datagram msg) throws IOException {
         var oos = new ObjectOutputStream(out);
         oos.writeObject(msg);
     }
 
     @Override
-    public Message receiveMessage(InputStream in) throws UnsupportedProtocolException, IOException {
+    public Datagram receiveMessage(InputStream in) throws UnsupportedProtocolException, IOException {
         try (var ois = new ObjectInputStream(in)) {
-            Message msg = (Message) ois.readObject();
+            Datagram msg = (Datagram) ois.readObject();
             return msg;
         } catch (ClassNotFoundException e) {
             throw new UnsupportedProtocolException();

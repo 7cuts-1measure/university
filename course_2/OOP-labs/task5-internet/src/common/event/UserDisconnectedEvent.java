@@ -1,6 +1,6 @@
 package common.event;
 
-public class UserDisconnectedEvent implements UserEvent{
+public class UserDisconnectedEvent implements Event{
     private final String userName;
 
     @Override

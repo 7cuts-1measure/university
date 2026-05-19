@@ -1,5 +1,7 @@
 package common.message;
 
-public interface Message {
+import common.protocol.Datagram;
+
+public interface Message extends Datagram{
     String getSessionId();
 }

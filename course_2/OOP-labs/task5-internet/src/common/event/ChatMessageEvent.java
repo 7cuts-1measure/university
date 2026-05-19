@@ -1,6 +1,6 @@
 package common.event;
 
-public class ChatMessageEvent implements UserEvent{
+public class ChatMessageEvent implements Event{
 
     private final String text;
 
