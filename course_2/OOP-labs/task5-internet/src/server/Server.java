@@ -40,23 +40,23 @@ class Server {
     }
 
     public void start() {
-        while (!Thread.interrupted()) {
-            try {
-                serverSocket = new ServerSocket(portNumber);
+        try {
+            serverSocket = new ServerSocket(portNumber);
+            while (!Thread.interrupted()) {
                 Socket client = serverSocket.accept();  
                 log.info("New connection");
                 threadPool.execute(new ClientHandler(client));
-            } catch (IOException e) {
-                log.err("Got IOException: " + e.getLocalizedMessage());
-                e.printStackTrace();
-            } finally {
-                if (serverSocket != null) {
-                    try {
-                        serverSocket.close();
-                    } catch (IOException e) {
-                        log.err("Cannot close server socket");
-                        e.printStackTrace();
-                    }
+            }
+        } catch (IOException e) {
+            log.err("Got IOException: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        } finally {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    log.err("Cannot close server socket");
+                    e.printStackTrace();
                 }
             }
         }
