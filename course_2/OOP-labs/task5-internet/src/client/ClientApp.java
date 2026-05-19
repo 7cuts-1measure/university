@@ -27,20 +27,12 @@ public class ClientApp {
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
 
-        log.debug("Choosing protocol");
-
         Protocol protocol = new ObjectProtocol(in, out);
-
-        log.debug("protocol choosed");
-
         Datagram datagram = new ChatMessageEvent("text", "from");
-
-        log.debug("Datagram created");
         protocol.sendDatagram(datagram);
-        log.debug("Datagram sent");
-        protocol.close();
-
+        
         System.in.read();
+        protocol.close();
         socket.close();
     }
 }
