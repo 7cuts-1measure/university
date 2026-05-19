@@ -3,16 +3,16 @@ package server;
 import java.io.IOException;
 import java.net.Socket;
 
+import common.command.ListUsersCommand;
+import common.command.LoginCommand;
+import common.command.LogoutCommand;
+import common.command.MessageCommand;
 import common.event.ChatMessageEvent;
 import common.event.Event;
 import common.event.UserConnectedEvent;
 import common.event.UserDisconnectedEvent;
 import common.logging.Log;
 import common.logging.LogLevel;
-import common.message.ChatMessage;
-import common.message.ListUsersMessage;
-import common.message.LoginMessage;
-import common.message.LogoutMessage;
 import common.protocol.Datagram;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
@@ -22,58 +22,54 @@ class ClientHandler implements Runnable {
     private final Socket socket;
     private final Log log = new Log(LogLevel.DEBUG);
 
+    private final ChatRoom chatRoom;
 
-    ClientHandler(Socket socket) {
+    private final Protocol protocol;
+
+    ClientHandler(Socket socket, ChatRoom chatRoom) throws IOException {
         this.socket = socket;
+        this.chatRoom = chatRoom;
+        protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
     }
 
     private void processDatagram(Datagram datagram) {
         if (datagram instanceof Event) {
             log.warn("Got an event from client. Only server is allowed to send events => ignore");
-        } else if (datagram instanceof LoginMessage) {
-            processLoginMessage((LoginMessage) datagram);
-        } else if (datagram instanceof LogoutMessage) {
-            processLogoutMessage((LogoutMessage) datagram);
-        } else if (datagram instanceof ListUsersMessage) {
-            processListUsersMessage((ListUsersMessage) datagram);
-        } else if (datagram instanceof ChatMessage) {
-            processChatMessage((ChatMessage) datagram);
+        } else if (datagram instanceof LoginCommand) {
+            processLoginMessage((LoginCommand) datagram);
+        } else if (datagram instanceof LogoutCommand) {
+            processLogoutMessage((LogoutCommand) datagram);
+        } else if (datagram instanceof ListUsersCommand) {
+            processListUsersMessage((ListUsersCommand) datagram);
+        } else if (datagram instanceof MessageCommand) {
+            processChatMessage((MessageCommand) datagram);
         }
     }
 
-    private void processChatMessage(ChatMessage msg) {
-
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processChatMessage'");
+    private void processChatMessage(MessageCommand msg) {
+        chatRoom.addMessage(msg.getSessionId(), msg.getText());
     }
 
-    private void processListUsersMessage(ListUsersMessage msg) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processListUsersMessage'");
+    private void processListUsersMessage(ListUsersCommand msg) {
+        chatRoom.getUsersList();
+        // TODO: protocol.sendDatagram(kind of response);
     }
 
-    private void processLogoutMessage(LogoutMessage msg) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processLogoutMessage'");
+    private void processLogoutMessage(LogoutCommand msg) {
+        chatRoom.removeClient(msg.getSessionId());
     }
 
-    private void processLoginMessage(LoginMessage msg) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processLoginMessage'");
+    private void processLoginMessage(LoginCommand msg) {
+        chatRoom.addClient(msg.getSessionId(), new Client(msg.getUserName(), protocol, msg.getClientName()));
     }
 
     @Override
     public void run() {
-    
         try {
-            
-            Protocol protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
-
             Datagram datagram;
             while ((datagram = protocol.receiveDatagram()) != null) {
                 log.debug("Got datagram: " + datagram);
                 processDatagram(datagram);
-                // process datagram
             }
 
             protocol.close();

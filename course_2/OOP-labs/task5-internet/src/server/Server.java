@@ -16,6 +16,7 @@ class Server {
     private ServerSocket serverSocket = null;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
+    private final ChatRoom chatRoom = new ChatRoom();
 
     private final Thread shutDownHook = new Thread(() -> {
         log.info("Cleaning resources...");
@@ -26,7 +27,6 @@ class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /* Allow threads to finish their tasks */
         threadPool.shutdown();
     });
 
@@ -45,7 +45,7 @@ class Server {
             while (!Thread.interrupted()) {
                 Socket client = serverSocket.accept();  
                 log.info("New connection");
-                threadPool.execute(new ClientHandler(client));
+                threadPool.execute(new ClientHandler(client, chatRoom));
             }
         } catch (IOException e) {
             log.err("Got IOException: " + e.getLocalizedMessage());
