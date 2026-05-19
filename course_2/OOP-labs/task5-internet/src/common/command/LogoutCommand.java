@@ -1,4 +1,4 @@
-package common.message;
+package common.command;
 
 
 public class LogoutCommand implements Command {
