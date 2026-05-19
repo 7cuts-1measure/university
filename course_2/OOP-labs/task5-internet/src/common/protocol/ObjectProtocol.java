@@ -9,13 +9,13 @@ import java.io.OutputStream;
 public class ObjectProtocol implements Protocol{
 
     @Override
-    public void sendMessage(OutputStream out, Datagram msg) throws IOException {
+    public void sendDatagram(OutputStream out, Datagram msg) throws IOException {
         var oos = new ObjectOutputStream(out);
         oos.writeObject(msg);
     }
 
     @Override
-    public Datagram receiveMessage(InputStream in) throws UnsupportedProtocolException, IOException {
+    public Datagram receiveDatagram(InputStream in) throws UnsupportedProtocolException, IOException {
         try (var ois = new ObjectInputStream(in)) {
             Datagram msg = (Datagram) ois.readObject();
             return msg;

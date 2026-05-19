@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 public interface Protocol {
     
-    void sendMessage(OutputStream out, Datagram msg) throws IOException;
+    void sendDatagram(OutputStream out, Datagram msg) throws IOException;
     
-    Datagram receiveMessage(InputStream in) throws UnsupportedProtocolException, IOException;
+    Datagram receiveDatagram(InputStream in) throws UnsupportedProtocolException, IOException;
 }
