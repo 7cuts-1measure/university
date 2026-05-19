@@ -16,20 +16,22 @@ class Server {
     private ServerSocket serverSocket = null;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-    private void registerShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("Cleaning resources...");
-            try {
-                if (serverSocket != null && !serverSocket.isClosed()) {
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
 
+    private final Thread shutDownHook = new Thread(() -> {
+        log.info("Cleaning resources...");
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         /* Allow threads to finish their tasks */
         threadPool.shutdown();
+    });
+
+    private void registerShutDownHook() {       
+        Runtime.getRuntime().addShutdownHook(shutDownHook);
     }
 
     public Server(int portNumber) {
@@ -38,21 +40,23 @@ class Server {
     }
 
     public void start() {
-        try {
-            serverSocket = new ServerSocket(portNumber);
-            Socket client = serverSocket.accept();
-            threadPool.submit(new ClientHandler(client));
-        } catch (IOException e) {
-            log.err(e.getLocalizedMessage());
-            e.printStackTrace();
-        } finally {
-            if (serverSocket != null) {
-                try {
-                    serverSocket.close();
-
-                } catch (IOException e) {
-                    log.err("Cannot close server socket");
-                    e.printStackTrace();
+        while (!Thread.interrupted()) {
+            try {
+                serverSocket = new ServerSocket(portNumber);
+                Socket client = serverSocket.accept();  
+                log.info("New connection");
+                threadPool.execute(new ClientHandler(client));
+            } catch (IOException e) {
+                log.err("Got IOException: " + e.getLocalizedMessage());
+                e.printStackTrace();
+            } finally {
+                if (serverSocket != null) {
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        log.err("Cannot close server socket");
+                        e.printStackTrace();
+                    }
                 }
             }
         }
