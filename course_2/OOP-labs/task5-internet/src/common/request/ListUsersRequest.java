@@ -1,10 +1,10 @@
 package common.command;
 
+public class ListUsersRequest implements Request {
 
-public class LogoutCommand implements Command {
     private final String sessionId;
 
-    public LogoutCommand(String sessionId) {
+    public ListUsersRequest(String sessionId) {
         this.sessionId = sessionId;
     }
 

@@ -1,8 +1,8 @@
 package common.command;
 
-public class MessageCommand implements Command {
+public class MessageRequest implements Request {
 
-    public MessageCommand(String sessionId, String text) {
+    public MessageRequest(String sessionId, String text) {
         this.sessionId = sessionId;
         this.text = text;
     }

@@ -1,6 +1,6 @@
 package common.command;
 
-public class LoginCommand implements Command{
+public class LoginRequest implements Request{
     
     private final String userName;
 
@@ -15,7 +15,7 @@ public class LoginCommand implements Command{
         return clientName;
     }
 
-    public LoginCommand(String userName, String clientName) {
+    public LoginRequest(String userName, String clientName) {
         this.userName = userName;
         this.clientName = clientName;
     }
