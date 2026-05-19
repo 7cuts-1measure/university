@@ -20,10 +20,11 @@ class ClientHandler implements Runnable {
     @Override
     public void run() {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-            PrintWriter out = new PrintWriter(socket.getOutputStream());
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
+                log.debug("Got input from client: " + inputLine);
                 out.println(inputLine);
             }
             log.info("Connection ended");      
