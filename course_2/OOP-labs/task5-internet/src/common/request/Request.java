@@ -1,4 +1,4 @@
-package common.command;
+package common.request;
 
 import common.protocol.Datagram;
 

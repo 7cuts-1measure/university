@@ -3,20 +3,17 @@ package server;
 import java.io.IOException;
 import java.net.Socket;
 
-import common.command.ListUsersCommand;
-import common.command.LoginCommand;
-import common.command.LogoutCommand;
-import common.command.MessageCommand;
-import common.event.ChatMessageEvent;
 import common.event.Event;
-import common.event.UserConnectedEvent;
-import common.event.UserDisconnectedEvent;
 import common.logging.Log;
 import common.logging.LogLevel;
 import common.protocol.Datagram;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
 import common.protocol.UnsupportedProtocolException;
+import common.request.ListUsersRequest;
+import common.request.LoginRequest;
+import common.request.LogoutRequest;
+import common.request.MessageRequest;
 
 class ClientHandler implements Runnable {
     private final Socket socket;
@@ -35,31 +32,31 @@ class ClientHandler implements Runnable {
     private void processDatagram(Datagram datagram) {
         if (datagram instanceof Event) {
             log.warn("Got an event from client. Only server is allowed to send events => ignore");
-        } else if (datagram instanceof LoginCommand) {
-            processLoginMessage((LoginCommand) datagram);
-        } else if (datagram instanceof LogoutCommand) {
-            processLogoutMessage((LogoutCommand) datagram);
-        } else if (datagram instanceof ListUsersCommand) {
-            processListUsersMessage((ListUsersCommand) datagram);
-        } else if (datagram instanceof MessageCommand) {
-            processChatMessage((MessageCommand) datagram);
+        } else if (datagram instanceof LoginRequest) {
+            processLoginMessage((LoginRequest) datagram);
+        } else if (datagram instanceof LogoutRequest) {
+            processLogoutMessage((LogoutRequest) datagram);
+        } else if (datagram instanceof ListUsersRequest) {
+            processListUsersMessage((ListUsersRequest) datagram);
+        } else if (datagram instanceof MessageRequest) {
+            processChatMessage((MessageRequest) datagram);
         }
     }
 
-    private void processChatMessage(MessageCommand msg) {
+    private void processChatMessage(MessageRequest msg) {
         chatRoom.addMessage(msg.getSessionId(), msg.getText());
     }
 
-    private void processListUsersMessage(ListUsersCommand msg) {
+    private void processListUsersMessage(ListUsersRequest msg) {
         chatRoom.getUsersList();
         // TODO: protocol.sendDatagram(kind of response);
     }
 
-    private void processLogoutMessage(LogoutCommand msg) {
+    private void processLogoutMessage(LogoutRequest msg) {
         chatRoom.removeClient(msg.getSessionId());
     }
 
-    private void processLoginMessage(LoginCommand msg) {
+    private void processLoginMessage(LoginRequest msg) {
         chatRoom.addClient(msg.getSessionId(), new Client(msg.getUserName(), protocol, msg.getClientName()));
     }
 

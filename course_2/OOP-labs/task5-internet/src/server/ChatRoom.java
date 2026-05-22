@@ -26,7 +26,8 @@ public class ChatRoom {
 
     private final static int HISTORY_SIZE = 100;
 
-    public synchronized void addClient(String sessionId, Client client) {    
+    public synchronized void addClient(String sessionId, Client client) {   
+        log.info("Add client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType() + "]"); 
         clients.put(sessionId, client);
         sendHistory(client);
     }
@@ -34,9 +35,13 @@ public class ChatRoom {
     public synchronized void addMessage(String sessionId, String text) {
         Client client = clients.get(sessionId);
         if (client == null) {
-            log.warn("Got message with bad sessionId");
+            log.warn("Got message with bad sessionId. Ignoring");
+            return;
         }
+
         Message msg = new Message(client.getName(), text);
+
+        log.info("Got message: " + msg);
 
         if (history.size() == HISTORY_SIZE) {
             history.removeLast();
@@ -63,10 +68,12 @@ public class ChatRoom {
     }
 
     public void removeClient(String sessionId) {
-        Client cleintInfo = clients.remove(sessionId);
-        if (cleintInfo == null) {
-            log.warn("Cannot remove client from chat room: There are no such sessionId");
+        Client client = clients.remove(sessionId);
+        if (client == null) {
+            log.warn("Cannot remove client from chat room: There are no such sessionId: " + sessionId);
         }
+
+        log.info("Remove client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType() + "]"); 
     }
 
     public synchronized List<String> getUsersList() {

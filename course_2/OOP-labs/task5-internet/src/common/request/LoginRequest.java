@@ -1,4 +1,4 @@
-package common.command;
+package common.request;
 
 public class LoginRequest implements Request{
     

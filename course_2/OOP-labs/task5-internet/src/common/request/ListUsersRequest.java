@@ -1,4 +1,4 @@
-package common.command;
+package common.request;
 
 public class ListUsersRequest implements Request {
 
