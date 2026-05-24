@@ -6,9 +6,6 @@ public class ClientApp {
         SwingUtilities.invokeLater(() -> {
             LoginDialog login = new LoginDialog(null);
             login.setVisible(true);
-            if (!login.isSucceeded()) {
-                System.exit(0);
-            }
         });
     }
 }

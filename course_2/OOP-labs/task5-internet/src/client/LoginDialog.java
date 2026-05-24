@@ -2,6 +2,7 @@ package client;
 
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -10,7 +11,6 @@ public class LoginDialog extends JDialog {
     private JTextField portField;
     private JTextField nicknameField;
     private JButton connectButton;
-    private boolean succeeded = false;
 
     public LoginDialog(JFrame parent) {
         super(parent, "Подключение к чату", true);
@@ -51,7 +51,7 @@ public class LoginDialog extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    private void onConnect(ActionEvent e) {
+    private void onConnect(ActionEvent event) {
         String host = hostField.getText().trim();
         String portText = portField.getText().trim();
         String nickname = nicknameField.getText().trim();
@@ -64,7 +64,7 @@ public class LoginDialog extends JDialog {
         int port;
         try {
             port = Integer.parseInt(portText);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Порт должен быть числом");
             return;
         }
@@ -72,13 +72,13 @@ public class LoginDialog extends JDialog {
         // ЗДЕСЬ БУДЕТ РЕАЛЬНОЕ ПОДКЛЮЧЕНИЕ
         // Пока заглушка – вызываем метод connect у главного окна
         MainChatWindow mainWindow = new MainChatWindow(nickname);
-        mainWindow.connect(host, port, nickname);  // заглушка
-        succeeded = true;
+        try {
+            mainWindow.connect(host, port, nickname);
+        } catch (ConnectionException e) {
+            JOptionPane.showMessageDialog(this, "Cannot connect to the server: " + e.getLocalizedMessage());
+            return;
+        }
         dispose();
         mainWindow.setVisible(true);
-    }
-
-    public boolean isSucceeded() {
-        return succeeded;
     }
 }

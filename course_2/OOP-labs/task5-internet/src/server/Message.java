@@ -18,7 +18,7 @@ public class Message {
 
     @Override
     public String toString() {
-        return from + ": " + text;
+        return "{" + from + ": " + text + "}"; 
     }
 
     public Message(String from, String text) {

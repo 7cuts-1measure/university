@@ -1,9 +1,8 @@
 package server;
 
-import java.io.IOException;
-
 import common.event.Event;
 import common.protocol.Protocol;
+import common.protocol.ConnectionLostException;
 
 public class Client {
        
@@ -27,7 +26,7 @@ public class Client {
         return name;
     }
 
-    public void sendEvent(Event event) throws IOException {
+    public void sendEvent(Event event) throws ConnectionLostException {
         protocol.sendDatagram(event);
     }
 }

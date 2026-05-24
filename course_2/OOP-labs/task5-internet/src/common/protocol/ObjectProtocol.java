@@ -32,16 +32,22 @@ public class ObjectProtocol implements Protocol{
 
 
     @Override
-    public void sendDatagram(Datagram msg) throws IOException {
-        oos.writeObject(msg);
+    public void sendDatagram(Datagram msg) throws ConnectionLostException {
+        try {
+            oos.writeObject(msg);
+        } catch (IOException e) {
+            throw new ConnectionLostException();
+        }
     }
 
     @Override
-    public Datagram receiveDatagram() throws UnsupportedProtocolException, IOException {
+    public Datagram receiveDatagram() throws UnsupportedProtocolException, ConnectionLostException {
         try {
             return (Datagram) ois.readObject();
         } catch (ClassNotFoundException e) {
             throw new UnsupportedProtocolException();
+        } catch (IOException e) {
+            throw new ConnectionLostException();
         }
     }
 }

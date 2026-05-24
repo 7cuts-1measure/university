@@ -1,11 +1,8 @@
 package common.protocol;
 
-import java.io.IOException;
-
-
 public interface Protocol extends java.io.Closeable {
     
-    void sendDatagram(Datagram msg) throws IOException;
+    void sendDatagram(Datagram msg) throws ConnectionLostException;
     
-    Datagram receiveDatagram() throws UnsupportedProtocolException, IOException;
+    Datagram receiveDatagram() throws UnsupportedProtocolException, ConnectionLostException;
 }
