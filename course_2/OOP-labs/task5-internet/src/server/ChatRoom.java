@@ -51,6 +51,8 @@ public class ChatRoom {
         List<Message> historyCopy;
         synchronized(this) {
             // history can change while we sending it to client
+            // but we don't want to take a lock on whole function because
+            // sending something could be slow
             historyCopy = List.copyOf(history);
         }
 
