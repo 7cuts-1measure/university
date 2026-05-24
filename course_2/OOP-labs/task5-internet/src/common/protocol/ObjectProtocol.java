@@ -14,10 +14,12 @@ public class ObjectProtocol implements Protocol{
 
   
     public ObjectProtocol(InputStream in, OutputStream out) throws IOException {
-        //  !!!! ORDER OF INITIALIZATION IS IMPORTANT !!!!!
-        //  ObjectOutputStream must be created first to write the stream header,
-        //  then ObjectInputStream can read the server's response header.
-        //  Reversing the order (OIS first) would cause deadlock as both sides wait for each other's headers.
+        /*   
+         * !!!! ORDER OF INITIALIZATION IS IMPORTANT !!!!!
+         *  ObjectOutputStream must be created first to write the stream header,
+         *  then ObjectInputStream can read the server's response header.
+         *  Reversing the order (OIS first) would cause deadlock as both sides wait for each other's headers.
+         */
         oos = new ObjectOutputStream(out);
         ois = new ObjectInputStream(in);
     }
