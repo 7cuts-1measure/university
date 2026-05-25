@@ -9,6 +9,7 @@ import common.event.UserDisconnectedEvent;
 import common.protocol.ConnectionLostException;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
+import common.protocol.XmlProtocol;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
 import common.request.MessageRequest;
@@ -122,8 +123,9 @@ public class MainChatWindow extends JFrame {
 
         try {
             socket = new Socket(host, port);
-            protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
-            
+            //protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
+            protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
+
             networkManager = new NetworkManager(protocol);
 
             networkManager.startEventListener(new EventListener() {

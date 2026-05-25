@@ -14,6 +14,7 @@ import common.protocol.Datagram;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
 import common.protocol.UnsupportedProtocolException;
+import common.protocol.XmlProtocol;
 import common.request.ListUsersRequest;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
@@ -42,7 +43,8 @@ class ClientHandler implements Runnable {
     ClientHandler(Socket socket, ChatRoom chatRoom) throws IOException {
         this.socket = socket;
         this.chatRoom = chatRoom;
-        protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
+        //protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
+        protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
     }
 
     private void processDatagram(Datagram datagram) throws ConnectionLostException {
