@@ -39,12 +39,13 @@ class ClientHandler implements Runnable {
     private Client client = null;
 
     private AtomicBoolean isConnectionLost = new AtomicBoolean(false);
+    private Thread clientWatcher;
 
     ClientHandler(Socket socket, ChatRoom chatRoom) throws IOException {
         this.socket = socket;
         this.chatRoom = chatRoom;
-        //protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
-        protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
+        protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
+        //protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
     }
 
     private void processDatagram(Datagram datagram) throws ConnectionLostException {
@@ -112,7 +113,7 @@ class ClientHandler implements Runnable {
     private void processLogoutMessage(LogoutRequest msg) throws ConnectionLostException {
         Status status = chatRoom.removeClient(msg.getSessionId(), "logout");
         if (status.ok) {
-            client = null;
+            clientWatcher.interrupt();
             protocol.sendDatagram(new LogoutResponse());
         } else {
             protocol.sendDatagram(new ErrorResponse(status.errorMessage));
@@ -123,18 +124,25 @@ class ClientHandler implements Runnable {
         String sessionId = UUID.randomUUID().toString();
         client = new Client(msg.getUserName(), protocol, msg.getClientName());
         
-        Thread clientWatcher = new Thread() {
+
+        clientWatcher = new Thread() {
+            private static final int TIMEOUT_MS = 5000;
             @Override
             public void run() {
-                while (!Thread.interrupted()) {
-                    var now = System.currentTimeMillis();
-                    if (now - client.getLastTimePingedMS() > 5000) {
-                        log.info("Client " + sessionId + " timed out");
-                        chatRoom.removeClient(sessionId, "timeout");
-                        isConnectionLost.set(true);
-                        interrupt();
+                try {
+                    while (!Thread.interrupted()) {
+                        long now = System.currentTimeMillis();
+                        Thread.sleep(TIMEOUT_MS + 100);
+                        long last = client.getLastTimePingedMS();
+                        if (now - last > TIMEOUT_MS) {
+                            log.info("Client " + sessionId + " timed out");
+                            chatRoom.removeClient(sessionId, "timeout");
+                            isConnectionLost.set(true);
+                            interrupt();
+                        }
+    
                     }
-
+                } catch(InterruptedException e) {
                 }
             }
         };

@@ -25,7 +25,7 @@ public class ChatRoom {
 
     private final List<Message> history = new LinkedList<>();
 
-    private final static int HISTORY_SIZE = 100;
+    private final static int HISTORY_SIZE = 10;
 
     public synchronized Status addClient(String sessionId, Client client) {
         log.info("Add client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType()

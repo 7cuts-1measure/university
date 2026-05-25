@@ -82,7 +82,7 @@ public class XmlProtocol implements Protocol {
             return success(elem("session", r.sessionId));
         } else if (msg instanceof ListUsersResponse r) {
             StringBuilder users = new StringBuilder();
-            for (String name : r.listUsers) {
+            for (String name : r.usersList) {
                 users.append("<user>").append(elem("name", name)).append("</user>");
             }
             return success("<listusers>" + users + "</listusers>");

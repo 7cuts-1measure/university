@@ -7,12 +7,15 @@ import common.event.Event;
 import common.event.UserConnectedEvent;
 import common.event.UserDisconnectedEvent;
 import common.protocol.ConnectionLostException;
+import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
 import common.protocol.XmlProtocol;
+import common.request.ListUsersRequest;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
 import common.request.MessageRequest;
 import common.response.ErrorResponse;
+import common.response.ListUsersResponse;
 import common.response.LoginResponse;
 import common.response.LogoutResponse;
 import common.response.MessageResponse;
@@ -108,10 +111,13 @@ public class MainChatWindow extends JFrame {
 
     private void processUserDisconnectedEvent(UserDisconnectedEvent event) {
         addMessageToChat("*** User " + event.getUserName() + " disconnected, reason: " + event.getReason() +  " ***");
+        requestAndUpdateUsersList();
     }
 
     private void processUserConnectedEvent(UserConnectedEvent event) {
         addMessageToChat("*** User " + event.getUserName() + " is online!***");
+        requestAndUpdateUsersList();
+        
     }
 
     private void processChatMessageEvent(ChatMessageEvent chatMessageEvent) {
@@ -122,8 +128,8 @@ public class MainChatWindow extends JFrame {
 
         try {
             socket = new Socket(host, port);
-            //protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
-            protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
+            protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
+            //protocol = new XmlProtocol(socket.getInputStream(), socket.getOutputStream());
 
             networkManager = new NetworkManager(protocol);
 
@@ -162,14 +168,27 @@ public class MainChatWindow extends JFrame {
             pingerThread = new PingerThread(sessionId, networkManager);
             pingerThread.start();
             
-
+            requestAndUpdateUsersList();
         } catch (InterruptedException | IOException | ConnectionLostException e) {
             throw new ConnectionException(e.getLocalizedMessage());
         }
 
-        addMessageToChat("*** Подключение к " + host + ":" + port + " ***");
-        
+        addMessageToChat("*** Подключение к " + host + ":" + port + " ***");    
+    }
 
+    private void requestAndUpdateUsersList() {
+        try {
+            var request = new ListUsersRequest(sessionId);
+            Response response = networkManager.doRequsetAndWaitResponse(request);
+            if (response instanceof ErrorResponse) {
+                System.err.println("Cannot get users list: " + ((ErrorResponse)response).reason);
+            } else if (response instanceof ListUsersResponse) {
+                ListUsersResponse r = (ListUsersResponse) response;
+                updateUserList(r.usersList);
+            }
+        } catch (ConnectionLostException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void sendMessage(String text) {
@@ -223,7 +242,6 @@ public class MainChatWindow extends JFrame {
         SwingUtilities.invokeLater(() -> {
             setVisible(false);
             dispose();
-            // Показать окно логина заново
             LoginDialog login = new LoginDialog(null);
             login.setVisible(true);
         });
