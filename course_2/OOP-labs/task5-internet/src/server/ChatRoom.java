@@ -104,7 +104,7 @@ public class ChatRoom {
         return new Status(true, null);
     }
 
-    public Status removeClient(String sessionId) {
+    public Status removeClient(String sessionId, String reason) {
         Client client = clients.remove(sessionId);
         if (client == null) {
             String errorMsg = "Cannot remove client from chat room: There are no such sessionId: " + sessionId;
@@ -115,7 +115,7 @@ public class ChatRoom {
         log.info("Remove client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType()
                 + "]");
 
-        UserDisconnectedEvent ude = new UserDisconnectedEvent(client.getName());
+        UserDisconnectedEvent ude = new UserDisconnectedEvent(client.getName(), reason);
         broadcast(ude);
         return new Status(true, null);
     }
@@ -129,12 +129,15 @@ public class ChatRoom {
         return users;
     }
 
-    public void ping(String sessionId) {
+    public Status ping(String sessionId) {
         Client client = clients.get(sessionId);
         if (client == null) {
-            return;
+            String errorMsg = "Cannot receive ping from client: There are no such sessionId: " + sessionId;
+            log.warn(errorMsg);
+            return new Status(false, errorMsg);
         }
         client.ping();
+        return new Status(true, null);
     }
 
 }

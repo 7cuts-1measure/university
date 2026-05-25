@@ -70,8 +70,12 @@ class ClientHandler implements Runnable {
     }
 
     private void processPingRequest(PingRequest pingRequest) throws ConnectionLostException {
-        chatRoom.ping(pingRequest.getSessionId());
-        protocol.sendDatagram(new PingResponse());
+        Status status = chatRoom.ping(pingRequest.getSessionId());
+        if (status.ok) {
+            protocol.sendDatagram(new PingResponse());
+        } else {
+            protocol.sendDatagram(new ErrorResponse(status.errorMessage));
+        }
     }
 
     private void processChatMessage(MessageRequest msg) throws ConnectionLostException {
@@ -106,7 +110,7 @@ class ClientHandler implements Runnable {
     }
 
     private void processLogoutMessage(LogoutRequest msg) throws ConnectionLostException {
-        Status status = chatRoom.removeClient(msg.getSessionId());
+        Status status = chatRoom.removeClient(msg.getSessionId(), "logout");
         if (status.ok) {
             client = null;
             protocol.sendDatagram(new LogoutResponse());
@@ -126,7 +130,7 @@ class ClientHandler implements Runnable {
                     var now = System.currentTimeMillis();
                     if (now - client.getLastTimePingedMS() > 5000) {
                         log.info("Client " + sessionId + " timed out");
-                        chatRoom.removeClient(sessionId);
+                        chatRoom.removeClient(sessionId, "timeout");
                         isConnectionLost.set(true);
                         interrupt();
                     }

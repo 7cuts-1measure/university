@@ -4,6 +4,9 @@ import java.time.Duration;
 
 import common.protocol.ConnectionLostException;
 import common.request.PingRequest;
+import common.response.ErrorResponse;
+import common.response.PingResponse;
+import common.response.Response;
 
 public class PingerThread  extends Thread{
 
@@ -29,7 +32,15 @@ public class PingerThread  extends Thread{
         while (!Thread.interrupted()) {
             PingRequest pingRequest = new PingRequest(sessionId);
             try {
-                networkManager.doRequsetAndWaitResponse(pingRequest);
+                Response response = networkManager.doRequsetAndWaitResponse(pingRequest);
+                if (response instanceof PingResponse) {
+                    // ok
+                } else if (response instanceof ErrorResponse) {
+                    var er = (ErrorResponse) response;
+                    System.err.println("Bad ping: " + er.reason);
+                } else {
+                    System.err.println("Unknown response: " + response);
+                }
                 Thread.sleep(Duration.ofSeconds(2));
             } catch (InterruptedException | ConnectionLostException e) {
                 break;

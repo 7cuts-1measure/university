@@ -70,49 +70,36 @@ public class XmlProtocol implements Protocol {
     private String toXml(Datagram msg) throws UnsupportedProtocolException {
         if (msg instanceof LoginRequest r) {
             return command("login", elem("name", r.getUserName()) + elem("type", r.getClientName()));
-        }
-        if (msg instanceof ListUsersRequest r) {
+        } else if (msg instanceof ListUsersRequest r) {
             return command("list", elem("session", r.getSessionId()));
-        }
-        if (msg instanceof MessageRequest r) {
+        } else if (msg instanceof MessageRequest r) {
             return command("message", elem("message", r.getText()) + elem("session", r.getSessionId()));
-        }
-        if (msg instanceof LogoutRequest r) {
+        } else if (msg instanceof LogoutRequest r) {
             return command("logout", elem("session", r.getSessionId()));
-        }
-        if (msg instanceof PingRequest r) {
+        } else if (msg instanceof PingRequest r) {
             return command("ping", elem("session", r.getSessionId()));
-        }
-        if (msg instanceof LoginResponse r) {
+        } else if (msg instanceof LoginResponse r) {
             return success(elem("session", r.sessionId));
-        }
-        if (msg instanceof ListUsersResponse r) {
+        } else if (msg instanceof ListUsersResponse r) {
             StringBuilder users = new StringBuilder();
             for (String name : r.listUsers) {
                 users.append("<user>").append(elem("name", name)).append("</user>");
             }
             return success("<listusers>" + users + "</listusers>");
-        }
-        if (msg instanceof MessageResponse) {
+        } else if (msg instanceof MessageResponse) {
             return "<success></success>";
-        }
-        if (msg instanceof LogoutResponse) {
+        } else if (msg instanceof LogoutResponse) {
             return success("<logout></logout>");
-        }
-        if (msg instanceof PingResponse) {
+        } else if (msg instanceof PingResponse) {
             return success("<ping></ping>");
-        }
-        if (msg instanceof ErrorResponse r) {
+        } else if (msg instanceof ErrorResponse r) {
             return "<error>" + elem("message", r.reason) + "</error>";
-        }
-        if (msg instanceof ChatMessageEvent e) {
+        } else if (msg instanceof ChatMessageEvent e) {
             return event("message", elem("message", e.getText()) + elem("name", e.getFrom()));
-        }
-        if (msg instanceof UserConnectedEvent e) {
+        } else if (msg instanceof UserConnectedEvent e) {
             return event("userlogin", elem("name", e.getUserName()));
-        }
-        if (msg instanceof UserDisconnectedEvent e) {
-            return event("userlogout", elem("name", e.getUserName()));
+        } else if (msg instanceof UserDisconnectedEvent e) {
+            return event("userlogout", elem("name", e.getUserName()) + elem("reason", e.getReason()));
         }
         throw new UnsupportedProtocolException();
     }
@@ -205,7 +192,7 @@ public class XmlProtocol implements Protocol {
         return switch (name) {
             case "message" -> new ChatMessageEvent(text(root, "message"), text(root, "name"));
             case "userlogin" -> new UserConnectedEvent(text(root, "name"));
-            case "userlogout" -> new UserDisconnectedEvent(text(root, "name"));
+            case "userlogout" -> new UserDisconnectedEvent(text(root, "name"), text(root, "reason"));
             default -> throw new UnsupportedProtocolException();
         };
     }

@@ -7,7 +7,6 @@ import common.event.Event;
 import common.event.UserConnectedEvent;
 import common.event.UserDisconnectedEvent;
 import common.protocol.ConnectionLostException;
-import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
 import common.protocol.XmlProtocol;
 import common.request.LoginRequest;
@@ -108,7 +107,7 @@ public class MainChatWindow extends JFrame {
 
 
     private void processUserDisconnectedEvent(UserDisconnectedEvent event) {
-        addMessageToChat("*** User " + event.getUserName() + " disconnected ***");
+        addMessageToChat("*** User " + event.getUserName() + " disconnected, reason: " + event.getReason() +  " ***");
     }
 
     private void processUserConnectedEvent(UserConnectedEvent event) {
