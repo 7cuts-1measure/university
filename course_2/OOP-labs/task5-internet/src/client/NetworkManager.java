@@ -7,6 +7,7 @@ import common.protocol.ConnectionLostException;
 import common.protocol.Datagram;
 import common.protocol.Protocol;
 import common.protocol.UnsupportedProtocolException;
+import common.response.ErrorResponse;
 import common.response.Response;
 
 public class NetworkManager {
@@ -41,6 +42,7 @@ public class NetworkManager {
             } catch (InterruptedException | UnsupportedProtocolException | ConnectionLostException e) {
                 System.err.println("ERROR: Connection lost");
                 Thread.currentThread().interrupt();
+                isLostConnection.set(true);
                 eventListener.onConnectionLost();
             }            
         });
@@ -58,17 +60,12 @@ public class NetworkManager {
         }
     }
 
-    // TODO: add timeout
     public Response waitResponse() throws InterruptedException, ConnectionLostException {
         synchronized (lastResponseLock) {
             while (lastResponse == null) {
                 lastResponseLock.wait();
             }
-            // what if connection lost?
-            if (isLostConnection.get() == true) {
-                throw new ConnectionLostException();
-            }
-
+          
             Response res = lastResponse;
             lastResponse = null;
             lastResponseLock.notifyAll();
@@ -76,7 +73,7 @@ public class NetworkManager {
         }
     }
 
-    public Response doRequsetAndWaitResponse(Datagram datagram) throws ConnectionLostException, InterruptedException {
+    public synchronized Response doRequsetAndWaitResponse(Datagram datagram) throws ConnectionLostException, InterruptedException {
         protocol.sendDatagram(datagram);
         return waitResponse();
     }

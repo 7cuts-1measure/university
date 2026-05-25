@@ -9,7 +9,6 @@ import common.event.UserDisconnectedEvent;
 import common.protocol.ConnectionLostException;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
-import common.protocol.XmlProtocol;
 import common.request.ListUsersRequest;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
@@ -30,6 +29,8 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainChatWindow extends JFrame {
     private JTextArea chatArea;
@@ -111,12 +112,12 @@ public class MainChatWindow extends JFrame {
 
     private void processUserDisconnectedEvent(UserDisconnectedEvent event) {
         addMessageToChat("*** User " + event.getUserName() + " disconnected, reason: " + event.getReason() +  " ***");
-        requestAndUpdateUsersList();
+        requestAndUpdateUsersListAsync();
     }
 
     private void processUserConnectedEvent(UserConnectedEvent event) {
         addMessageToChat("*** User " + event.getUserName() + " is online!***");
-        requestAndUpdateUsersList();
+        requestAndUpdateUsersListAsync();
         
     }
 
@@ -168,7 +169,7 @@ public class MainChatWindow extends JFrame {
             pingerThread = new PingerThread(sessionId, networkManager);
             pingerThread.start();
             
-            requestAndUpdateUsersList();
+            requestAndUpdateUsersListAsync();
         } catch (InterruptedException | IOException | ConnectionLostException e) {
             throw new ConnectionException(e.getLocalizedMessage());
         }
@@ -176,19 +177,39 @@ public class MainChatWindow extends JFrame {
         addMessageToChat("*** Подключение к " + host + ":" + port + " ***");    
     }
 
-    private void requestAndUpdateUsersList() {
-        try {
-            var request = new ListUsersRequest(sessionId);
-            Response response = networkManager.doRequsetAndWaitResponse(request);
-            if (response instanceof ErrorResponse) {
-                System.err.println("Cannot get users list: " + ((ErrorResponse)response).reason);
-            } else if (response instanceof ListUsersResponse) {
-                ListUsersResponse r = (ListUsersResponse) response;
-                updateUserList(r.usersList);
-            }
-        } catch (ConnectionLostException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+
+    
+    /**
+     * Do not change! {@code requestAndUpdateUsersListAsync} needs this executor
+     */
+    private final Executor executor = Executors.newFixedThreadPool(1);
+    /**
+     * This function does request to server for getting users list 
+     * acynchronously, because we want to 
+     * call this function from {@link EventListener}. But the method {@code onEvent()} 
+     * is executed by the same thread that listens on the socket.
+     * If we utilize that thread for *another requset* we'll get the deadlock, 
+     * because nobody will receive server response
+    */
+    private void requestAndUpdateUsersListAsync() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    var request = new ListUsersRequest(sessionId);
+                    Response response = networkManager.doRequsetAndWaitResponse(request);
+                    if (response instanceof ErrorResponse) {
+                        System.err.println("Cannot get users list: " + ((ErrorResponse)response).reason);
+                    } else if (response instanceof ListUsersResponse) {
+                        ListUsersResponse r = (ListUsersResponse) response;
+                        updateUserList(r.usersList);
+                    }
+                } catch (ConnectionLostException | InterruptedException e) {
+                    return;
+                }
+            };
+        }.start();
+        
     }
 
     public void sendMessage(String text) {
