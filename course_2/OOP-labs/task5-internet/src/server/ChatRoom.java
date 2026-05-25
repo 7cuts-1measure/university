@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import common.event.Event;
+import common.event.UserConnectedEvent;
+import common.event.UserDisconnectedEvent;
 import common.logging.Log;
 import common.logging.LogLevel;
 import common.protocol.ConnectionLostException;
 
 /**
- * Thread safety chat room. (Because multiple {@code ClientHadnler}s have access
+ * Thread safety chat room. (Because multiple ClientHadnlers have access
  * to it)
  */
 public class ChatRoom {
@@ -32,7 +36,10 @@ public class ChatRoom {
             log.warn(msg);
             return new Status(false, msg);
         }
-
+        // Order is important
+        // 1. Broadcast
+        broadcast(new UserConnectedEvent(client.getName()));
+        // 2. Then add
         clients.put(sessionId, client);
         sendHistory(client);
 
@@ -62,19 +69,20 @@ public class ChatRoom {
         log.info("Got message: " + msg);
 
         if (history.size() == HISTORY_SIZE) {
-            history.removeLast();
-            history.addFirst(msg);
+            history.removeFirst();
+            history.addLast(msg);
         }
+        history.addLast(msg);
 
-        broadcast(msg);
+        broadcast(msg.toChatMessageEvent());
     }
 
-    private void broadcast(Message msg) {
+    private void broadcast(Event event) {
         for (var pair : clients.entrySet()) {
             Client client = pair.getValue();
             String sessionId = pair.getKey();
             try {
-                client.sendEvent(msg.toChatMessageEvent());
+                client.sendEvent(event);
             } catch (ConnectionLostException e) {
                 log.err("Failed to send message to " + client.getName() + ", SessionID=" + sessionId);
             }
@@ -82,17 +90,11 @@ public class ChatRoom {
     }
 
     private synchronized Status sendHistory(Client client) {
-        List<Message> historyCopy;
-            // history can change while we sending it to client
-            // but we don't want to take a lock on whole function because
-            // sending something could be slow
-            historyCopy = List.copyOf(history);
-
-        for (var message : historyCopy) {
+        for (var message : history) {
             try {
                 client.sendEvent(message.toChatMessageEvent());
             } catch (ConnectionLostException e) {
-                // TODO: may be resend it to client after some time?
+                // TODO: remove client
                 String errorMsg = "Cannot send message to client " + client.getName() + ": " + e.getLocalizedMessage();
                 log.err(errorMsg);
                 return new Status(false, errorMsg);
@@ -112,6 +114,9 @@ public class ChatRoom {
 
         log.info("Remove client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType()
                 + "]");
+
+        UserDisconnectedEvent ude = new UserDisconnectedEvent(client.getName());
+        broadcast(ude);
         return new Status(true, null);
     }
 
@@ -122,6 +127,14 @@ public class ChatRoom {
             users.add(client.getName());
         }
         return users;
+    }
+
+    public void ping(String sessionId) {
+        Client client = clients.get(sessionId);
+        if (client == null) {
+            return;
+        }
+        client.ping();
     }
 
 }

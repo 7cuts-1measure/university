@@ -1,5 +1,7 @@
 package client;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import common.event.Event;
 import common.protocol.ConnectionLostException;
 import common.protocol.Datagram;
@@ -20,10 +22,12 @@ public class NetworkManager {
     private Response lastResponse = null;
     private final Object lastResponseLock = new Object();
 
+    private final AtomicBoolean isLostConnection = new AtomicBoolean(false);
+
     public void startEventListener(EventListener eventListener) {
         listenerThread = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
+            try { 
+                while (!Thread.interrupted()) {                
                     Datagram datagram = protocol.receiveDatagram();
                     System.err.println("Get datagram: " + datagram);
                     if (datagram instanceof Event) {
@@ -33,14 +37,12 @@ public class NetworkManager {
                     } else {
                         System.err.println("Got invalid datagram: " + datagram);
                     }
-                } catch (UnsupportedProtocolException | ConnectionLostException e) {
-                    // Не должно случиться, т.к. протокол уже установлен
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    System.err.println("Interrupted");
-                    break;
-                }
-            }
+                } 
+            } catch (InterruptedException | UnsupportedProtocolException | ConnectionLostException e) {
+                System.err.println("ERROR: Connection lost");
+                Thread.currentThread().interrupt();
+                eventListener.onConnectionLost();
+            }            
         });
         listenerThread.setDaemon(true); // чтобы JVM могла завершиться при закрытии окна
         listenerThread.start();
@@ -57,11 +59,16 @@ public class NetworkManager {
     }
 
     // TODO: add timeout
-    public Response waitResponse() throws InterruptedException {
+    public Response waitResponse() throws InterruptedException, ConnectionLostException {
         synchronized (lastResponseLock) {
             while (lastResponse == null) {
                 lastResponseLock.wait();
             }
+            // what if connection lost?
+            if (isLostConnection.get() == true) {
+                throw new ConnectionLostException();
+            }
+
             Response res = lastResponse;
             lastResponse = null;
             lastResponseLock.notifyAll();
@@ -69,7 +76,6 @@ public class NetworkManager {
         }
     }
 
-    // TODO: may be retry sending data after some time if got some error and then destroy...
     public Response doRequsetAndWaitResponse(Datagram datagram) throws ConnectionLostException, InterruptedException {
         protocol.sendDatagram(datagram);
         return waitResponse();

@@ -29,4 +29,13 @@ public class Client {
     public void sendEvent(Event event) throws ConnectionLostException {
         protocol.sendDatagram(event);
     }
+
+    private long lastTimePinged = System.currentTimeMillis();
+    public long getLastTimePingedMS() {
+        return lastTimePinged;
+    }
+
+    public void ping() {
+        lastTimePinged = System.currentTimeMillis();
+    }
 }

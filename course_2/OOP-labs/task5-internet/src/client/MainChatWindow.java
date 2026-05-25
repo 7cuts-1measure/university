@@ -7,10 +7,8 @@ import common.event.Event;
 import common.event.UserConnectedEvent;
 import common.event.UserDisconnectedEvent;
 import common.protocol.ConnectionLostException;
-import common.protocol.Datagram;
 import common.protocol.ObjectProtocol;
 import common.protocol.Protocol;
-import common.protocol.UnsupportedProtocolException;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
 import common.request.MessageRequest;
@@ -31,7 +29,6 @@ import java.net.Socket;
 import java.util.List;
 
 public class MainChatWindow extends JFrame {
-    private final String nickname;
     private JTextArea chatArea;
     private JList<String> userList;
     private DefaultListModel<String> userListModel;
@@ -47,9 +44,9 @@ public class MainChatWindow extends JFrame {
 
     private NetworkManager networkManager = null;
 
+    private Thread pingerThread = null;
 
     public MainChatWindow(String nickname) {
-        this.nickname = nickname;
         setTitle("Чат – " + nickname);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setSize(800, 600);
@@ -59,7 +56,6 @@ public class MainChatWindow extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 disconnect();
-                dispose();
             }
         });
 
@@ -95,29 +91,27 @@ public class MainChatWindow extends JFrame {
         bottomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         inputField = new JTextField();
-        inputField.addActionListener(this::onSendMessage);
+        inputField.addActionListener(this::onSendButtomClick);
         bottomPanel.add(inputField, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         sendButton = new JButton("Отправить");
-        sendButton.addActionListener(this::onSendMessage);
+        sendButton.addActionListener(this::onSendButtomClick);
         disconnectButton = new JButton("Отключиться");
         disconnectButton.addActionListener(e -> disconnect());
         buttonPanel.add(sendButton);
         buttonPanel.add(disconnectButton);
         bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
-        add(bottomPanel, BorderLayout.SOUTH);
-    }
+        add(bottomPanel, BorderLayout.SOUTH);    }
 
 
     private void processUserDisconnectedEvent(UserDisconnectedEvent event) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processUserDisconnectedEvent'");
+        addMessageToChat("*** User " + event.getUserName() + " disconnected ***");
     }
 
     private void processUserConnectedEvent(UserConnectedEvent event) {
-        throw new UnsupportedOperationException("Unimplemented method 'processUserConnectedEvent'");
+        addMessageToChat("*** User " + event.getUserName() + " is online!***");
     }
 
     private void processChatMessageEvent(ChatMessageEvent chatMessageEvent) {
@@ -131,10 +125,27 @@ public class MainChatWindow extends JFrame {
             protocol = new ObjectProtocol(socket.getInputStream(), socket.getOutputStream());
             
             networkManager = new NetworkManager(protocol);
-            LoginRequest loginRequset = new LoginRequest(username, "OBJECT");
-            protocol.sendDatagram(loginRequset);
+
+            networkManager.startEventListener(new EventListener() {
+                @Override
+                public void onEvent(Event event) {
+                    if (event instanceof ChatMessageEvent) {
+                        processChatMessageEvent((ChatMessageEvent) event);
+                    } else if (event instanceof UserConnectedEvent) {
+                        processUserConnectedEvent((UserConnectedEvent) event);
+                    } else if (event instanceof UserDisconnectedEvent) {
+                        processUserDisconnectedEvent((UserDisconnectedEvent) event);
+                    }
+                }
+                @Override
+                public void onConnectionLost() {
+                    pingerThread.interrupt();
+                    goToLoginWindow();
+                }         
+            });
             
-            Datagram response = protocol.receiveDatagram();
+            LoginRequest loginRequset = new LoginRequest(username, "OBJECT");
+            Response response = networkManager.doRequsetAndWaitResponse(loginRequset);
             if (response instanceof ErrorResponse) {
                 ErrorResponse errorResponse = (ErrorResponse) response;
                 System.out.println("ERROR: " + errorResponse.reason);
@@ -146,22 +157,18 @@ public class MainChatWindow extends JFrame {
                 System.out.println("Invalid Response");
                 throw new ConnectionException("Invalid Response");
             }
+        
+            pingerThread = new PingerThread(sessionId, networkManager);
+            pingerThread.start();
+            
 
-        } catch (UnsupportedProtocolException | IOException | ConnectionLostException e) {
+        } catch (InterruptedException | IOException | ConnectionLostException e) {
             throw new ConnectionException(e.getLocalizedMessage());
         }
 
         addMessageToChat("*** Подключение к " + host + ":" + port + " ***");
         
-        networkManager.startEventListener( (Event datagram) -> {
-            if (datagram instanceof ChatMessageEvent) {
-            processChatMessageEvent((ChatMessageEvent) datagram);
-            } else if (datagram instanceof UserConnectedEvent) {
-                processUserConnectedEvent((UserConnectedEvent) datagram);
-            } else if (datagram instanceof UserDisconnectedEvent) {
-                processUserDisconnectedEvent((UserDisconnectedEvent) datagram);
-            }
-        });       
+
     }
 
     public void sendMessage(String text) {
@@ -179,12 +186,9 @@ public class MainChatWindow extends JFrame {
             } else {
                 System.out.println("Invalid response");
             }
-        } catch (ConnectionLostException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ConnectionLostException | InterruptedException e) {
             Thread.currentThread().interrupt();
         }    
-        
         inputField.setText("");
     }
 
@@ -195,35 +199,35 @@ public class MainChatWindow extends JFrame {
     public boolean disconnect() {
         LogoutRequest logoutRequest = new LogoutRequest(sessionId);
 
-        Response response;
+        if (pingerThread != null) {
+            pingerThread.interrupt();
+        }
         try {
-            response = networkManager.doRequsetAndWaitResponse(logoutRequest);
+            Response response = networkManager.doRequsetAndWaitResponse(logoutRequest);
 
             if (response instanceof ErrorResponse) {
                 printError((ErrorResponse) response);
             } else if (response instanceof LogoutResponse) {
-                // success
-                addMessageToChat("*** Отключение от чата ***");
-                // Закрыть окно через секунду (или сразу)
-                SwingUtilities.invokeLater(() -> {
-                    setVisible(false);
-                    dispose();
-                    // Показать окно логина заново
-                    LoginDialog login = new LoginDialog(null);
-                    login.setVisible(true);
-                });
+                goToLoginWindow();
                 return true;
             }
-        } catch (ConnectionLostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ConnectionLostException | InterruptedException e) {
             Thread.currentThread().interrupt();
         }
         return false;
     }
 
-    // Методы для обновления GUI (должны вызываться из EDT)
+    private void goToLoginWindow() {
+        // success
+        SwingUtilities.invokeLater(() -> {
+            setVisible(false);
+            dispose();
+            // Показать окно логина заново
+            LoginDialog login = new LoginDialog(null);
+            login.setVisible(true);
+        });
+    }
+
     public void addMessageToChat(String message) {
         SwingUtilities.invokeLater(() -> {
             chatArea.append(message + "\n");
@@ -241,8 +245,7 @@ public class MainChatWindow extends JFrame {
         });
     }
 
-    // Обработчики событий
-    private void onSendMessage(ActionEvent e) {
+    private void onSendButtomClick(ActionEvent e) {
         String text = inputField.getText().trim();
         if (!text.isEmpty()) {
             sendMessage(text);
