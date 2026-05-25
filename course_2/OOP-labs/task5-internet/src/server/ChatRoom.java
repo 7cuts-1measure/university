@@ -70,7 +70,6 @@ public class ChatRoom {
 
         if (history.size() == HISTORY_SIZE) {
             history.removeFirst();
-            history.addLast(msg);
         }
         history.addLast(msg);
 
@@ -94,7 +93,6 @@ public class ChatRoom {
             try {
                 client.sendEvent(message.toChatMessageEvent());
             } catch (ConnectionLostException e) {
-                // TODO: remove client
                 String errorMsg = "Cannot send message to client " + client.getName() + ": " + e.getLocalizedMessage();
                 log.err(errorMsg);
                 return new Status(false, errorMsg);
@@ -121,7 +119,6 @@ public class ChatRoom {
     }
 
     public synchronized List<String> getUsersList() {
-        // TODO: optimize this function
         List<String> users = new ArrayList<>(clients.size());
         for (var client : clients.values()) {
             users.add(client.getName());

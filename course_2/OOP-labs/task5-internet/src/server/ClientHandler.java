@@ -86,6 +86,7 @@ class ClientHandler implements Runnable {
         Status status = chatRoom.checkMessage(sessionId);
         
         if (status.ok) {
+            // TODO: idk if order is stil so important
             /*
              * Firstly we should send success response to client
              * and only then we can add (and broadcast) out message
