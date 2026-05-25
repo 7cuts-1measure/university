@@ -183,6 +183,7 @@ public class MainChatWindow extends JFrame {
      * Do not change! {@code requestAndUpdateUsersListAsync} needs this executor
      */
     private final Executor executor = Executors.newFixedThreadPool(1);
+    
     /**
      * This function does request to server for getting users list 
      * acynchronously, because we want to 
