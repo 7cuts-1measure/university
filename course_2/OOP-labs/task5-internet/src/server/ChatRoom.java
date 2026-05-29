@@ -2,9 +2,11 @@ package server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import common.event.Event;
 import common.event.UserConnectedEvent;
@@ -22,6 +24,7 @@ public class ChatRoom {
     private final Log log = new Log(LogLevel.INFO);
 
     private final Map<String, Client> clients = new HashMap<>();
+    private final Set<String> uniqueNames = new HashSet<>();
 
     private final List<Message> history = new LinkedList<>();
 
@@ -36,6 +39,13 @@ public class ChatRoom {
             log.warn(msg);
             return new Status(false, msg);
         }
+        if (uniqueNames.contains(client.getName())) {
+            String msg = "Other client on the server has the same name";
+            log.warn(msg);
+            return new Status(false, msg);
+        }
+        uniqueNames.add(client.getName());
+        
         // Order is important
         // 1. Broadcast
         broadcast(new UserConnectedEvent(client.getName()));
@@ -113,6 +123,7 @@ public class ChatRoom {
         log.info("Remove client: [sessionId=" + sessionId + ", name=" + client.getName() + ", type=" + client.getType()
                 + "]");
 
+        uniqueNames.remove(client.getName());
         UserDisconnectedEvent ude = new UserDisconnectedEvent(client.getName(), reason);
         broadcast(ude);
         return new Status(true, null);
