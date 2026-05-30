@@ -13,6 +13,7 @@ import common.request.ListUsersRequest;
 import common.request.LoginRequest;
 import common.request.LogoutRequest;
 import common.request.MessageRequest;
+import common.request.Request;
 import common.response.ErrorResponse;
 import common.response.ListUsersResponse;
 import common.response.LoginResponse;
@@ -67,11 +68,9 @@ public class MainChatWindow extends JFrame {
     }
 
     private void initComponents() {
-        // Центральная панель: чат + список пользователей
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        // Область чата с прокруткой
         chatArea = new JTextArea();
         chatArea.setEditable(false);
         chatArea.setLineWrap(true);
@@ -80,7 +79,6 @@ public class MainChatWindow extends JFrame {
         chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         mainPanel.add(chatScroll, BorderLayout.CENTER);
 
-        // Список пользователей справа
         userListModel = new DefaultListModel<>();
         userList = new JList<>(userListModel);
         userList.setFixedCellWidth(150);
@@ -90,7 +88,6 @@ public class MainChatWindow extends JFrame {
 
         add(mainPanel, BorderLayout.CENTER);
 
-        // Нижняя панель с полем ввода и кнопками
         JPanel bottomPanel = new JPanel(new BorderLayout(5, 5));
         bottomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -116,7 +113,7 @@ public class MainChatWindow extends JFrame {
     }
 
     private void processUserConnectedEvent(UserConnectedEvent event) {
-        addMessageToChat("*** User " + event.getUserName() + " is online!***");
+        addMessageToChat("*** User " + event.getUserName() + " is online! ***");
         requestAndUpdateUsersListAsync();
         
     }
@@ -197,7 +194,7 @@ public class MainChatWindow extends JFrame {
             @Override
             public void run() {
                 try {
-                    var request = new ListUsersRequest(sessionId);
+                    Request request = new ListUsersRequest(sessionId);
                     Response response = networkManager.doRequsetAndWaitResponse(request);
                     if (response instanceof ErrorResponse) {
                         System.err.println("Cannot get users list: " + ((ErrorResponse)response).reason);

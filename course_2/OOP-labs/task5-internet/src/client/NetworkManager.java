@@ -7,7 +7,6 @@ import common.protocol.ConnectionLostException;
 import common.protocol.Datagram;
 import common.protocol.Protocol;
 import common.protocol.UnsupportedProtocolException;
-import common.response.ErrorResponse;
 import common.response.Response;
 
 public class NetworkManager {
