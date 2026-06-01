@@ -6,19 +6,21 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.GemField;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
+import ru.nsu.ccfit.gerasimov2.a.game.model.AnimationState;
 import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
-public class ConsoleView extends View {
+public class ConsoleView implements View {
     Scanner scanner;    
     Position selectionPos;
+    GameModel model;
 
+    Controller controller;
 
     public ConsoleView(GameModel model) {
-        super(model);
+        this.model = model;
         scanner = new Scanner(System.in);
     }
 
@@ -54,19 +56,18 @@ public class ConsoleView extends View {
     }
 
     public void displayGemField() {
-        GemField gemField = model.getGemField();
         System.out.print("    ");
-        for (int i = 0; i < gemField.getCols(); i++) {
+        for (int i = 0; i < model.getCols(); i++) {
             System.out.printf("%d ", i);
         }
         System.out.println();
         System.out.println("---------------------");
 
-        for (int i = 0; i < gemField.getRows(); i++) {
+        for (int i = 0; i < model.getRows(); i++) {
             System.out.printf("%d | ", i);
-            for (int j = 0; j < gemField.getCols(); j++) {
+            for (int j = 0; j < model.getCols(); j++) {
                 Position currPos    = new Position(i, j);
-                Gem gem             = gemField.at(currPos);
+                Gem gem             = model.gemAt(currPos);
                 printGem(gem, currPos, selectionPos);
                 System.out.print(" ");
             }
@@ -124,9 +125,9 @@ public class ConsoleView extends View {
 
 
     private void processFullAnimation() {
-        while (model.isAnimating()) {
-            sleep(Duration.ofMillis(1000));
+        while (model.getAnimationState() != AnimationState.IDLE) {
             model.nextAnimationStep();
+            sleep(Duration.ofMillis(1000));
         }
     }
 
@@ -134,13 +135,15 @@ public class ConsoleView extends View {
     public void start() {
         model.restart();
         while (true) {
-            if (model.isAnimating()) processFullAnimation();
+            processFullAnimation();
             System.out.print("-> ");  // printing prompt
             clearInputStream();
             Position userInput = readInputPosition();
+            if (controller == null) {
+                throw new IllegalStateException("Contoller in null. You need to call setController() to start the game");
+            }
             controller.handleInput(userInput);
-            if (model.isAnimating()) model.nextAnimationStep();
-
+            model.nextAnimationStep();  // skip swap animation
         }
     }
 
@@ -156,5 +159,10 @@ public class ConsoleView extends View {
     @Override
     public void setController(Controller controller) {
         this.controller = controller;
+    }
+
+    @Override
+    public Controller getController() {
+        return controller;
     }
 }

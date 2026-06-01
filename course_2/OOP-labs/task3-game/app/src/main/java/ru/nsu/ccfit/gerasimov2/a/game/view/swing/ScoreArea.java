@@ -9,14 +9,12 @@ import javax.swing.JLabel;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
-
 public class ScoreArea extends JPanel {
-    GameModel model;
+    ModelBox modelBox;
     JLabel scoreText;
     JLabel scoreValue;
 
-    public ScoreArea(GameModel model) {
+    public ScoreArea(ModelBox modelBox) {
         setMinimumSize(new Dimension(100, 50));
         setPreferredSize(new Dimension(100, 50));
         Font font = new Font(null, Font.BOLD, 24);
@@ -30,7 +28,7 @@ public class ScoreArea extends JPanel {
         scoreValue.setFont(font);
         add(scoreValue);
 
-        this.model = model;
+        this.modelBox = modelBox;
 
         setBackground(Color.BLACK);
         setBorder(BorderFactory.createLineBorder(Color.black, 2));
@@ -38,12 +36,12 @@ public class ScoreArea extends JPanel {
     }
 
     public void updateScore() {
-        scoreValue.setText(String.valueOf(model.getScore()));
+        scoreValue.setText(String.valueOf(modelBox.getModel().getScore()));
     }
     
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        scoreValue.setText(String.valueOf(model.getScore()));
+        scoreValue.setText(String.valueOf(modelBox.getModel().getScore()));
     }
 }

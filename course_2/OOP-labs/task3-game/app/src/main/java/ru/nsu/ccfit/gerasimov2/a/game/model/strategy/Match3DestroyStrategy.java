@@ -7,7 +7,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.GemField;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
-public class Match3DestroyStrategy implements DestroyStratagy {
+public class Match3DestroyStrategy implements DestroyStratagy, java.io.Serializable {
 
     public List<Position> getPositionsToDestroy(GemField gemField) {
         List<Position> horizontal = implGetPositionToDestroy(gemField);

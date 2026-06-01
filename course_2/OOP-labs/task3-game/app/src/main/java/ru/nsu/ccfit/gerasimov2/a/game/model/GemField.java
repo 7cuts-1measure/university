@@ -3,7 +3,7 @@ package ru.nsu.ccfit.gerasimov2.a.game.model;
 import ru.nsu.ccfit.gerasimov2.a.game.model.factory.GemFactory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
-public class GemField {
+public class GemField implements java.io.Serializable {
     private Gem[][] field;
     private boolean isTransposed = false;
     private GemFactory gemFactory;

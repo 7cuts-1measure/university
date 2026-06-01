@@ -24,9 +24,8 @@ public class DefaultController extends Controller {
         } else if (secondSelection == null) {
             selectSecond(userSelection);
 
-            boolean isMovable = model.checkMove(firstSelection, secondSelection);
-            
-            if (isMovable) {
+            boolean isValidMove = model.isValidMove(firstSelection, secondSelection);
+            if (isValidMove) {
                 model.startSwapAnimation(firstSelection, secondSelection);   /* Calling the model */
                 deselectFirst();
             } else {
@@ -55,12 +54,19 @@ public class DefaultController extends Controller {
     }
 
     private void updateSelection(Position pos) {
-            view.drawSelection(pos); // remove selection         
+        view.drawSelection(pos); // remove selection         
     }
 
     @Override
     public void resetModel() {
         model.restart();
+    }
+
+    @Override
+    public void changeModel(GameModel model) {
+        this.model = model;
+        deselectSecond();
+        deselectFirst();
     }
 }
 

@@ -3,7 +3,7 @@ package ru.nsu.ccfit.gerasimov2.a.game.model.factory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.DefaultGem;
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 
-public class GemFactory {
+public class GemFactory implements java.io.Serializable {
     private int maxColor;
 
     public GemFactory(int maxColor) {

@@ -14,6 +14,8 @@ public abstract class Controller{
         model.addObserver(view);
     }
 
+    public abstract void changeModel(GameModel model);
+
     public abstract void handleInput(Position userSelection);
 
     public abstract void resetModel();

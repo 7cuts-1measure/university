@@ -12,15 +12,15 @@ import javax.swing.JPanel;
 
 import ru.nsu.ccfit.gerasimov2.a.game.model.gem.Gem;
 import ru.nsu.ccfit.gerasimov2.a.game.controller.Controller;
-import ru.nsu.ccfit.gerasimov2.a.game.model.GameModel;
+import ru.nsu.ccfit.gerasimov2.a.game.model.AnimationState;
 import ru.nsu.ccfit.gerasimov2.a.game.model.Position;
 
 public class GameArea extends JPanel {
 
     private int gridRows;
     private int gridCols;
-    private GameModel model;
     private Controller controller;
+    private ModelBox modelBox;
     private Position cachedSelection;
     boolean isSelecting = false;
 
@@ -33,10 +33,10 @@ public class GameArea extends JPanel {
         }
     }
 
-    public GameArea(GameModel model) {
-        this.model = model;
-        this.gridCols = model.getCols();
-        this.gridRows = model.getRows();
+    public GameArea(ModelBox modelBox) {
+        this.modelBox = modelBox;
+        this.gridCols = modelBox.getModel().getCols();
+        this.gridRows = modelBox.getModel().getRows();
                
         setBackground(GameForm.bgColor);
         setBorder(BorderFactory.createLineBorder(Color.black, 2));
@@ -46,7 +46,7 @@ public class GameArea extends JPanel {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-                if (!model.isAnimating()) handleMouseClick(e.getX(), e.getY());
+                if (modelBox.getModel().getAnimationState() == AnimationState.IDLE) handleMouseClick(e.getX(), e.getY());
             }
         }); 
         
@@ -149,7 +149,7 @@ public class GameArea extends JPanel {
 
         for (int row = 0; row < gridRows; row++) {
             for (int col = 0; col < gridCols; col++) {          
-                Gem gem = model.gemAt(row, col);
+                Gem gem = modelBox.getModel().gemAt(row, col);
                 
                 g.setColor(intToColor(gem.color));
                 int identation = 2;

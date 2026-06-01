@@ -8,7 +8,7 @@ import ru.nsu.ccfit.gerasimov2.a.game.model.factory.GemFactory;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.DestroyStratagy;
 import ru.nsu.ccfit.gerasimov2.a.game.model.strategy.Match3DestroyStrategy;
 
-class Move {
+class Move implements java.io.Serializable {
     public Position start;
     public Position end;
 
@@ -24,9 +24,9 @@ public class Match3Model extends GameModel {
     private AnimationState currAnimationState = AnimationState.IDLE;
     private Move move;
     private int score;
-    public boolean isAnimating = false;
     private int rows;
     private int cols;
+    
     private GemFactory gemFactory;
 
     @Override
@@ -34,7 +34,6 @@ public class Match3Model extends GameModel {
         reset();
         
         gemField = new GemField(cols, rows, gemFactory);
-        isAnimating = true;
         currAnimationState = AnimationState.DESTROY;
     }
 
@@ -43,7 +42,6 @@ public class Match3Model extends GameModel {
     public void reset() {
         score = 0;
         move = null;
-        isAnimating = false;
         currAnimationState = AnimationState.IDLE;
     }
 
@@ -62,16 +60,6 @@ public class Match3Model extends GameModel {
     }
 
     @Override
-    public boolean isDestroyable() {
-        return destroyAlgo.isDestroyable(gemField);
-    }
-
-    @Override
-    public Gem gemAt(Position pos) {
-        return gemField.at(pos);
-    }
-
-    @Override
     public Gem gemAt(int row, int col) {
         return gemField.at(row, col);
     }
@@ -85,7 +73,7 @@ public class Match3Model extends GameModel {
     }
 
     @Override
-    public boolean checkMove(Position p1, Position p2) {
+    public boolean isValidMove(Position p1, Position p2) {
         boolean isSame = p1.getCol() == p2.getCol() && p1.getRow() == p2.getRow();
 
         int diffRows = Math.abs(p1.getRow() - p2.getRow());
@@ -102,11 +90,6 @@ public class Match3Model extends GameModel {
         gemField.swap(p1, p2);
         return isValidMove;
         
-    }
-
-    @Override
-    public GemField getGemField() {
-        return gemField;
     }
 
     @Override
@@ -131,7 +114,6 @@ public class Match3Model extends GameModel {
 
     @Override
     public void startSwapAnimation(Position p1, Position p2) {
-        isAnimating = true;
         currAnimationState = AnimationState.SWAP;
         move = new Move(p1, p2);
     }
@@ -140,7 +122,6 @@ public class Match3Model extends GameModel {
     public void nextAnimationStep() {
         switch (currAnimationState) {
             case IDLE:
-                isAnimating = false;
                 return;
             case SWAP:
                 doSwap();
@@ -159,7 +140,6 @@ public class Match3Model extends GameModel {
                     currAnimationState = AnimationState.DESTROY;
                 } else {
                     currAnimationState = AnimationState.IDLE; 
-                    isAnimating = false; /* end animating */
                 }
                 break;
             default:
@@ -187,11 +167,9 @@ public class Match3Model extends GameModel {
         gemField.refillDestroyed();
     }
 
+
     @Override
-    public boolean isAnimating() {
-        return isAnimating;
+    public Gem gemAt(Position currPos) {
+        return gemField.at(currPos);
     }
-
-
-    
 }
