@@ -1,0 +1,25 @@
+package common.request;
+
+public class MessageRequest implements Request {
+
+    public MessageRequest(String sessionId, String text) {
+        this.sessionId = sessionId;
+        this.text = text;
+    }
+
+    private final String sessionId;
+
+    private final String text;
+    
+
+    @Override
+    public String getSessionId() {
+        return sessionId;
+    }
+
+
+    public String getText() {
+        return text;
+    }
+    
+}
