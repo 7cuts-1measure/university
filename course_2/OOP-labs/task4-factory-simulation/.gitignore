@@ -4,5 +4,16 @@
 # Ignore Gradle build output directory
 build
 
+#ingore maven build output directory
+target
+
 # Ignore Kotlin plugin data
 .kotlin
+
+.vscode
+
+app/build
+app/bin
+
+# ingore log file
+*.log
